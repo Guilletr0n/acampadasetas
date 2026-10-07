@@ -1,0 +1,20 @@
+@import "tailwindcss";
+@plugin "daisyui";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --font-sans: "Londrina Solid", sans-serif;
+  --color-brand-primary: #af0b56;
+  --color-brand-bg: #fcf2df;
+  --color-brand-black: #1d1d1b;
+}
+
+@layer base {
+  @import url('https://fonts.googleapis.com/css2?family=Londrina+Solid&display=swap');
+  
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-brand-bg);
+    color: var(--color-brand-black);
+  }
+}

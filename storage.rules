@@ -1,0 +1,18 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    function isApprovedEditor() {
+      return request.auth != null && request.auth.token.approved == true && request.auth.token.role in ['admin', 'editor'];
+    }
+
+    match /{allPaths=**} {
+      allow read: if true;
+      // Enforce max 5MB size limit and image types
+      allow write: if isApprovedEditor() 
+                   && request.resource.size < 5 * 1024 * 1024 
+                   && request.resource.contentType.matches('image/.*');
+    }
+  }
+}

@@ -1,0 +1,87 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { adminDb } from "../lib/firebase/admin";
+import { marked } from "marked";
+
+// Fetch published sections
+let sections: any[] = [];
+try {
+  const sectionsSnap = await adminDb.collection("sections").get();
+  sections = sectionsSnap.docs
+    .map(doc => ({ id: doc.id, ...doc.data() }))
+    .filter((sec: any) => sec.live)
+    .map((sec: any) => sec.live);
+    
+  // Simple order logic if order field doesn't exist
+  // We can just rely on the order they are stored or add a fallback
+} catch (error) {
+  console.error("Failed to fetch sections", error);
+}
+---
+
+<Layout title="Home">
+  <!-- Sticky Header -->
+  <header class="sticky top-0 z-50 bg-brand-bg/90 backdrop-blur border-b border-brand-primary p-4 flex justify-between items-center">
+    <h1 class="text-2xl font-brand text-brand-primary">Acampada Setas</h1>
+    <nav class="hidden md:flex gap-4">
+      {sections.map((section: any) => (
+        <a href={`#${section.slug}`} class="hover:text-brand-primary transition-colors font-bold uppercase text-sm">
+          {section.title}
+        </a>
+      ))}
+      <a href="/gallery" class="hover:text-brand-primary transition-colors font-bold uppercase text-sm">Gallery</a>
+    </nav>
+  </header>
+
+  <main>
+    {sections.length === 0 && (
+      <div class="min-h-screen flex items-center justify-center">
+        <p class="text-xl">No content published yet.</p>
+      </div>
+    )}
+    
+    {sections.map((section: any) => {
+      const htmlBody = section.body ? marked.parse(section.body) : "";
+
+      if (section.template === "multi-column") {
+        return (
+          <section id={section.slug} class="min-h-screen py-16 px-4 md:px-8 max-w-6xl mx-auto flex flex-col md:flex-row gap-8 items-center">
+            <div class="flex-1">
+              <h2 class="text-6xl font-brand text-brand-primary mb-2">{section.title}</h2>
+              {section.subtitle && <h3 class="text-2xl mb-4 font-bold">{section.subtitle}</h3>}
+              {section.highlight && <div class="badge badge-primary mb-4 p-4 text-lg">{section.highlight}</div>}
+              
+              <div class="prose prose-lg" set:html={htmlBody} />
+            </div>
+            {section.illustrationUrl && (
+              <div class="flex-1">
+                <img src={section.illustrationUrl} alt={section.title} class="rounded-xl shadow-2xl max-w-full" />
+              </div>
+            )}
+          </section>
+        );
+      }
+
+      // Default single-column template
+      return (
+        <section id={section.slug} class="min-h-screen py-16 px-4 md:px-8 max-w-4xl mx-auto text-center flex flex-col items-center justify-center">
+          <h2 class="text-6xl font-brand text-brand-primary mb-2">{section.title}</h2>
+          {section.subtitle && <h3 class="text-2xl mb-4 font-bold">{section.subtitle}</h3>}
+          {section.highlight && <div class="badge badge-primary mb-6 p-4 text-lg border-none bg-brand-primary text-white">{section.highlight}</div>}
+          
+          {section.illustrationUrl && (
+            <img src={section.illustrationUrl} alt={section.title} class="rounded-xl shadow-xl w-full max-w-2xl mb-8 object-cover mx-auto" />
+          )}
+          
+          <div class="prose prose-lg text-left w-full" set:html={htmlBody} />
+        </section>
+      );
+    })}
+  </main>
+</Layout>
+
+<style>
+  html {
+    scroll-behavior: smooth;
+  }
+</style>

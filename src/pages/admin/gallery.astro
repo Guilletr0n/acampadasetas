@@ -1,0 +1,154 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Admin - Gallery">
+  <div class="drawer lg:drawer-open">
+    <input id="admin-drawer" type="checkbox" class="drawer-toggle" />
+    <div class="drawer-content flex flex-col items-center justify-start p-8">
+      <div class="w-full max-w-6xl flex justify-between items-center mb-8">
+        <label for="admin-drawer" class="btn btn-primary drawer-button lg:hidden">Menu</label>
+        <h1 class="text-4xl font-brand text-brand-primary">Gallery Management</h1>
+      </div>
+
+      <div class="w-full max-w-6xl bg-base-100 rounded-box shadow p-6 mb-8">
+        <h2 class="text-2xl font-bold mb-4">Upload New Image</h2>
+        <form id="upload-form" class="space-y-4">
+          <div class="form-control">
+            <label class="label"><span class="label-text">Select Image</span></label>
+            <input type="file" id="image" class="file-input file-input-bordered w-full" accept="image/png, image/jpeg, image/webp" required />
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="form-control">
+              <label class="label"><span class="label-text">Caption</span></label>
+              <input type="text" id="caption" class="input input-bordered w-full" />
+            </div>
+            <div class="form-control">
+              <label class="label"><span class="label-text">Author Name</span></label>
+              <input type="text" id="author" class="input input-bordered w-full" />
+            </div>
+            <div class="form-control md:col-span-2">
+              <label class="label"><span class="label-text">Author Social Link</span></label>
+              <input type="url" id="social" class="input input-bordered w-full" placeholder="https://instagram.com/..." />
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" id="upload-btn">Upload to Gallery</button>
+        </form>
+      </div>
+
+      <div class="w-full max-w-6xl">
+        <h2 class="text-2xl font-bold mb-4">Manage Gallery</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="gallery-grid">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+    </div> 
+    
+    <div class="drawer-side">
+      <label for="admin-drawer" class="drawer-overlay"></label> 
+      <ul class="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
+        <li class="mb-4"><h2 class="text-2xl font-brand text-brand-primary">Backoffice</h2></li>
+        <li><a href="/admin/sections">Sections</a></li>
+        <li><a href="/admin/gallery" class="active">Gallery</a></li>
+        <li><a href="/admin/users">Users</a></li>
+        <li class="mt-auto"><a href="/logout">Logout</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    import { db } from "../../lib/firebase/client";
+    import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc, orderBy, query } from "firebase/firestore";
+
+    const loadGallery = async () => {
+      const q = query(collection(db, "gallery"), orderBy("timestamp", "desc"));
+      const snap = await getDocs(q);
+      const grid = document.getElementById("gallery-grid");
+      if (!grid) return;
+      
+      grid.innerHTML = "";
+      snap.forEach(imageDoc => {
+        const data = imageDoc.data();
+        const card = document.createElement("div");
+        card.className = "card bg-base-100 shadow-xl";
+        card.innerHTML = `
+          <figure><img src="${data.url}" alt="${data.caption}" class="h-48 w-full object-cover" /></figure>
+          <div class="card-body">
+            <input type="text" class="input input-bordered input-sm mb-2 edit-caption" value="${data.caption || ''}" data-id="${imageDoc.id}" placeholder="Caption" />
+            <input type="text" class="input input-bordered input-sm mb-2 edit-author" value="${data.author || ''}" data-id="${imageDoc.id}" placeholder="Author" />
+            <div class="card-actions justify-end mt-4">
+              <button class="btn btn-error btn-xs delete-btn" data-id="${imageDoc.id}">Delete</button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      document.querySelectorAll('.edit-caption').forEach(el => {
+        el.addEventListener('change', async (e: any) => {
+          await updateDoc(doc(db, "gallery", e.target.dataset.id), { caption: e.target.value });
+        });
+      });
+      document.querySelectorAll('.edit-author').forEach(el => {
+        el.addEventListener('change', async (e: any) => {
+          await updateDoc(doc(db, "gallery", e.target.dataset.id), { author: e.target.value });
+        });
+      });
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', async (e: any) => {
+          if (confirm("Delete this image?")) {
+            await deleteDoc(doc(db, "gallery", e.target.dataset.id));
+            loadGallery();
+          }
+        });
+      });
+    };
+
+    document.addEventListener("DOMContentLoaded", loadGallery);
+
+    const uploadForm = document.getElementById("upload-form") as HTMLFormElement;
+    const uploadBtn = document.getElementById("upload-btn") as HTMLButtonElement;
+
+    uploadForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById("image") as HTMLInputElement;
+      const file = fileInput.files?.[0];
+      if (!file) return;
+
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = "Uploading...";
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await fetch("/api/upload", { method: "POST", body: formData });
+        const resData = await res.json();
+        
+        if (resData.url) {
+          const caption = (document.getElementById("caption") as HTMLInputElement).value;
+          const author = (document.getElementById("author") as HTMLInputElement).value;
+          const social = (document.getElementById("social") as HTMLInputElement).value;
+
+          await addDoc(collection(db, "gallery"), {
+            url: resData.url,
+            caption,
+            author,
+            social,
+            timestamp: new Date().toISOString()
+          });
+
+          uploadForm.reset();
+          loadGallery();
+        } else {
+          alert("Upload failed: " + resData.error);
+        }
+      } catch (err) {
+        alert("Upload error.");
+      } finally {
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = "Upload to Gallery";
+      }
+    });
+  </script>
+</Layout>

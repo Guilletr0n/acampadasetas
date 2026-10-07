@@ -1,0 +1,38 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAdmin() {
+      return request.auth != null && request.auth.token.role == 'admin';
+    }
+    
+    function isApprovedEditor() {
+      return request.auth != null && request.auth.token.approved == true && request.auth.token.role in ['admin', 'editor'];
+    }
+
+    match /sections/{sectionId} {
+      allow read: if true;
+      allow write: if isApprovedEditor();
+      
+      match /history/{historyId} {
+        allow read: if true;
+        // Only allow creation, no updates or deletes for history
+        allow create: if isApprovedEditor();
+        allow update, delete: if false;
+      }
+    }
+
+    match /gallery/{document=**} {
+      allow read: if true; // Public can read
+      allow write: if isApprovedEditor();
+    }
+
+    match /users/{userId} {
+      allow read, write: if isAdmin();
+      // Allow users to read their own data
+      allow read: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

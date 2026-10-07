@@ -1,0 +1,58 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { adminDb } from "../lib/firebase/admin";
+
+let images: any[] = [];
+try {
+  const snap = await adminDb.collection("gallery").orderBy("timestamp", "desc").get();
+  images = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+} catch (error) {
+  console.error("Error fetching gallery", error);
+}
+---
+
+<Layout title="Gallery">
+  <div class="min-h-screen bg-neutral-950 text-neutral-content pt-20 pb-10">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="flex justify-between items-center mb-10">
+        <h1 class="text-5xl font-brand text-brand-primary">Photo Gallery</h1>
+        <a href="/" class="btn btn-outline text-neutral-content hover:bg-neutral-800">Back Home</a>
+      </div>
+
+      {images.length === 0 ? (
+        <div class="text-center py-20 text-xl text-neutral-500">No images in gallery yet.</div>
+      ) : (
+        <div class="carousel w-full rounded-box bg-neutral-900 shadow-2xl">
+          {images.map((img, index) => (
+            <div id={`slide${index}`} class="carousel-item relative w-full h-[70vh] flex-col">
+              <img src={img.url} class="w-full h-full object-contain bg-black" alt={img.caption} />
+              
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-8">
+                <div class="max-w-4xl mx-auto">
+                  {img.caption && <p class="text-2xl mb-2">{img.caption}</p>}
+                  {img.author && (
+                    <p class="text-neutral-400">
+                      Photo by: 
+                      {img.social ? (
+                        <a href={img.social} target="_blank" rel="noopener noreferrer" class="text-brand-primary hover:underline ml-1">
+                          {img.author}
+                        </a>
+                      ) : (
+                        <span class="ml-1">{img.author}</span>
+                      )}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
+                <a href={`#slide${index === 0 ? images.length - 1 : index - 1}`} class="btn btn-circle btn-ghost bg-black/50 hover:bg-black/80 border-none text-white">❮</a> 
+                <a href={`#slide${index === images.length - 1 ? 0 : index + 1}`} class="btn btn-circle btn-ghost bg-black/50 hover:bg-black/80 border-none text-white">❯</a>
+              </div>
+            </div> 
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+</Layout>

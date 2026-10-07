@@ -1,0 +1,110 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { adminDb } from "../../lib/firebase/admin";
+
+// Authentication is handled in middleware.ts (admin only)
+const usersSnapshot = await adminDb.collection("users").get();
+const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+---
+
+<Layout title="Admin - User Management">
+  <div class="drawer lg:drawer-open">
+    <input id="admin-drawer" type="checkbox" class="drawer-toggle" />
+    <div class="drawer-content flex flex-col items-center justify-start p-8">
+      <div class="w-full max-w-6xl flex justify-between items-center mb-8">
+        <label for="admin-drawer" class="btn btn-primary drawer-button lg:hidden">Menu</label>
+        <h1 class="text-4xl font-brand text-brand-primary">User Management</h1>
+      </div>
+
+      <div class="w-full max-w-6xl overflow-x-auto bg-base-100 rounded-box shadow">
+        <table class="table w-full">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((user: any) => (
+              <tr class="hover">
+                <td>{user.name}</td>
+                <td>{user.email}</td>
+                <td>
+                  <select 
+                    class="select select-bordered select-sm w-full max-w-xs role-select" 
+                    data-uid={user.id}
+                  >
+                    <option value="reader" selected={user.role === 'reader'}>Reader</option>
+                    <option value="editor" selected={user.role === 'editor'}>Editor</option>
+                    <option value="admin" selected={user.role === 'admin'}>Admin</option>
+                  </select>
+                </td>
+                <td>
+                  <input 
+                    type="checkbox" 
+                    class="toggle toggle-success toggle-sm approval-toggle" 
+                    checked={user.approved} 
+                    data-uid={user.id} 
+                  />
+                </td>
+                <td>
+                  <button class="btn btn-error btn-xs delete-btn" data-uid={user.id}>Delete</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div> 
+    <div class="drawer-side">
+      <label for="admin-drawer" class="drawer-overlay"></label> 
+      <ul class="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
+        <li class="mb-4"><h2 class="text-2xl font-brand text-brand-primary">Backoffice</h2></li>
+        <li><a href="/admin/sections">Sections</a></li>
+        <li><a href="/admin/gallery">Gallery</a></li>
+        <li><a href="/admin/users" class="active">Users</a></li>
+        <li class="mt-auto"><a href="/logout">Logout</a></li>
+      </ul>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  const updateRole = async (uid: string, role: string) => {
+    await fetch(`/api/admin/users/${uid}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role })
+    });
+  };
+
+  const updateApproval = async (uid: string, approved: boolean) => {
+    await fetch(`/api/admin/users/${uid}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ approved })
+    });
+  };
+
+  const deleteUser = async (uid: string) => {
+    if (confirm("Are you sure you want to delete this user?")) {
+      await fetch(`/api/admin/users/${uid}`, { method: "DELETE" });
+      window.location.reload();
+    }
+  };
+
+  document.querySelectorAll('.role-select').forEach(el => {
+    el.addEventListener('change', (e: any) => updateRole(e.target.dataset.uid, e.target.value));
+  });
+
+  document.querySelectorAll('.approval-toggle').forEach(el => {
+    el.addEventListener('change', (e: any) => updateApproval(e.target.dataset.uid, e.target.checked));
+  });
+
+  document.querySelectorAll('.delete-btn').forEach(el => {
+    el.addEventListener('click', (e: any) => deleteUser(e.target.dataset.uid));
+  });
+</script>
