@@ -1,249 +1,501 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import AdminNav from "../../components/AdminNav.astro";
+import { getSections } from "../../lib/db";
+import { getCurrentUser } from "../../lib/auth";
+
+export const prerender = false;
+
+const currentUser = await getCurrentUser(Astro.cookies);
+if (!currentUser || !currentUser.approved) {
+  return Astro.redirect('/login');
+}
+
+const sections = await getSections(false);
 ---
 
-<Layout title="Admin - Sections">
-  <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
-  
-  <div class="drawer lg:drawer-open">
-    <input id="admin-drawer" type="checkbox" class="drawer-toggle" />
-    <div class="drawer-content flex flex-col items-center justify-start p-8">
-      <div class="w-full max-w-6xl flex justify-between items-center mb-8">
-        <label for="admin-drawer" class="btn btn-primary drawer-button lg:hidden">Menu</label>
-        <h1 class="text-4xl font-brand text-brand-primary">Section Management</h1>
+<Layout title="Gestor de Secciones | CMS" isDashboard={true}>
+  <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css" />
+  <AdminNav activeTab="sections" user={currentUser} />
+
+  <main class="max-w-6xl mx-auto p-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+      <div>
+        <h1 class="text-4xl font-londrina text-[#1d1d1b]">SECCIONES DE LA LANDING</h1>
+        <p class="text-xs text-gray-500">Edición en borrador, plantillas DaisyUI y control de versiones publicadas.</p>
       </div>
 
-      <div class="w-full max-w-6xl bg-base-100 rounded-box shadow p-6">
-        <div class="form-control mb-4">
-          <label class="label"><span class="label-text">Select Section</span></label>
-          <select id="section-selector" class="select select-bordered w-full">
-            <option value="new">-- Create New Section --</option>
-            <!-- Loaded via JS -->
-          </select>
-        </div>
-
-        <form id="section-form" class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="form-control">
-              <label class="label"><span class="label-text">Title</span></label>
-              <input type="text" id="title" class="input input-bordered w-full" required />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">Template</span></label>
-              <select id="template" class="select select-bordered w-full">
-                <option value="single-column">Single Column</option>
-                <option value="multi-column">Multi Column</option>
-              </select>
-            </div>
-          </div>
-          
-          <div class="form-control">
-            <label class="label"><span class="label-text">Subtitle</span></label>
-            <input type="text" id="subtitle" class="input input-bordered w-full" />
-          </div>
-          
-          <div class="form-control">
-            <label class="label"><span class="label-text">Highlight</span></label>
-            <input type="text" id="highlight" class="input input-bordered w-full" />
-          </div>
-
-          <div class="form-control">
-            <label class="label"><span class="label-text">Illustration</span></label>
-            <input type="file" id="illustration" class="file-input file-input-bordered w-full" accept="image/png, image/jpeg, image/webp" />
-            <div id="illustration-preview" class="mt-2 text-sm text-gray-500"></div>
-          </div>
-          
-          <div class="form-control">
-            <label class="label"><span class="label-text">Body Content (Markdown)</span></label>
-            <textarea id="markdown-editor"></textarea>
-          </div>
-          
-          <div class="flex gap-4 pt-4">
-            <button type="button" id="save-draft" class="btn btn-outline">Save Draft</button>
-            <button type="button" id="publish" class="btn btn-primary">Publish</button>
-          </div>
-        </form>
-
-        <div class="divider">Version History</div>
-        <div class="overflow-x-auto">
-          <table class="table w-full">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Author</th>
-                <th>Template</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="history-table">
-              <!-- Loaded via JS -->
-            </tbody>
-          </table>
-        </div>
+      <!-- Section Selector & Order -->
+      <div class="flex items-center gap-2 w-full md:w-auto">
+        <select id="section-selector" class="select select-bordered select-sm border-2 border-[#1d1d1b] font-bold">
+          <option value="new">+ Crear Nueva Sección</option>
+          {sections.map((s) => (
+            <option value={s.id} data-order={s.order} data-slug={s.slug}>
+              [{s.order}] {s.draft.title || s.slug} {s.live ? '●' : '○'}
+            </option>
+          ))}
+        </select>
       </div>
-    </div> 
-    
-    <div class="drawer-side">
-      <label for="admin-drawer" class="drawer-overlay"></label> 
-      <ul class="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
-        <li class="mb-4"><h2 class="text-2xl font-brand text-brand-primary">Backoffice</h2></li>
-        <li><a href="/admin/sections" class="active">Sections</a></li>
-        <li><a href="/admin/gallery">Gallery</a></li>
-        <li><a href="/admin/users">Users</a></li>
-        <li class="mt-auto"><a href="/logout">Logout</a></li>
-      </ul>
     </div>
-  </div>
+
+    <!-- Main Section Form -->
+    <div class="bg-white rounded-box shadow-lg border-2 border-[#1d1d1b] p-6 mb-8">
+      <form id="section-form" class="space-y-4">
+        <input type="hidden" id="section-id" value={sections[0]?.id || 'new'} />
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="form-control md:col-span-2">
+            <label class="label font-bold text-xs" for="title">
+              <span class="label-text">TÍTULO DE LA SECCIÓN</span>
+            </label>
+            <input 
+              type="text" 
+              id="title" 
+              class="input input-bordered w-full border-2 border-[#1d1d1b]" 
+              placeholder="Ej: Manifiesto Acampada Setas" 
+              required 
+            />
+          </div>
+
+          <div class="form-control">
+            <label class="label font-bold text-xs" for="slug">
+              <span class="label-text">SLUG / ANCLA (#url)</span>
+            </label>
+            <input 
+              type="text" 
+              id="slug" 
+              class="input input-bordered w-full border-2 border-[#1d1d1b] font-mono text-xs" 
+              placeholder="manifiesto" 
+              required 
+            />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="form-control">
+            <label class="label font-bold text-xs" for="template">
+              <span class="label-text">PLANTILLA DE DISEÑO</span>
+            </label>
+            <select id="template" class="select select-bordered w-full border-2 border-[#1d1d1b]">
+              <option value="single-column">Columna Única (Manifiesto / Centrado)</option>
+              <option value="multi-column">Multi-Columna (Agenda / Horarios)</option>
+            </select>
+          </div>
+
+          <div class="form-control">
+            <label class="label font-bold text-xs" for="order">
+              <span class="label-text">ORDEN DE SECUENCIA</span>
+            </label>
+            <input 
+              type="number" 
+              id="order" 
+              class="input input-bordered w-full border-2 border-[#1d1d1b]" 
+              value="1" 
+              min="1" 
+              max="99" 
+            />
+          </div>
+
+          <div class="form-control">
+            <label class="label font-bold text-xs" for="highlight">
+              <span class="label-text">DESTACADO / BADGE</span>
+            </label>
+            <input 
+              type="text" 
+              id="highlight" 
+              class="input input-bordered w-full border-2 border-[#1d1d1b]" 
+              placeholder="Ej: Asamblea diaria 20:00h" 
+            />
+          </div>
+        </div>
+
+        <div class="form-control">
+          <label class="label font-bold text-xs" for="subtitle">
+            <span class="label-text">SUBTÍTULO</span>
+          </label>
+          <input 
+            type="text" 
+            id="subtitle" 
+            class="input input-bordered w-full border-2 border-[#1d1d1b]" 
+            placeholder="Breve introducción explicativa" 
+          />
+        </div>
+
+        <!-- Illustration File Upload -->
+        <div class="form-control">
+          <label class="label font-bold text-xs">
+            <span class="label-text">ILUSTRACIÓN O FOTOGRAFÍA (PNG, JPG, WebP ≤ 5 MB)</span>
+          </label>
+          <div class="flex flex-col md:flex-row gap-3 items-start md:items-center">
+            <input 
+              type="file" 
+              id="illustration-file" 
+              accept="image/png, image/jpeg, image/webp" 
+              class="file-input file-input-bordered file-input-sm border-2 border-[#1d1d1b] w-full md:w-auto" 
+            />
+            <input 
+              type="text" 
+              id="illustration-url" 
+              placeholder="O pega una URL de imagen..." 
+              class="input input-bordered input-sm flex-1 border-2 border-[#1d1d1b] font-mono text-xs" 
+            />
+          </div>
+          <div id="illustration-preview-container" class="mt-2 hidden">
+            <img id="illustration-preview" src="" alt="Vista previa" class="h-28 rounded border-2 border-[#1d1d1b] object-cover" />
+          </div>
+        </div>
+
+        <!-- Markdown Body -->
+        <div class="form-control">
+          <label class="label font-bold text-xs" for="body-editor">
+            <span class="label-text">CUERPO DEL CONTENIDO (MARKDOWN)</span>
+          </label>
+          <textarea id="body-editor"></textarea>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t-2 border-[#1d1d1b]">
+          <div class="flex items-center gap-2">
+            <span id="save-status" class="text-xs font-semibold text-gray-500"></span>
+          </div>
+
+          <div class="flex gap-3">
+            <button 
+              type="button" 
+              id="btn-save-draft" 
+              class="btn btn-outline border-2 border-[#1d1d1b] hover:bg-gray-100 font-bold"
+            >
+              💾 Guardar Borrador
+            </button>
+            <button 
+              type="button" 
+              id="btn-publish" 
+              class="btn bg-[#af0b56] hover:bg-[#8f0946] text-white border-2 border-[#1d1d1b] font-bold shadow-[2px_2px_0px_#1d1d1b]"
+            >
+              🚀 Publicar en Directo
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Version History Viewer (10 entries paginated) -->
+    <div class="bg-white rounded-box shadow-lg border-2 border-[#1d1d1b] p-6">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h2 class="text-2xl font-londrina text-[#1d1d1b]">HISTORIAL DE VERSIONES PUBLICADAS</h2>
+          <p class="text-xs text-gray-500">Instantáneas inmutables archivadas con autoría y fecha para restaurar a borrador.</p>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="table w-full text-xs">
+          <thead class="bg-gray-100 border-b-2 border-[#1d1d1b] uppercase font-bold text-[#1d1d1b]">
+            <tr>
+              <th>Fecha y Hora</th>
+              <th>Autoría</th>
+              <th>Título Publicado</th>
+              <th>Plantilla</th>
+              <th class="text-right">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <tr>
+              <td colspan="5" class="text-center py-4 text-gray-400">Selecciona una sección para ver su historial.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- History Pagination -->
+      <div id="history-pagination" class="flex justify-between items-center mt-4 hidden">
+        <span id="history-page-info" class="text-xs text-gray-500">Página 1</span>
+        <div class="join">
+          <button id="history-prev-btn" class="join-item btn btn-xs border-2 border-[#1d1d1b]">« Anterior</button>
+          <button id="history-next-btn" class="join-item btn btn-xs border-2 border-[#1d1d1b]">Siguiente »</button>
+        </div>
+      </div>
+    </div>
+  </main>
 
   <script is:inline src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
-  <script>
-    import { db } from "../../lib/firebase/client";
-    import { collection, getDocs, doc, getDoc, setDoc, addDoc, query, orderBy } from "firebase/firestore";
+  <script is:inline>
+    let easyMDE;
+    let currentHistory = [];
+    let currentHistoryPage = 1;
+    const HISTORY_PER_PAGE = 10;
 
-    let easyMDE: any;
-    let currentSectionId = "new";
-    let illustrationUrl = "";
-
-    document.addEventListener("DOMContentLoaded", async () => {
-      // @ts-ignore
-      easyMDE = new EasyMDE({ element: document.getElementById("markdown-editor") });
-      await loadSections();
-    });
-
-    const loadSections = async () => {
-      const q = query(collection(db, "sections"), orderBy("order"));
-      const snap = await getDocs(q);
-      const selector = document.getElementById("section-selector") as HTMLSelectElement;
-      
-      selector.innerHTML = '<option value="new">-- Create New Section --</option>';
-      snap.forEach(doc => {
-        const option = document.createElement("option");
-        option.value = doc.id;
-        option.textContent = doc.data().draft?.title || doc.data().live?.title || doc.id;
-        selector.appendChild(option);
+    document.addEventListener('DOMContentLoaded', () => {
+      easyMDE = new EasyMDE({
+        element: document.getElementById('body-editor'),
+        spellChecker: false,
+        status: false,
+        placeholder: 'Escribe aquí el contenido en formato Markdown...',
+        minHeight: '220px',
       });
-    };
 
-    document.getElementById("section-selector")?.addEventListener("change", async (e: any) => {
-      currentSectionId = e.target.value;
-      if (currentSectionId === "new") {
-        (document.getElementById("section-form") as HTMLFormElement).reset();
-        easyMDE.value("");
-        illustrationUrl = "";
-        return;
-      }
-
-      const docRef = doc(db, "sections", currentSectionId);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data().draft || docSnap.data().live || {};
-        
-        (document.getElementById("title") as HTMLInputElement).value = data.title || "";
-        (document.getElementById("subtitle") as HTMLInputElement).value = data.subtitle || "";
-        (document.getElementById("highlight") as HTMLInputElement).value = data.highlight || "";
-        (document.getElementById("template") as HTMLSelectElement).value = data.template || "single-column";
-        easyMDE.value(data.body || "");
-        illustrationUrl = data.illustrationUrl || "";
-        
-        loadHistory(currentSectionId);
+      // Load initial section
+      const selector = document.getElementById('section-selector');
+      if (selector.value && selector.value !== 'new') {
+        loadSection(selector.value);
       }
     });
 
-    const loadHistory = async (sectionId: string) => {
-      const q = query(collection(db, `sections/${sectionId}/history`), orderBy("timestamp", "desc"));
-      const snap = await getDocs(q);
-      const tbody = document.getElementById("history-table");
-      if (!tbody) return;
-      
-      tbody.innerHTML = "";
-      snap.forEach(historyDoc => {
-        const data = historyDoc.data();
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${new Date(data.timestamp).toLocaleString()}</td>
-          <td>${data.authorName || 'Unknown'}</td>
-          <td>${data.template}</td>
-          <td><button class="btn btn-xs btn-outline restore-btn" data-id="${historyDoc.id}">Restore to Draft</button></td>
-        `;
-        tbody.appendChild(tr);
-      });
-      
-      document.querySelectorAll('.restore-btn').forEach(btn => {
-        btn.addEventListener('click', async (e: any) => {
-          const hid = e.target.dataset.id;
-          const hSnap = await getDoc(doc(db, `sections/${sectionId}/history`, hid));
-          if(hSnap.exists()) {
-            const hData = hSnap.data();
-            (document.getElementById("title") as HTMLInputElement).value = hData.title || "";
-            (document.getElementById("subtitle") as HTMLInputElement).value = hData.subtitle || "";
-            easyMDE.value(hData.body || "");
-            alert("Restored to draft. Click Save Draft to persist.");
+    // Handle section switching
+    document.getElementById('section-selector').addEventListener('change', (e) => {
+      const id = e.target.value;
+      if (id === 'new') {
+        resetForm();
+      } else {
+        loadSection(id);
+      }
+    });
+
+    async function loadSection(id) {
+      document.getElementById('save-status').innerText = 'Cargando sección...';
+      try {
+        const res = await fetch(`/api/admin/sections?id=${id}`);
+        const data = await res.json();
+        if (data.section) {
+          const s = data.section;
+          const content = s.draft || s.live || {};
+
+          document.getElementById('section-id').value = s.id;
+          document.getElementById('title').value = content.title || '';
+          document.getElementById('slug').value = s.slug || '';
+          document.getElementById('template').value = content.template || 'single-column';
+          document.getElementById('order').value = s.order || 1;
+          document.getElementById('highlight').value = content.highlight || '';
+          document.getElementById('subtitle').value = content.subtitle || '';
+          document.getElementById('illustration-url').value = content.illustrationUrl || '';
+          
+          if (content.illustrationUrl) {
+            document.getElementById('illustration-preview').src = content.illustrationUrl;
+            document.getElementById('illustration-preview-container').classList.remove('hidden');
+          } else {
+            document.getElementById('illustration-preview-container').classList.add('hidden');
           }
-        });
-      });
-    };
 
-    const getFormData = () => ({
-      title: (document.getElementById("title") as HTMLInputElement).value,
-      subtitle: (document.getElementById("subtitle") as HTMLInputElement).value,
-      highlight: (document.getElementById("highlight") as HTMLInputElement).value,
-      template: (document.getElementById("template") as HTMLSelectElement).value,
-      body: easyMDE.value(),
-      illustrationUrl
-    });
+          easyMDE.value(content.body || '');
+          document.getElementById('save-status').innerText = '';
 
-    document.getElementById("save-draft")?.addEventListener("click", async () => {
-      const data = getFormData();
-      const slug = data.title.toLowerCase().replace(/\s+/g, '-');
-      
-      if (currentSectionId === "new") {
-        currentSectionId = slug;
+          // Render History
+          currentHistory = data.history || [];
+          currentHistoryPage = 1;
+          renderHistory();
+        }
+      } catch (err) {
+        document.getElementById('save-status').innerText = 'Error al cargar';
       }
-      
-      const docRef = doc(db, "sections", currentSectionId);
-      await setDoc(docRef, { slug, draft: data }, { merge: true });
-      alert("Draft saved!");
-      loadSections();
-    });
+    }
 
-    document.getElementById("publish")?.addEventListener("click", async () => {
-      const data = getFormData();
-      const slug = data.title.toLowerCase().replace(/\s+/g, '-');
-      
-      if (currentSectionId === "new") {
-        currentSectionId = slug;
+    function resetForm() {
+      document.getElementById('section-id').value = 'new';
+      document.getElementById('title').value = '';
+      document.getElementById('slug').value = '';
+      document.getElementById('template').value = 'single-column';
+      document.getElementById('order').value = document.querySelectorAll('#section-selector option').length;
+      document.getElementById('highlight').value = '';
+      document.getElementById('subtitle').value = '';
+      document.getElementById('illustration-url').value = '';
+      document.getElementById('illustration-preview-container').classList.add('hidden');
+      easyMDE.value('');
+      currentHistory = [];
+      renderHistory();
+    }
+
+    // Auto slug from title if new
+    document.getElementById('title').addEventListener('input', (e) => {
+      if (document.getElementById('section-id').value === 'new') {
+        const slug = e.target.value.toLowerCase()
+          .replace(/[^a-z0-9áéíóúñ]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+        document.getElementById('slug').value = slug;
       }
-
-      const docRef = doc(db, "sections", currentSectionId);
-      await setDoc(docRef, { slug, live: data, draft: data }, { merge: true });
-      
-      // Add to history
-      await addDoc(collection(db, `sections/${currentSectionId}/history`), {
-        ...data,
-        timestamp: new Date().toISOString(),
-      });
-      
-      alert("Published successfully!");
-      loadHistory(currentSectionId);
     });
 
-    // Upload handling
-    document.getElementById("illustration")?.addEventListener("change", async (e: any) => {
+    // Image upload handler
+    document.getElementById('illustration-file').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append('file', file);
+      document.getElementById('save-status').innerText = 'Optimizando y subiendo imagen...';
 
       try {
-        const res = await fetch("/api/upload", { method: "POST", body: formData });
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
         const data = await res.json();
-        if (data.url) {
-          illustrationUrl = data.url;
-          (document.getElementById("illustration-preview") as HTMLDivElement).innerText = "Uploaded: " + data.url;
+        if (res.ok && data.url) {
+          document.getElementById('illustration-url').value = data.url;
+          document.getElementById('illustration-preview').src = data.url;
+          document.getElementById('illustration-preview-container').classList.remove('hidden');
+          document.getElementById('save-status').innerText = '✓ Imagen subida';
+        } else {
+          alert(data.error || 'Error al subir');
+          document.getElementById('save-status').innerText = '';
         }
-      } catch (err) {
-        alert("Upload failed.");
+      } catch {
+        alert('Error de conexión al subir imagen');
+        document.getElementById('save-status').innerText = '';
+      }
+    });
+
+    // Get Form Payload
+    function getPayload() {
+      const id = document.getElementById('section-id').value;
+      const title = document.getElementById('title').value.trim();
+      const slug = document.getElementById('slug').value.trim();
+      const template = document.getElementById('template').value;
+      const order = parseInt(document.getElementById('order').value, 10) || 1;
+      const highlight = document.getElementById('highlight').value.trim();
+      const subtitle = document.getElementById('subtitle').value.trim();
+      const illustrationUrl = document.getElementById('illustration-url').value.trim();
+      const body = easyMDE.value();
+
+      return {
+        id: id === 'new' ? undefined : id,
+        title,
+        slug,
+        template,
+        order,
+        highlight,
+        subtitle,
+        illustrationUrl,
+        body
+      };
+    }
+
+    // Save Draft
+    document.getElementById('btn-save-draft').addEventListener('click', async () => {
+      const payload = getPayload();
+      if (!payload.title) {
+        alert('El título es obligatorio');
+        return;
+      }
+
+      document.getElementById('save-status').innerText = 'Guardando borrador...';
+      try {
+        const res = await fetch('/api/admin/sections', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'save-draft', ...payload }),
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          document.getElementById('save-status').innerText = '✓ Borrador guardado (' + new Date().toLocaleTimeString() + ')';
+          if (payload.id === undefined) {
+            setTimeout(() => window.location.reload(), 1000);
+          }
+        } else {
+          alert(data.error || 'Error al guardar');
+        }
+      } catch {
+        alert('Error de conexión');
+      }
+    });
+
+    // Publish Live
+    document.getElementById('btn-publish').addEventListener('click', async () => {
+      const payload = getPayload();
+      if (!payload.title) {
+        alert('El título es obligatorio');
+        return;
+      }
+
+      if (!confirm('¿Deseas publicar esta versión en la web en directo? Se creará una instantánea en el historial.')) {
+        return;
+      }
+
+      document.getElementById('save-status').innerText = 'Publicando en directo...';
+      try {
+        const res = await fetch('/api/admin/sections', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'publish', ...payload }),
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          document.getElementById('save-status').innerText = '✓ ¡Publicado con éxito!';
+          setTimeout(() => window.location.reload(), 1000);
+        } else {
+          alert(data.error || 'Error al publicar');
+        }
+      } catch {
+        alert('Error de conexión');
+      }
+    });
+
+    // Render Paginated History
+    function renderHistory() {
+      const tbody = document.getElementById('history-tbody');
+      const pag = document.getElementById('history-pagination');
+
+      if (!currentHistory || currentHistory.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-400">No hay versiones archivadas para esta sección todavía.</td></tr>';
+        pag.classList.add('hidden');
+        return;
+      }
+
+      pag.classList.remove('hidden');
+      const totalPages = Math.ceil(currentHistory.length / HISTORY_PER_PAGE);
+      document.getElementById('history-page-info').innerText = `Página ${currentHistoryPage} de ${totalPages} (${currentHistory.length} versiones)`;
+
+      const start = (currentHistoryPage - 1) * HISTORY_PER_PAGE;
+      const pageEntries = currentHistory.slice(start, start + HISTORY_PER_PAGE);
+
+      tbody.innerHTML = pageEntries.map(h => `
+        <tr class="border-b border-gray-200 hover">
+          <td class="font-mono text-xs">${new Date(h.timestamp).toLocaleString('es-ES')}</td>
+          <td class="font-bold">${h.authorName || 'Admin'}</td>
+          <td>${h.title}</td>
+          <td><span class="badge badge-xs">${h.template}</span></td>
+          <td class="text-right">
+            <button class="btn btn-xs btn-outline border-2 border-[#1d1d1b] restore-btn" data-hid="${h.id}">
+              ↩ Restaurar a Borrador
+            </button>
+          </td>
+        </tr>
+      `).join('');
+
+      document.querySelectorAll('.restore-btn').forEach(b => {
+        b.addEventListener('click', async (e) => {
+          const hid = e.target.dataset.hid;
+          const secId = document.getElementById('section-id').value;
+          if (confirm('¿Restaurar esta versión archivada al editor en borrador?')) {
+            try {
+              const res = await fetch('/api/admin/sections', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'restore', id: secId, historyId: hid }),
+              });
+              if (res.ok) {
+                alert('Versión restaurada en el borrador con éxito.');
+                loadSection(secId);
+              }
+            } catch {
+              alert('Error al restaurar');
+            }
+          }
+        });
+      });
+    }
+
+    document.getElementById('history-prev-btn').addEventListener('click', () => {
+      if (currentHistoryPage > 1) {
+        currentHistoryPage--;
+        renderHistory();
+      }
+    });
+
+    document.getElementById('history-next-btn').addEventListener('click', () => {
+      const totalPages = Math.ceil(currentHistory.length / HISTORY_PER_PAGE);
+      if (currentHistoryPage < totalPages) {
+        currentHistoryPage++;
+        renderHistory();
       }
     });
   </script>

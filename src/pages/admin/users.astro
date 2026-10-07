@@ -1,110 +1,235 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import { adminDb } from "../../lib/firebase/admin";
+import AdminNav from "../../components/AdminNav.astro";
+import { getUsers } from "../../lib/users";
+import { getCurrentUser } from "../../lib/auth";
 
-// Authentication is handled in middleware.ts (admin only)
-const usersSnapshot = await adminDb.collection("users").get();
-const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+export const prerender = false;
+
+const currentUser = await getCurrentUser(Astro.cookies);
+if (!currentUser || currentUser.role !== 'admin') {
+  return Astro.redirect('/admin/sections');
+}
+
+const users = await getUsers();
 ---
 
-<Layout title="Admin - User Management">
-  <div class="drawer lg:drawer-open">
-    <input id="admin-drawer" type="checkbox" class="drawer-toggle" />
-    <div class="drawer-content flex flex-col items-center justify-start p-8">
-      <div class="w-full max-w-6xl flex justify-between items-center mb-8">
-        <label for="admin-drawer" class="btn btn-primary drawer-button lg:hidden">Menu</label>
-        <h1 class="text-4xl font-brand text-brand-primary">User Management</h1>
+<Layout title="Gestión de Usuarios | Admin CMS" isDashboard={true}>
+  <AdminNav activeTab="users" user={currentUser} />
+
+  <main class="max-w-6xl mx-auto p-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+      <div>
+        <h1 class="text-4xl font-londrina text-[#1d1d1b]">CONTROL DE USUARIOS Y ROLES</h1>
+        <p class="text-xs text-gray-500">Aprobación de postulaciones a editora, cambio de roles y moderación de cuentas.</p>
       </div>
 
-      <div class="w-full max-w-6xl overflow-x-auto bg-base-100 rounded-box shadow">
-        <table class="table w-full">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user: any) => (
-              <tr class="hover">
-                <td>{user.name}</td>
-                <td>{user.email}</td>
-                <td>
-                  <select 
-                    class="select select-bordered select-sm w-full max-w-xs role-select" 
-                    data-uid={user.id}
-                  >
-                    <option value="reader" selected={user.role === 'reader'}>Reader</option>
-                    <option value="editor" selected={user.role === 'editor'}>Editor</option>
-                    <option value="admin" selected={user.role === 'admin'}>Admin</option>
-                  </select>
-                </td>
-                <td>
+      <!-- Filters -->
+      <div class="flex items-center gap-2">
+        <select id="filter-role" class="select select-bordered select-sm border-2 border-[#1d1d1b]">
+          <option value="all">Todos los roles</option>
+          <option value="admin">Admin</option>
+          <option value="editor">Editor</option>
+          <option value="reader">Reader</option>
+        </select>
+        <select id="filter-status" class="select select-bordered select-sm border-2 border-[#1d1d1b]">
+          <option value="all">Todos los estados</option>
+          <option value="pending">Pendientes</option>
+          <option value="approved">Aprobados</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- User Table -->
+    <div class="overflow-x-auto bg-white rounded-box shadow border-2 border-[#1d1d1b]">
+      <table class="table w-full">
+        <thead class="bg-gray-100 border-b-2 border-[#1d1d1b] text-[#1d1d1b] font-bold text-xs uppercase">
+          <tr>
+            <th>Nombre / Colectivo</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Estado Aprobación</th>
+            <th>Fecha Registro</th>
+            <th class="text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="users-tbody">
+          {users.map((u) => (
+            <tr class="hover user-row border-b border-gray-200" data-role={u.role} data-approved={u.approved ? 'approved' : 'pending'}>
+              <td class="font-bold text-sm">
+                {u.displayName}
+                {u.uid === currentUser.uid && <span class="badge badge-xs badge-neutral ml-1">Tú</span>}
+              </td>
+              <td class="font-mono text-xs text-gray-600">{u.email}</td>
+              <td>
+                <select 
+                  class="select select-bordered select-xs border-2 border-[#1d1d1b] font-semibold role-select" 
+                  data-uid={u.uid}
+                  disabled={u.uid === currentUser.uid}
+                >
+                  <option value="reader" selected={u.role === 'reader'}>Reader</option>
+                  <option value="editor" selected={u.role === 'editor'}>Editor</option>
+                  <option value="admin" selected={u.role === 'admin'}>Admin</option>
+                </select>
+              </td>
+              <td>
+                <label class="cursor-pointer label justify-start gap-2">
                   <input 
                     type="checkbox" 
                     class="toggle toggle-success toggle-sm approval-toggle" 
-                    checked={user.approved} 
-                    data-uid={user.id} 
+                    checked={u.approved} 
+                    data-uid={u.uid}
+                    disabled={u.uid === currentUser.uid}
                   />
-                </td>
-                <td>
-                  <button class="btn btn-error btn-xs delete-btn" data-uid={user.id}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div> 
-    <div class="drawer-side">
-      <label for="admin-drawer" class="drawer-overlay"></label> 
-      <ul class="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
-        <li class="mb-4"><h2 class="text-2xl font-brand text-brand-primary">Backoffice</h2></li>
-        <li><a href="/admin/sections">Sections</a></li>
-        <li><a href="/admin/gallery">Gallery</a></li>
-        <li><a href="/admin/users" class="active">Users</a></li>
-        <li class="mt-auto"><a href="/logout">Logout</a></li>
-      </ul>
+                  <span class={`badge badge-sm font-semibold ${u.approved ? 'badge-success' : 'badge-warning'}`}>
+                    {u.approved ? 'Aprobado' : 'Pendiente'}
+                  </span>
+                </label>
+              </td>
+              <td class="text-xs text-gray-500 font-mono">
+                {new Date(u.createdAt).toLocaleDateString('es-ES')}
+              </td>
+              <td class="text-right">
+                {u.uid !== currentUser.uid && (
+                  <div class="flex justify-end gap-1">
+                    {!u.approved && (
+                      <button 
+                        class="btn btn-xs bg-success text-white approve-btn" 
+                        data-uid={u.uid}
+                      >
+                        ✓ Aprobar como Editora
+                      </button>
+                    )}
+                    <button 
+                      class="btn btn-xs btn-error text-white delete-btn" 
+                      data-uid={u.uid} 
+                      data-name={u.displayName}
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
-  </div>
-</Layout>
+  </main>
 
-<script>
-  const updateRole = async (uid: string, role: string) => {
-    await fetch(`/api/admin/users/${uid}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role })
-    });
-  };
+  <script is:inline>
+    // Filters logic
+    const filterRole = document.getElementById('filter-role');
+    const filterStatus = document.getElementById('filter-status');
+    const rows = document.querySelectorAll('.user-row');
 
-  const updateApproval = async (uid: string, approved: boolean) => {
-    await fetch(`/api/admin/users/${uid}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ approved })
-    });
-  };
+    function applyFilters() {
+      const selectedRole = filterRole.value;
+      const selectedStatus = filterStatus.value;
 
-  const deleteUser = async (uid: string) => {
-    if (confirm("Are you sure you want to delete this user?")) {
-      await fetch(`/api/admin/users/${uid}`, { method: "DELETE" });
-      window.location.reload();
+      rows.forEach(row => {
+        const role = row.getAttribute('data-role');
+        const approved = row.getAttribute('data-approved');
+
+        const roleMatch = (selectedRole === 'all' || role === selectedRole);
+        const statusMatch = (selectedStatus === 'all' || approved === selectedStatus);
+
+        if (roleMatch && statusMatch) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
     }
-  };
 
-  document.querySelectorAll('.role-select').forEach(el => {
-    el.addEventListener('change', (e: any) => updateRole(e.target.dataset.uid, e.target.value));
-  });
+    filterRole.addEventListener('change', applyFilters);
+    filterStatus.addEventListener('change', applyFilters);
 
-  document.querySelectorAll('.approval-toggle').forEach(el => {
-    el.addEventListener('change', (e: any) => updateApproval(e.target.dataset.uid, e.target.checked));
-  });
+    // Update role
+    document.querySelectorAll('.role-select').forEach(select => {
+      select.addEventListener('change', async (e) => {
+        const uid = e.target.dataset.uid;
+        const newRole = e.target.value;
+        try {
+          const res = await fetch(`/api/admin/users/${uid}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: newRole }),
+          });
+          if (res.ok) {
+            e.target.closest('tr').setAttribute('data-role', newRole);
+          } else {
+            alert('Error al actualizar el rol');
+          }
+        } catch {
+          alert('Error de conexión');
+        }
+      });
+    });
 
-  document.querySelectorAll('.delete-btn').forEach(el => {
-    el.addEventListener('click', (e: any) => deleteUser(e.target.dataset.uid));
-  });
-</script>
+    // Toggle approval
+    document.querySelectorAll('.approval-toggle').forEach(toggle => {
+      toggle.addEventListener('change', async (e) => {
+        const uid = e.target.dataset.uid;
+        const approved = e.target.checked;
+        try {
+          const res = await fetch(`/api/admin/users/${uid}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ approved }),
+          });
+          if (res.ok) {
+            window.location.reload();
+          } else {
+            alert('Error al actualizar aprobación');
+          }
+        } catch {
+          alert('Error de conexión');
+        }
+      });
+    });
+
+    // Quick approve as editor
+    document.querySelectorAll('.approve-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const uid = e.target.dataset.uid;
+        try {
+          const res = await fetch(`/api/admin/users/${uid}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ approved: true, role: 'editor' }),
+          });
+          if (res.ok) {
+            window.location.reload();
+          } else {
+            alert('Error al aprobar usuario');
+          }
+        } catch {
+          alert('Error de conexión');
+        }
+      });
+    });
+
+    // Delete user
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const uid = e.target.dataset.uid;
+        const name = e.target.dataset.name;
+        if (confirm(`¿Estás segura de eliminar la cuenta de "${name}"? Esta acción no se puede deshacer.`)) {
+          try {
+            const res = await fetch(`/api/admin/users/${uid}`, {
+              method: 'DELETE',
+            });
+            if (res.ok) {
+              window.location.reload();
+            } else {
+              alert('Error al eliminar usuario');
+            }
+          } catch {
+            alert('Error de conexión');
+          }
+        }
+      });
+    });
+  </script>
+</Layout>

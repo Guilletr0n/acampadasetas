@@ -3,21 +3,40 @@ import "../styles/global.css";
 
 interface Props {
   title: string;
+  theme?: string;
+  isDashboard?: boolean;
 }
 
-const { title } = Astro.props;
+const { title, theme = "light", isDashboard = false } = Astro.props;
 ---
 
 <!DOCTYPE html>
-<html lang="es" data-theme="light">
+<html lang="es" data-theme={theme}>
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    <title>{title} | Acampada Setas</title>
+    
+    <!-- Google Fonts: Londrina Solid -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@300;400;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+    
+    <title>{title} | Acampada Setas Sevilla</title>
   </head>
-  <body>
+  <body class={isDashboard ? "font-sans bg-base-200 min-h-screen text-base-content" : "min-h-screen"}>
     <slot />
   </body>
 </html>
+
+<style is:global>
+  :root {
+    --brand-primary: #af0b56;
+    --brand-bg: #fcf2df;
+    --brand-black: #1d1d1b;
+  }
+  .font-londrina {
+    font-family: 'Londrina Solid', cursive, sans-serif;
+  }
+</style>

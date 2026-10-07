@@ -1,83 +1,232 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { adminDb } from "../lib/firebase/admin";
+import { getSections } from "../lib/db";
 import { marked } from "marked";
 
-// Fetch published sections
-let sections: any[] = [];
-try {
-  const sectionsSnap = await adminDb.collection("sections").get();
-  sections = sectionsSnap.docs
-    .map(doc => ({ id: doc.id, ...doc.data() }))
-    .filter((sec: any) => sec.live)
-    .map((sec: any) => sec.live);
-    
-  // Simple order logic if order field doesn't exist
-  // We can just rely on the order they are stored or add a fallback
-} catch (error) {
-  console.error("Failed to fetch sections", error);
-}
+export const prerender = false;
+
+const sections = await getSections(true); // true = live published sections only
 ---
 
-<Layout title="Home">
-  <!-- Sticky Header -->
-  <header class="sticky top-0 z-50 bg-brand-bg/90 backdrop-blur border-b border-brand-primary p-4 flex justify-between items-center">
-    <h1 class="text-2xl font-brand text-brand-primary">Acampada Setas</h1>
-    <nav class="hidden md:flex gap-4">
-      {sections.map((section: any) => (
-        <a href={`#${section.slug}`} class="hover:text-brand-primary transition-colors font-bold uppercase text-sm">
-          {section.title}
+<Layout title="Acampada Setas Sevilla | Movilización por la Vivienda">
+  <!-- Sticky Navigation Header -->
+  <header class="sticky top-0 z-50 bg-[#fcf2df]/95 backdrop-blur-md border-b-2 border-[#1d1d1b] px-4 md:px-8 py-3 transition-all shadow-sm">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2 group">
+        <span class="text-3xl md:text-4xl font-londrina text-[#af0b56] tracking-wide group-hover:scale-105 transition-transform">
+          ACAMPADA SETAS
+        </span>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center gap-6 font-bold text-sm text-[#1d1d1b]">
+        {sections.map((sec) => (
+          <a 
+            href={`#${sec.slug}`} 
+            class="hover:text-[#af0b56] uppercase tracking-wider transition-colors scroll-link"
+          >
+            {sec.live?.title || sec.slug}
+          </a>
+        ))}
+        <a 
+          href="/gallery" 
+          class="hover:text-[#af0b56] uppercase tracking-wider transition-colors flex items-center gap-1 text-[#af0b56]"
+        >
+          📷 Galería
         </a>
-      ))}
-      <a href="/gallery" class="hover:text-brand-primary transition-colors font-bold uppercase text-sm">Gallery</a>
-    </nav>
+        <a 
+          href="/login" 
+          class="btn btn-xs bg-[#1d1d1b] hover:bg-black text-white border-none font-mono text-[11px] px-3"
+        >
+          CMS ↗
+        </a>
+      </nav>
+
+      <!-- Mobile dropdown -->
+      <div class="dropdown dropdown-end md:hidden">
+        <label tabindex="0" class="btn btn-ghost btn-sm border-2 border-[#1d1d1b]">
+          ☰
+        </label>
+        <ul tabindex="0" class="dropdown-content menu p-2 shadow-lg bg-[#fcf2df] border-2 border-[#1d1d1b] rounded-box w-52 text-sm font-bold mt-2">
+          {sections.map((sec) => (
+            <li>
+              <a href={`#${sec.slug}`} class="uppercase text-[#1d1d1b] hover:text-[#af0b56]">
+                {sec.live?.title || sec.slug}
+              </a>
+            </li>
+          ))}
+          <li class="border-t border-[#1d1d1b]/20 mt-1 pt-1">
+            <a href="/gallery" class="text-[#af0b56]">📷 Galería Oscura</a>
+          </li>
+          <li>
+            <a href="/login" class="text-gray-700">Acceso CMS</a>
+          </li>
+        </ul>
+      </div>
+    </div>
   </header>
 
-  <main>
-    {sections.length === 0 && (
-      <div class="min-h-screen flex items-center justify-center">
-        <p class="text-xl">No content published yet.</p>
-      </div>
-    )}
-    
-    {sections.map((section: any) => {
-      const htmlBody = section.body ? marked.parse(section.body) : "";
+  <!-- Hero / Intro Banner -->
+  <section class="py-12 md:py-20 px-4 max-w-6xl mx-auto text-center border-b-2 border-[#1d1d1b]">
+    <div class="inline-block bg-[#af0b56] text-white px-4 py-1 text-sm md:text-base font-bold uppercase tracking-widest rounded-full mb-4 shadow-[2px_2px_0px_#1d1d1b] border border-[#1d1d1b]">
+      Plaza de la Encarnación • Sevilla
+    </div>
+    <h1 class="text-6xl md:text-8xl font-londrina text-[#1d1d1b] leading-none mb-6">
+      POR EL DERECHO A LA CIUDAD Y A LA VIVIENDA
+    </h1>
+    <p class="max-w-2xl mx-auto text-lg md:text-xl text-[#1d1d1b] font-medium leading-relaxed">
+      Frente a la especulación rentista, los desahucios y la turistificación masiva: autoorganización popular y asamblea abierta permanente.
+    </p>
+    <div class="flex flex-wrap justify-center gap-4 mt-8">
+      <a 
+        href="#manifiesto" 
+        class="btn bg-[#af0b56] hover:bg-[#8f0946] text-white border-2 border-[#1d1d1b] font-bold px-6 text-base shadow-[3px_3px_0px_#1d1d1b]"
+      >
+        Leer Manifiesto ↓
+      </a>
+      <a 
+        href="#agenda" 
+        class="btn bg-[#fcf2df] hover:bg-amber-100 text-[#1d1d1b] border-2 border-[#1d1d1b] font-bold px-6 text-base shadow-[3px_3px_0px_#1d1d1b]"
+      >
+        Ver Programa de Actividades
+      </a>
+      <a 
+        href="/gallery" 
+        class="btn bg-[#1d1d1b] hover:bg-black text-white border-2 border-[#1d1d1b] font-bold px-6 text-base shadow-[3px_3px_0px_#af0b56]"
+      >
+        Galería de Fotos 📸
+      </a>
+    </div>
+  </section>
 
-      if (section.template === "multi-column") {
-        return (
-          <section id={section.slug} class="min-h-screen py-16 px-4 md:px-8 max-w-6xl mx-auto flex flex-col md:flex-row gap-8 items-center">
-            <div class="flex-1">
-              <h2 class="text-6xl font-brand text-brand-primary mb-2">{section.title}</h2>
-              {section.subtitle && <h3 class="text-2xl mb-4 font-bold">{section.subtitle}</h3>}
-              {section.highlight && <div class="badge badge-primary mb-4 p-4 text-lg">{section.highlight}</div>}
-              
-              <div class="prose prose-lg" set:html={htmlBody} />
-            </div>
-            {section.illustrationUrl && (
-              <div class="flex-1">
-                <img src={section.illustrationUrl} alt={section.title} class="rounded-xl shadow-2xl max-w-full" />
+  <!-- Dynamic Sections Rendered by Template -->
+  <main class="space-y-0">
+    {sections.length === 0 ? (
+      <div class="py-20 text-center text-gray-500">
+        <p class="text-xl font-bold">No hay secciones publicadas actualmente.</p>
+        <p class="text-sm mt-1">Inicia sesión en el <a href="/login" class="underline text-[#af0b56]">CMS</a> para redactar y publicar contenidos.</p>
+      </div>
+    ) : (
+      sections.map((sec, index) => {
+        const content = sec.live;
+        if (!content) return null;
+
+        const renderedMarkdown = marked.parse(content.body || '');
+        const isAlternate = index % 2 === 1;
+
+        // TEMPLATE 1: MULTI-COLUMN (e.g., Agenda / Activity Schedule)
+        if (content.template === 'multi-column') {
+          return (
+            <section 
+              id={sec.slug} 
+              class={`py-16 md:py-24 px-4 border-b-2 border-[#1d1d1b] ${isAlternate ? 'bg-[#f7e9d0]' : 'bg-[#fcf2df]'}`}
+            >
+              <div class="max-w-6xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-10 pb-4 border-b-2 border-[#1d1d1b]">
+                  <div>
+                    {content.highlight && (
+                      <span class="inline-block bg-[#af0b56] text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-[#1d1d1b] mb-2 shadow-[2px_2px_0px_#1d1d1b]">
+                        ★ {content.highlight}
+                      </span>
+                    )}
+                    <h2 class="text-5xl md:text-6xl font-londrina text-[#1d1d1b] m-0">
+                      {content.title}
+                    </h2>
+                    {content.subtitle && (
+                      <p class="text-lg md:text-xl text-gray-700 font-medium mt-1">
+                        {content.subtitle}
+                      </p>
+                    )}
+                  </div>
+                  <a href={`#${sec.slug}`} class="text-xs font-mono font-bold text-gray-400 hover:text-black">
+                    #{sec.slug}
+                  </a>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                  <div class={`prose max-w-none text-[#1d1d1b] ${content.illustrationUrl ? 'lg:col-span-7' : 'lg:col-span-12'}`}>
+                    <div class="space-y-4 text-base md:text-lg leading-relaxed" set:html={renderedMarkdown} />
+                  </div>
+
+                  {content.illustrationUrl && (
+                    <div class="lg:col-span-5 sticky top-24">
+                      <div class="border-2 border-[#1d1d1b] rounded-xl overflow-hidden bg-white shadow-[6px_6px_0px_#1d1d1b]">
+                        <img 
+                          src={content.illustrationUrl} 
+                          alt={content.title} 
+                          class="w-full h-auto object-cover max-h-[420px]" 
+                          loading="lazy"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
+            </section>
+          );
+        }
+
+        // TEMPLATE 2: SINGLE-COLUMN (e.g., Manifiesto / Centered focus layout)
+        return (
+          <section 
+            id={sec.slug} 
+            class={`py-16 md:py-24 px-4 border-b-2 border-[#1d1d1b] ${isAlternate ? 'bg-[#f7e9d0]' : 'bg-[#fcf2df]'}`}
+          >
+            <div class="max-w-4xl mx-auto text-center">
+              {content.highlight && (
+                <div class="inline-block bg-[#af0b56] text-white text-xs md:text-sm font-bold uppercase tracking-wider px-4 py-1 rounded-full border border-[#1d1d1b] mb-4 shadow-[2px_2px_0px_#1d1d1b]">
+                  {content.highlight}
+                </div>
+              )}
+
+              <h2 class="text-5xl md:text-7xl font-londrina text-[#1d1d1b] mb-3 leading-tight">
+                {content.title}
+              </h2>
+
+              {content.subtitle && (
+                <p class="text-xl md:text-2xl text-gray-700 font-medium mb-8 max-w-2xl mx-auto">
+                  {content.subtitle}
+                </p>
+              )}
+
+              {content.illustrationUrl && (
+                <div class="my-8 max-w-2xl mx-auto border-2 border-[#1d1d1b] rounded-xl overflow-hidden shadow-[6px_6px_0px_#1d1d1b] bg-white">
+                  <img 
+                    src={content.illustrationUrl} 
+                    alt={content.title} 
+                    class="w-full h-auto object-cover max-h-[400px]" 
+                    loading="lazy"
+                  />
+                </div>
+              )}
+
+              <div class="prose max-w-none text-left text-base md:text-lg leading-relaxed bg-white/80 p-6 md:p-10 border-2 border-[#1d1d1b] rounded-xl shadow-[4px_4px_0px_#1d1d1b] mt-6">
+                <div set:html={renderedMarkdown} />
+              </div>
+            </div>
           </section>
         );
-      }
-
-      // Default single-column template
-      return (
-        <section id={section.slug} class="min-h-screen py-16 px-4 md:px-8 max-w-4xl mx-auto text-center flex flex-col items-center justify-center">
-          <h2 class="text-6xl font-brand text-brand-primary mb-2">{section.title}</h2>
-          {section.subtitle && <h3 class="text-2xl mb-4 font-bold">{section.subtitle}</h3>}
-          {section.highlight && <div class="badge badge-primary mb-6 p-4 text-lg border-none bg-brand-primary text-white">{section.highlight}</div>}
-          
-          {section.illustrationUrl && (
-            <img src={section.illustrationUrl} alt={section.title} class="rounded-xl shadow-xl w-full max-w-2xl mb-8 object-cover mx-auto" />
-          )}
-          
-          <div class="prose prose-lg text-left w-full" set:html={htmlBody} />
-        </section>
-      );
-    })}
+      })
+    )}
   </main>
+
+  <!-- Footer -->
+  <footer class="bg-[#1d1d1b] text-[#fcf2df] py-12 px-4 border-t-4 border-[#af0b56]">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
+      <div>
+        <h3 class="text-3xl font-londrina text-[#af0b56] tracking-wide">ACAMPADA SETAS SEVILLA</h3>
+        <p class="text-xs text-gray-400 mt-1">Contacto: arrendataria@zohomail.com • Dominio: acampadasetas.org</p>
+      </div>
+
+      <div class="flex items-center gap-4 text-sm font-bold">
+        <a href="/gallery" class="hover:text-[#af0b56] transition-colors">Galería Fotográfica</a>
+        <span>•</span>
+        <a href="/join-editor" class="hover:text-[#af0b56] transition-colors">Postularse como Editora</a>
+        <span>•</span>
+        <a href="/login" class="hover:text-[#af0b56] transition-colors">Acceso CMS</a>
+      </div>
+    </div>
+  </footer>
 </Layout>
 
 <style>

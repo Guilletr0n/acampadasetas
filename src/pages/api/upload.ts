@@ -1,63 +1,48 @@
-import type { APIRoute } from "astro";
-import { adminStorage } from "../../lib/firebase/admin";
-import sharp from "sharp";
-import crypto from "crypto";
+import type { APIRoute } from 'astro';
+import { uploadImage } from '../../lib/storage';
+import { canEditContent } from '../../lib/auth';
+
+export const prerender = false;
 
 export const POST: APIRoute = async ({ request, locals }) => {
-  // Authentication check
-  if (!locals.user || !locals.user.approved || !['admin', 'editor'].includes(locals.user.role)) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 403 });
+  if (!locals.user || !canEditContent(locals.user)) {
+    return new Response(JSON.stringify({ error: 'No autorizado para subir archivos' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   try {
     const formData = await request.formData();
-    const file = formData.get("file") as File;
+    const file = formData.get('file') as File | null;
 
     if (!file) {
-      return new Response(JSON.stringify({ error: "No file provided" }), { status: 400 });
+      return new Response(JSON.stringify({ error: 'No se envió ningún archivo' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    // Size limit check (5 MB)
     if (file.size > 5 * 1024 * 1024) {
-      return new Response(JSON.stringify({ error: "File exceeds 5MB limit" }), { status: 400 });
+      return new Response(JSON.stringify({ error: 'El archivo supera el límite de 5 MB' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Optimize image and convert to WebP
-    const optimizedBuffer = await sharp(buffer)
-      .webp({ quality: 80 })
-      .toBuffer();
+    const url = await uploadImage(buffer, file.name);
 
-    // Generate unique ID
-    const uniqueId = crypto.randomUUID();
-    const fileName = `uploads/${uniqueId}.webp`;
-
-    // Upload to Firebase Storage using Admin SDK
-    const bucket = adminStorage.bucket();
-    const fileRef = bucket.file(fileName);
-    
-    await fileRef.save(optimizedBuffer, {
-      metadata: {
-        contentType: 'image/webp',
-        metadata: {
-          originalName: file.name,
-          uploadedBy: locals.user.uid
-        }
-      },
-      public: true
-    });
-
-    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
-
-    return new Response(JSON.stringify({ url: publicUrl, id: uniqueId }), {
+    return new Response(JSON.stringify({ success: true, url }), {
       status: 200,
-      headers: { "Content-Type": "application/json" }
+      headers: { 'Content-Type': 'application/json' },
     });
-
-  } catch (error: any) {
-    console.error("Upload error:", error);
-    return new Response(JSON.stringify({ error: error.message || "Upload failed" }), { status: 500 });
+  } catch (err: any) {
+    return new Response(JSON.stringify({ error: err.message || 'Error al procesar la imagen' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 };

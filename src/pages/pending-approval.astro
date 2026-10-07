@@ -1,0 +1,28 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { getCurrentUser } from "../lib/auth";
+
+export const prerender = false;
+
+const user = await getCurrentUser(Astro.cookies);
+---
+
+<Layout title="Cuenta Pendiente de Aprobación" isDashboard={true}>
+  <main class="min-h-screen flex items-center justify-center p-4 bg-[#fcf2df]">
+    <div class="card w-full max-w-md bg-white shadow-xl border-2 border-[#1d1d1b] text-center p-6">
+      <div class="text-4xl mb-2">⏳</div>
+      <h2 class="text-3xl font-londrina text-[#af0b56]">CUENTA EN REVISIÓN</h2>
+      <p class="text-sm text-gray-700 mt-2">
+        Hola <strong>{user?.displayName || 'compañera'}</strong>, tu cuenta ({user?.email}) está registrada correctamente con rol de <strong>lectora</strong> y en estado <strong>pendiente de aprobación</strong>.
+      </p>
+      <p class="text-xs text-gray-500 mt-3">
+        Un administrador debe validar tu solicitud desde el panel de gestión para habilitar tus permisos de edición en el CMS.
+      </p>
+
+      <div class="flex justify-center gap-3 mt-6">
+        <a href="/" class="btn btn-outline border-2 border-[#1d1d1b] btn-sm">Ver la Web</a>
+        <a href="/api/auth/logout" class="btn bg-[#af0b56] text-white btn-sm">Cerrar Sesión</a>
+      </div>
+    </div>
+  </main>
+</Layout>

@@ -1,40 +1,23 @@
 import { defineMiddleware } from "astro:middleware";
-import { adminAuth } from "./lib/firebase/admin";
+import { getCurrentUser } from "./lib/auth";
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  const sessionCookie = context.cookies.get("session")?.value;
-  
-  context.locals.user = null;
-  
-  if (sessionCookie) {
-    try {
-      const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
-      context.locals.user = {
-        uid: decodedClaims.uid,
-        email: decodedClaims.email,
-        role: decodedClaims.role || "reader", // default role
-        approved: decodedClaims.approved === true,
-      };
-    } catch (error) {
-      // Invalid or expired cookie
-      context.cookies.delete("session", { path: "/" });
-    }
-  }
+  const user = await getCurrentUser(context.cookies);
+  context.locals.user = user;
 
-  // Route guarding based on role
   const url = new URL(context.request.url);
-  
+
   if (url.pathname.startsWith('/admin')) {
-    if (!context.locals.user) {
-      return context.redirect('/login');
+    if (!user) {
+      return context.redirect(`/login?redirect=${encodeURIComponent(url.pathname)}`);
     }
-    
-    if (!context.locals.user.approved) {
+
+    if (!user.approved) {
       return context.redirect('/pending-approval');
     }
 
-    if (url.pathname.startsWith('/admin/users') && context.locals.user.role !== 'admin') {
-      return new Response("Forbidden: Admins only", { status: 403 });
+    if (url.pathname.startsWith('/admin/users') && user.role !== 'admin') {
+      return new Response("Acceso Denegado: Exclusivo para administradores", { status: 403 });
     }
   }
 
