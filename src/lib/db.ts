@@ -101,6 +101,35 @@ Nos concentramos en la Plaza de la Encarnación (Las Setas) para denunciar la em
   }
 ];
 
+const INITIAL_HISTORY: SectionHistoryEntry[] = [
+  {
+    id: 'hist-seed-01',
+    sectionId: 'sec-manifiesto',
+    timestamp: '2026-10-01T10:00:00.000Z',
+    authorName: 'Administración Acampada',
+    template: 'single-column',
+    title: 'Manifiesto Acampada Setas',
+    subtitle: 'Por el derecho a la vivienda y la ciudad para quienes la habitan',
+    highlight: '¡La vivienda es un derecho, no un negocio!',
+    body: INITIAL_SECTIONS[0].live!.body,
+    illustrationUrl: '',
+    status: 'published',
+  },
+  {
+    id: 'hist-seed-02',
+    sectionId: 'sec-agenda',
+    timestamp: '2026-10-01T11:00:00.000Z',
+    authorName: 'Administración Acampada',
+    template: 'multi-column',
+    title: 'Programa y Actividades',
+    subtitle: 'Asambleas, talleres y formación colectiva',
+    highlight: 'Asamblea diaria a las 20:00h',
+    body: INITIAL_SECTIONS[1].live!.body,
+    illustrationUrl: '',
+    status: 'published',
+  }
+];
+
 const INITIAL_GALLERY: GalleryItem[] = [
   {
     id: 'gal-01',
@@ -129,8 +158,8 @@ function ensureDataFiles() {
   if (!fs.existsSync(SECTIONS_FILE)) {
     fs.writeFileSync(SECTIONS_FILE, JSON.stringify(INITIAL_SECTIONS, null, 2), 'utf-8');
   }
-  if (!fs.existsSync(HISTORY_FILE)) {
-    fs.writeFileSync(HISTORY_FILE, JSON.stringify([], null, 2), 'utf-8');
+  if (!fs.existsSync(HISTORY_FILE) || (fs.existsSync(HISTORY_FILE) && JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf-8') || '[]').length === 0)) {
+    fs.writeFileSync(HISTORY_FILE, JSON.stringify(INITIAL_HISTORY, null, 2), 'utf-8');
   }
   if (!fs.existsSync(GALLERY_FILE)) {
     fs.writeFileSync(GALLERY_FILE, JSON.stringify(INITIAL_GALLERY, null, 2), 'utf-8');
@@ -161,7 +190,6 @@ export async function getSections(liveOnly = false): Promise<Section[]> {
         const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Section));
         return liveOnly ? list.filter(s => s.live !== null) : list;
       } else {
-        // Seed initial
         const initial = readLocal<Section[]>(SECTIONS_FILE, INITIAL_SECTIONS);
         for (const s of initial) {
           await firestoreDb.collection('sections').doc(s.id).set(s);
@@ -193,7 +221,13 @@ export async function getSectionById(id: string): Promise<Section | null> {
   return list.find(s => s.id === id) || null;
 }
 
-export async function saveSectionDraft(id: string, draftData: SectionContent, slug?: string, order?: number): Promise<Section> {
+export async function saveSectionDraft(
+  id: string, 
+  draftData: SectionContent, 
+  slug?: string, 
+  order?: number,
+  authorName = 'Editor'
+): Promise<Section> {
   const now = new Date().toISOString();
   const existing = await getSectionById(id);
   const finalSlug = slug || existing?.slug || id.replace('sec-', '');
@@ -208,14 +242,36 @@ export async function saveSectionDraft(id: string, draftData: SectionContent, sl
     updatedAt: now,
   };
 
+  // Add a history revision record for this draft snapshot
+  const draftHistoryEntry: SectionHistoryEntry = {
+    id: 'hist-' + Math.random().toString(36).substring(2, 9),
+    sectionId: id,
+    timestamp: now,
+    authorName,
+    template: draftData.template,
+    title: draftData.title,
+    subtitle: draftData.subtitle,
+    highlight: draftData.highlight,
+    body: draftData.body,
+    illustrationUrl: draftData.illustrationUrl,
+    status: 'draft',
+  };
+
   if (firestoreDb) {
     try {
       await firestoreDb.collection('sections').doc(id).set(updatedSection, { merge: true });
+      await firestoreDb.collection('sections').doc(id).collection('history').doc(draftHistoryEntry.id).set(draftHistoryEntry);
     } catch (e) {
       console.warn('Firestore saveSectionDraft fallback:', e);
     }
   }
 
+  // Update local history
+  const historyList = readLocal<SectionHistoryEntry[]>(HISTORY_FILE, INITIAL_HISTORY);
+  historyList.unshift(draftHistoryEntry);
+  writeLocal(HISTORY_FILE, historyList);
+
+  // Update local sections
   const list = readLocal<Section[]>(SECTIONS_FILE, INITIAL_SECTIONS);
   const index = list.findIndex(s => s.id === id);
   if (index >= 0) {
@@ -235,7 +291,7 @@ export async function publishSection(id: string, authorName: string): Promise<Se
   const now = new Date().toISOString();
   const liveContent: SectionContent = { ...section.draft };
 
-  // 1. Create immutable snapshot in history
+  // Create immutable snapshot in history with published status
   const historyEntry: SectionHistoryEntry = {
     id: 'hist-' + Math.random().toString(36).substring(2, 9),
     sectionId: id,
@@ -247,6 +303,7 @@ export async function publishSection(id: string, authorName: string): Promise<Se
     highlight: liveContent.highlight,
     body: liveContent.body,
     illustrationUrl: liveContent.illustrationUrl,
+    status: 'published',
   };
 
   if (firestoreDb) {
@@ -262,7 +319,7 @@ export async function publishSection(id: string, authorName: string): Promise<Se
   }
 
   // Local storage sync
-  const historyList = readLocal<SectionHistoryEntry[]>(HISTORY_FILE, []);
+  const historyList = readLocal<SectionHistoryEntry[]>(HISTORY_FILE, INITIAL_HISTORY);
   historyList.unshift(historyEntry);
   writeLocal(HISTORY_FILE, historyList);
 
@@ -278,6 +335,28 @@ export async function publishSection(id: string, authorName: string): Promise<Se
   return section;
 }
 
+export async function deleteSection(id: string): Promise<boolean> {
+  if (firestoreDb) {
+    try {
+      await firestoreDb.collection('sections').doc(id).delete();
+    } catch (e) {
+      console.warn('Firestore deleteSection fallback:', e);
+    }
+  }
+
+  const sectionsList = readLocal<Section[]>(SECTIONS_FILE, INITIAL_SECTIONS);
+  const filtered = sectionsList.filter(s => s.id !== id);
+  if (filtered.length === sectionsList.length) return false;
+  writeLocal(SECTIONS_FILE, filtered);
+
+  // Also remove history entries for this section
+  const historyList = readLocal<SectionHistoryEntry[]>(HISTORY_FILE, INITIAL_HISTORY);
+  const filteredHistory = historyList.filter(h => h.sectionId !== id);
+  writeLocal(HISTORY_FILE, filteredHistory);
+
+  return true;
+}
+
 export async function getSectionHistory(sectionId: string): Promise<SectionHistoryEntry[]> {
   if (firestoreDb) {
     try {
@@ -290,7 +369,7 @@ export async function getSectionHistory(sectionId: string): Promise<SectionHisto
     }
   }
 
-  const historyList = readLocal<SectionHistoryEntry[]>(HISTORY_FILE, []);
+  const historyList = readLocal<SectionHistoryEntry[]>(HISTORY_FILE, INITIAL_HISTORY);
   return historyList.filter(h => h.sectionId === sectionId).sort((a, b) => b.timestamp.localeCompare(a.timestamp));
 }
 

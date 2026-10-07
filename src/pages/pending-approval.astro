@@ -10,7 +10,7 @@ const user = await getCurrentUser(Astro.cookies);
 <Layout title="Cuenta Pendiente de Aprobación" isDashboard={true}>
   <main class="min-h-screen flex items-center justify-center p-4 bg-base-200">
     <div class="card w-full max-w-md bg-base-100 shadow-xl text-center p-6">
-      <h2 class="text-3xl font-londrina text-primary">CUENTA EN REVISIÓN</h2>
+      <h2 class="text-3xl font-londrina text-[#af0b56]">CUENTA EN REVISIÓN</h2>
       <p class="text-sm text-base-content/80 mt-2">
         Hola <strong>{user?.displayName || 'compañera'}</strong>, tu cuenta ({user?.email}) está registrada correctamente con rol de <strong>lectora</strong> y en estado <strong>pendiente de aprobación</strong>.
       </p>

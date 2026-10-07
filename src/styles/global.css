@@ -12,6 +12,12 @@
   --color-brand-black: #1d1d1b;
 }
 
+:root, [data-theme], [data-theme="light"], [data-theme="dark"] {
+  --color-primary: #af0b56 !important;
+  --p: #af0b56 !important;
+  --color-brand-primary: #af0b56 !important;
+}
+
 @layer base {
   body {
     font-family: Arial, Helvetica, sans-serif;
@@ -28,6 +34,17 @@
   p, span, a, button, input, textarea, select, label, table, th, td, ul, ol, li, blockquote {
     font-family: Arial, Helvetica, sans-serif;
   }
+}
+
+/* Enforce Brand Primary Color #af0b56 everywhere */
+.text-primary {
+  color: #af0b56 !important;
+}
+.bg-primary {
+  background-color: #af0b56 !important;
+}
+.border-primary {
+  border-color: #af0b56 !important;
 }
 
 /* Unified DaisyUI Button Styles */

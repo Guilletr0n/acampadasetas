@@ -42,6 +42,7 @@ export interface SectionHistoryEntry {
   highlight?: string;
   body: string;
   illustrationUrl?: string;
+  status: 'published' | 'draft';
 }
 
 export interface GalleryItem {

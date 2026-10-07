@@ -13,7 +13,7 @@ const items = await getGalleryItems();
     <header class="border-b border-neutral-800 px-6 py-4 bg-black/60 backdrop-blur sticky top-0 z-50">
       <div class="max-w-6xl mx-auto flex items-center justify-between">
         <a href="/" class="flex items-center gap-2 group">
-          <span class="text-3xl font-londrina text-primary tracking-wider group-hover:opacity-80 transition-opacity">
+          <span class="text-3xl font-londrina text-[#af0b56] tracking-wider group-hover:opacity-80 transition-opacity">
             ACAMPADA SETAS
           </span>
         </a>
@@ -73,7 +73,7 @@ const items = await getGalleryItems();
                               href={img.social} 
                               target="_blank" 
                               rel="noopener noreferrer" 
-                              class="text-primary hover:underline font-bold transition-colors"
+                              class="text-[#af0b56] hover:underline font-bold transition-colors"
                             >
                               Perfil / Red Social
                             </a>
@@ -118,7 +118,7 @@ const items = await getGalleryItems();
             {items.map((img, idx) => (
               <a 
                 href={`#slide-${idx}`} 
-                class="w-12 h-12 md:w-16 md:h-16 rounded-lg border border-neutral-700 overflow-hidden hover:border-primary transition-colors shrink-0 opacity-70 hover:opacity-100"
+                class="w-12 h-12 md:w-16 md:h-16 rounded-lg border border-neutral-700 overflow-hidden hover:border-[#af0b56] transition-colors shrink-0 opacity-70 hover:opacity-100"
               >
                 <img src={img.url} alt={`Miniatura ${idx + 1}`} class="w-full h-full object-cover" />
               </a>

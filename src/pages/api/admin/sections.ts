@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getSections, getSectionById, saveSectionDraft, publishSection, getSectionHistory, restoreSectionDraft } from '../../../lib/db';
+import { getSections, getSectionById, saveSectionDraft, publishSection, getSectionHistory, restoreSectionDraft, deleteSection } from '../../../lib/db';
 import { canEditContent } from '../../../lib/auth';
 
 export const prerender = false;
@@ -36,6 +36,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const data = await request.json();
     const { action, id, title, subtitle, highlight, template, body, illustrationUrl, slug, order, historyId } = data;
+    const authorName = locals.user.displayName || locals.user.email || 'Editor';
 
     if (action === 'save-draft') {
       const sectionId = id || ('sec-' + (slug || title.toLowerCase().replace(/[^a-z0-9]/g, '-')));
@@ -46,14 +47,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
         template: template || 'single-column',
         body: body || '',
         illustrationUrl: illustrationUrl || '',
-      }, slug, order);
+      }, slug, order, authorName);
 
-      return new Response(JSON.stringify({ success: true, section: saved }), { status: 200 });
+      const history = await getSectionHistory(sectionId);
+      return new Response(JSON.stringify({ success: true, section: saved, history }), { status: 200 });
     }
 
     if (action === 'publish') {
       if (!id) return new Response(JSON.stringify({ error: 'ID de sección requerido' }), { status: 400 });
-      // First save draft if payload provided
       if (title) {
         await saveSectionDraft(id, {
           title,
@@ -62,11 +63,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
           template: template || 'single-column',
           body: body || '',
           illustrationUrl: illustrationUrl || '',
-        }, slug, order);
+        }, slug, order, authorName);
       }
 
-      const published = await publishSection(id, locals.user.displayName || locals.user.email);
-      return new Response(JSON.stringify({ success: true, section: published }), { status: 200 });
+      const published = await publishSection(id, authorName);
+      const history = await getSectionHistory(id);
+      return new Response(JSON.stringify({ success: true, section: published, history }), { status: 200 });
     }
 
     if (action === 'restore') {
@@ -74,7 +76,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
         return new Response(JSON.stringify({ error: 'ID de sección e historial requeridos' }), { status: 400 });
       }
       const restored = await restoreSectionDraft(id, historyId);
-      return new Response(JSON.stringify({ success: true, section: restored }), { status: 200 });
+      const history = await getSectionHistory(id);
+      return new Response(JSON.stringify({ success: true, section: restored, history }), { status: 200 });
+    }
+
+    if (action === 'delete') {
+      if (!id) return new Response(JSON.stringify({ error: 'ID de sección requerido' }), { status: 400 });
+      const ok = await deleteSection(id);
+      return new Response(JSON.stringify({ success: ok }), { status: 200 });
     }
 
     return new Response(JSON.stringify({ error: 'Acción desconocida' }), { status: 400 });
