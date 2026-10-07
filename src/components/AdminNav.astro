@@ -2,16 +2,17 @@
 import type { User } from '../lib/types';
 
 interface Props {
-  activeTab: 'sections' | 'gallery' | 'users';
+  activeTab: 'home' | 'sections' | 'gallery' | 'users';
   user: User | null;
 }
 
 const { activeTab, user } = Astro.props;
+const isHomeActive = activeTab === 'home' || activeTab === 'sections';
 ---
 
 <div class="navbar bg-base-100 shadow-md border-b border-base-300 px-6">
   <div class="flex-1 items-center gap-3">
-    <a href="/admin/sections" class="text-2xl font-londrina tracking-wide text-[#af0b56]">
+    <a href="/admin/home" class="text-2xl font-londrina tracking-wide text-[#af0b56]">
       ACAMPADA SETAS CMS
     </a>
     <span class="badge badge-outline text-xs uppercase font-bold tracking-wider">
@@ -22,8 +23,8 @@ const { activeTab, user } = Astro.props;
   <div class="flex-none gap-2">
     <ul class="menu menu-horizontal px-1 font-semibold gap-1">
       <li>
-        <a href="/admin/sections" class={activeTab === 'sections' ? 'active' : ''}>
-          Secciones
+        <a href="/admin/home" class={isHomeActive ? 'active' : ''}>
+          Inicio / Secciones
         </a>
       </li>
       <li>

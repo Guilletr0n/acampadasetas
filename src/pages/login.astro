@@ -6,7 +6,7 @@ export const prerender = false;
 
 const user = await getCurrentUser(Astro.cookies);
 if (user && user.approved) {
-  return Astro.redirect('/admin/sections');
+  return Astro.redirect('/admin/home');
 }
 ---
 
@@ -130,7 +130,7 @@ if (user && user.approved) {
 
         if (res.ok && data.success) {
           const params = new URLSearchParams(window.location.search);
-          const redirect = params.get('redirect') || '/admin/sections';
+          const redirect = params.get('redirect') || '/admin/home';
           window.location.href = redirect;
         } else {
           errorBox.innerText = data.error || 'Credenciales inválidas';

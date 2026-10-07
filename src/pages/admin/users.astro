@@ -8,7 +8,7 @@ export const prerender = false;
 
 const currentUser = await getCurrentUser(Astro.cookies);
 if (!currentUser || currentUser.role !== 'admin') {
-  return Astro.redirect('/admin/sections');
+  return Astro.redirect('/admin/home');
 }
 
 const users = await getUsers();

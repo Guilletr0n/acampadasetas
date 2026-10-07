@@ -18,14 +18,14 @@ const { title, theme = "light", isDashboard = false } = Astro.props;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     
-    <!-- Google Fonts: Londrina Solid -->
+    <!-- Google Fonts: Londrina Solid for titles -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@300;400;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@300;400;900&display=swap" rel="stylesheet" />
     
     <title>{title} | Acampada Setas Sevilla</title>
   </head>
-  <body class={isDashboard ? "font-sans bg-base-200 min-h-screen text-base-content" : "min-h-screen"}>
+  <body class={isDashboard ? "bg-base-200 min-h-screen text-base-content" : "min-h-screen"}>
     <slot />
   </body>
 </html>
@@ -36,7 +36,12 @@ const { title, theme = "light", isDashboard = false } = Astro.props;
     --brand-bg: #fcf2df;
     --brand-black: #1d1d1b;
   }
-  .font-londrina {
+
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-londrina {
     font-family: 'Londrina Solid', cursive, sans-serif;
   }
 </style>

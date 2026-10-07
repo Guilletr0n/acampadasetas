@@ -1,10 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Londrina+Solid&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@300;400;900&display=swap');
 @import "tailwindcss";
 @plugin "daisyui";
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --font-sans: "Londrina Solid", sans-serif;
+  --font-sans: Arial, Helvetica, sans-serif;
+  --font-title: "Londrina Solid", cursive, sans-serif;
+  --font-londrina: "Londrina Solid", cursive, sans-serif;
   --color-brand-primary: #af0b56;
   --color-brand-bg: #fcf2df;
   --color-brand-black: #1d1d1b;
@@ -12,8 +14,38 @@
 
 @layer base {
   body {
-    font-family: var(--font-sans);
+    font-family: Arial, Helvetica, sans-serif;
     background-color: var(--color-brand-bg);
     color: var(--color-brand-black);
   }
+
+  /* Font Londrina ONLY for titles */
+  h1, h2, h3, h4, h5, h6, .font-title, .font-londrina {
+    font-family: "Londrina Solid", cursive, sans-serif;
+    letter-spacing: 0.02em;
+  }
+
+  /* All other elements use clean sans-serif like Arial */
+  p, span, a, button, input, textarea, select, label, table, th, td, ul, ol, li, blockquote {
+    font-family: Arial, Helvetica, sans-serif;
+  }
+}
+
+/* Ensure markdown headings within .prose use Londrina and text uses Arial */
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  font-family: "Londrina Solid", cursive, sans-serif !important;
+  letter-spacing: 0.02em;
+}
+
+.prose p,
+.prose li,
+.prose strong,
+.prose em,
+.prose blockquote {
+  font-family: Arial, Helvetica, sans-serif !important;
 }

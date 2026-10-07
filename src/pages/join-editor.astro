@@ -6,7 +6,7 @@ export const prerender = false;
 
 const user = await getCurrentUser(Astro.cookies);
 if (user) {
-  return Astro.redirect('/admin/sections');
+  return Astro.redirect('/admin/home');
 }
 ---
 

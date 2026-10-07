@@ -14,9 +14,9 @@ if (!currentUser || !currentUser.approved) {
 const sections = await getSections(false);
 ---
 
-<Layout title="Gestor de Secciones | CMS" isDashboard={true}>
+<Layout title="Gestor de Inicio y Secciones | CMS" isDashboard={true}>
   <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css" />
-  <AdminNav activeTab="sections" user={currentUser} />
+  <AdminNav activeTab="home" user={currentUser} />
 
   <main class="max-w-6xl mx-auto p-6">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
