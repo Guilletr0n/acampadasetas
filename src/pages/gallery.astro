@@ -13,8 +13,8 @@ const items = await getGalleryItems();
     <header class="border-b border-neutral-800 px-6 py-4 bg-black/60 backdrop-blur sticky top-0 z-50">
       <div class="max-w-6xl mx-auto flex items-center justify-between">
         <a href="/" class="flex items-center gap-2 group">
-          <span class="text-3xl font-londrina text-[#af0b56] tracking-wider group-hover:opacity-80 transition-opacity">
-            ← ACAMPADA SETAS
+          <span class="text-3xl font-londrina text-primary tracking-wider group-hover:opacity-80 transition-opacity">
+            ACAMPADA SETAS
           </span>
         </a>
 
@@ -22,8 +22,8 @@ const items = await getGalleryItems();
           <span class="badge badge-outline text-xs font-mono text-neutral-400">
             {items.length} {items.length === 1 ? 'Fotografía' : 'Fotografías'}
           </span>
-          <a href="/admin/gallery" class="btn btn-xs btn-outline border-neutral-700 text-neutral-300 hover:bg-neutral-800">
-            Gestionar ↗
+          <a href="/admin/gallery" class="btn btn-xs btn-outline">
+            Gestionar
           </a>
         </div>
       </div>
@@ -65,7 +65,7 @@ const items = await getGalleryItems();
                         </p>
                       )}
                       <div class="flex items-center gap-2 mt-1 text-xs md:text-sm text-neutral-400">
-                        <span>📸 Fotografía por: <strong class="text-neutral-200">{img.author}</strong></span>
+                        <span>Fotografía por: <strong class="text-neutral-200">{img.author}</strong></span>
                         {img.social && (
                           <>
                             <span>•</span>
@@ -73,9 +73,9 @@ const items = await getGalleryItems();
                               href={img.social} 
                               target="_blank" 
                               rel="noopener noreferrer" 
-                              class="text-[#af0b56] hover:underline font-bold transition-colors flex items-center gap-1"
+                              class="text-primary hover:underline font-bold transition-colors"
                             >
-                              Perfil / Red Social ↗
+                              Perfil / Red Social
                             </a>
                           </>
                         )}
@@ -91,15 +91,21 @@ const items = await getGalleryItems();
                   <div class="absolute inset-y-0 inset-x-4 flex justify-between items-center pointer-events-none">
                     <a 
                       href={`#slide-${prevIndex}`} 
-                      class="btn btn-circle btn-sm md:btn-md bg-black/50 border-neutral-700 text-white hover:bg-black pointer-events-auto transition-transform active:scale-95"
+                      class="btn btn-circle btn-sm md:btn-md bg-black/60 border-neutral-700 text-white hover:bg-black pointer-events-auto"
+                      aria-label="Anterior"
                     >
-                      ❮
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                      </svg>
                     </a>
                     <a 
                       href={`#slide-${nextIndex}`} 
-                      class="btn btn-circle btn-sm md:btn-md bg-black/50 border-neutral-700 text-white hover:bg-black pointer-events-auto transition-transform active:scale-95"
+                      class="btn btn-circle btn-sm md:btn-md bg-black/60 border-neutral-700 text-white hover:bg-black pointer-events-auto"
+                      aria-label="Siguiente"
                     >
-                      ❯
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                      </svg>
                     </a>
                   </div>
                 </div>
@@ -112,7 +118,7 @@ const items = await getGalleryItems();
             {items.map((img, idx) => (
               <a 
                 href={`#slide-${idx}`} 
-                class="w-12 h-12 md:w-16 md:h-16 rounded-lg border border-neutral-700 overflow-hidden hover:border-[#af0b56] transition-colors shrink-0 opacity-70 hover:opacity-100"
+                class="w-12 h-12 md:w-16 md:h-16 rounded-lg border border-neutral-700 overflow-hidden hover:border-primary transition-colors shrink-0 opacity-70 hover:opacity-100"
               >
                 <img src={img.url} alt={`Miniatura ${idx + 1}`} class="w-full h-full object-cover" />
               </a>

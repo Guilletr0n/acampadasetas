@@ -11,71 +11,73 @@ if (user) {
 ---
 
 <Layout title="Unirse como Editora" isDashboard={true}>
-  <main class="min-h-screen flex items-center justify-center p-4 bg-[#fcf2df]">
-    <div class="card w-full max-w-md bg-white shadow-2xl border-2 border-[#1d1d1b]">
+  <main class="min-h-screen flex items-center justify-center p-4 bg-base-200">
+    <div class="card w-full max-w-md bg-base-100 shadow-xl">
       <div class="card-body">
         <div class="text-center mb-3">
-          <span class="text-xs uppercase tracking-widest font-bold text-[#af0b56] block">
+          <span class="text-xs uppercase tracking-widest font-bold text-primary block">
             CONVOCATORIA ABIERTA
           </span>
-          <h2 class="text-4xl font-londrina text-[#1d1d1b] m-0">UNIRSE AL EQUIPO</h2>
-          <p class="text-xs text-gray-500 mt-1">Solicitud de acceso para edición y publicación</p>
+          <h2 class="text-4xl font-londrina text-neutral m-0">UNIRSE AL EQUIPO</h2>
+          <p class="text-xs text-base-content/70 mt-1">Solicitud de acceso para edición y publicación</p>
         </div>
 
-        <div class="bg-amber-50 border border-[#1d1d1b] p-3 rounded text-xs text-gray-800 space-y-1 mb-2">
-          <p class="font-bold text-[#af0b56]">ℹ️ Proceso de Incorporación:</p>
-          <p>
-            Al registrarte se crea tu postulación en estado <strong>pendiente de aprobación</strong> con rol de lectora. Un administrador validará tu cuenta y te asignará el rol de <strong>Editora</strong> para habilitar la edición de contenidos.
-          </p>
+        <div class="alert alert-info py-2 text-xs mb-2">
+          <div>
+            <p class="font-bold">Proceso de Incorporación:</p>
+            <p>
+              Al registrarte se crea tu postulación en estado <strong>pendiente de aprobación</strong> con rol de lectora. Un administrador validará tu cuenta y te asignará el rol de <strong>Editora</strong> para habilitar la edición de contenidos.
+            </p>
+          </div>
         </div>
 
         <div id="error-box" class="hidden alert alert-error text-xs font-semibold py-2"></div>
         <div id="success-box" class="hidden alert alert-success text-xs font-semibold py-3 text-center">
           <div>
-            <h3 class="font-bold text-sm">¡Solicitud recibida!</h3>
-            <p class="mt-1">Tu cuenta está pendiente de revisión por el equipo de administración. Nos pondremos en contacto pronto.</p>
-            <a href="/login" class="btn btn-xs btn-outline mt-3">Ir al Inicio de Sesión</a>
+            <h3 class="font-bold text-sm">Solicitud recibida con éxito</h3>
+            <p class="mt-1">Tu cuenta está pendiente de revisión por el equipo de administración.</p>
+            <a href="/login" class="btn btn-sm btn-outline mt-3">Ir al Inicio de Sesión</a>
           </div>
         </div>
 
         <form id="join-form" class="space-y-4">
           <div class="form-control">
-            <label class="label font-bold text-xs" for="name">
-              <span class="label-text">NOMBRE O COLECTIVO</span>
+            <label class="label" for="name">
+              <span class="label-text font-bold text-xs">NOMBRE O COLECTIVO</span>
             </label>
             <input 
               type="text" 
               id="name" 
               name="name" 
-              class="input input-bordered w-full border-2 border-[#1d1d1b] focus:border-[#af0b56]" 
+              class="input input-bordered w-full" 
               placeholder="Ej: Asamblea Centro, Clara..." 
               required 
             />
           </div>
 
           <div class="form-control">
-            <label class="label font-bold text-xs" for="email">
-              <span class="label-text">CORREO ELECTRÓNICO</span>
+            <label class="label" for="email">
+              <span class="label-text font-bold text-xs">CORREO ELECTRÓNICO</span>
             </label>
             <input 
               type="email" 
               id="email" 
               name="email" 
-              class="input input-bordered w-full border-2 border-[#1d1d1b] focus:border-[#af0b56]" 
+              class="input input-bordered w-full" 
               placeholder="tu@correo.com" 
               required 
             />
           </div>
 
           <div class="form-control">
-            <label class="label font-bold text-xs" for="password">
-              <span class="label-text">CONTRASEÑA</span>
+            <label class="label" for="password">
+              <span class="label-text font-bold text-xs">CONTRASEÑA</span>
             </label>
             <input 
               type="password" 
               id="password" 
               name="password" 
-              class="input input-bordered w-full border-2 border-[#1d1d1b] focus:border-[#af0b56]" 
+              class="input input-bordered w-full" 
               placeholder="Mínimo 6 caracteres" 
               minlength="6" 
               required 
@@ -86,17 +88,17 @@ if (user) {
             <button 
               type="submit" 
               id="submit-btn" 
-              class="btn bg-[#af0b56] hover:bg-[#8f0946] text-white border-2 border-[#1d1d1b] text-base font-bold shadow-[2px_2px_0px_#1d1d1b]"
+              class="btn btn-primary w-full"
             >
-              Enviar Solicitud de Editora →
+              Enviar Solicitud de Editora
             </button>
           </div>
         </form>
 
-        <div class="mt-4 pt-3 border-t border-gray-200 text-center text-xs">
-          <span class="text-gray-600">¿Ya tienes cuenta aprobada?</span>
-          <a href="/login" class="text-[#af0b56] font-bold underline hover:opacity-80 block mt-1">
-            Iniciar Sesión aquí →
+        <div class="mt-4 pt-3 border-t border-base-200 text-center text-xs">
+          <span class="text-base-content/70">¿Ya tienes cuenta aprobada?</span>
+          <a href="/login" class="text-primary font-bold underline hover:opacity-80 block mt-1">
+            Iniciar Sesión aquí
           </a>
         </div>
       </div>
@@ -135,13 +137,13 @@ if (user) {
           errorBox.innerText = data.error || 'Error al procesar la solicitud';
           errorBox.classList.remove('hidden');
           submitBtn.disabled = false;
-          submitBtn.innerText = 'Enviar Solicitud de Editora →';
+          submitBtn.innerText = 'Enviar Solicitud de Editora';
         }
       } catch (err) {
         errorBox.innerText = 'Error de conexión con el servidor.';
         errorBox.classList.remove('hidden');
         submitBtn.disabled = false;
-        submitBtn.innerText = 'Enviar Solicitud de Editora →';
+        submitBtn.innerText = 'Enviar Solicitud de Editora';
       }
     });
   </script>

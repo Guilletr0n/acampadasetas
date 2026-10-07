@@ -15,8 +15,8 @@
 @layer base {
   body {
     font-family: Arial, Helvetica, sans-serif;
-    background-color: var(--color-brand-bg);
-    color: var(--color-brand-black);
+    background-color: #fcf2df;
+    color: #1d1d1b;
   }
 
   /* Font Londrina ONLY for titles */
@@ -25,10 +25,31 @@
     letter-spacing: 0.02em;
   }
 
-  /* All other elements use clean sans-serif like Arial */
   p, span, a, button, input, textarea, select, label, table, th, td, ul, ol, li, blockquote {
     font-family: Arial, Helvetica, sans-serif;
   }
+}
+
+/* Unified DaisyUI Button Styles */
+.btn-primary {
+  background-color: #af0b56 !important;
+  border-color: #af0b56 !important;
+  color: #ffffff !important;
+}
+.btn-primary:hover {
+  background-color: #8f0946 !important;
+  border-color: #8f0946 !important;
+}
+
+.btn-outline.btn-primary {
+  color: #af0b56 !important;
+  border-color: #af0b56 !important;
+  background-color: transparent !important;
+}
+.btn-outline.btn-primary:hover {
+  background-color: #af0b56 !important;
+  border-color: #af0b56 !important;
+  color: #ffffff !important;
 }
 
 /* Ensure markdown headings within .prose use Londrina and text uses Arial */

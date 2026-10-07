@@ -20,19 +20,19 @@ const users = await getUsers();
   <main class="max-w-6xl mx-auto p-6">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
       <div>
-        <h1 class="text-4xl font-londrina text-[#1d1d1b]">CONTROL DE USUARIOS Y ROLES</h1>
-        <p class="text-xs text-gray-500">Aprobación de postulaciones a editora, cambio de roles y moderación de cuentas.</p>
+        <h1 class="text-4xl font-londrina text-neutral">CONTROL DE USUARIOS Y ROLES</h1>
+        <p class="text-xs text-base-content/70">Aprobación de postulaciones a editora, cambio de roles y moderación de cuentas.</p>
       </div>
 
       <!-- Filters -->
       <div class="flex items-center gap-2">
-        <select id="filter-role" class="select select-bordered select-sm border-2 border-[#1d1d1b]">
+        <select id="filter-role" class="select select-bordered select-sm">
           <option value="all">Todos los roles</option>
           <option value="admin">Admin</option>
           <option value="editor">Editor</option>
           <option value="reader">Reader</option>
         </select>
-        <select id="filter-status" class="select select-bordered select-sm border-2 border-[#1d1d1b]">
+        <select id="filter-status" class="select select-bordered select-sm">
           <option value="all">Todos los estados</option>
           <option value="pending">Pendientes</option>
           <option value="approved">Aprobados</option>
@@ -41,9 +41,9 @@ const users = await getUsers();
     </div>
 
     <!-- User Table -->
-    <div class="overflow-x-auto bg-white rounded-box shadow border-2 border-[#1d1d1b]">
+    <div class="overflow-x-auto bg-base-100 rounded-box shadow">
       <table class="table w-full">
-        <thead class="bg-gray-100 border-b-2 border-[#1d1d1b] text-[#1d1d1b] font-bold text-xs uppercase">
+        <thead class="bg-base-200 text-base-content font-bold text-xs uppercase">
           <tr>
             <th>Nombre / Colectivo</th>
             <th>Email</th>
@@ -55,15 +55,15 @@ const users = await getUsers();
         </thead>
         <tbody id="users-tbody">
           {users.map((u) => (
-            <tr class="hover user-row border-b border-gray-200" data-role={u.role} data-approved={u.approved ? 'approved' : 'pending'}>
+            <tr class="hover user-row border-b border-base-200" data-role={u.role} data-approved={u.approved ? 'approved' : 'pending'}>
               <td class="font-bold text-sm">
                 {u.displayName}
                 {u.uid === currentUser.uid && <span class="badge badge-xs badge-neutral ml-1">Tú</span>}
               </td>
-              <td class="font-mono text-xs text-gray-600">{u.email}</td>
+              <td class="font-mono text-xs text-base-content/70">{u.email}</td>
               <td>
                 <select 
-                  class="select select-bordered select-xs border-2 border-[#1d1d1b] font-semibold role-select" 
+                  class="select select-bordered select-xs role-select font-semibold" 
                   data-uid={u.uid}
                   disabled={u.uid === currentUser.uid}
                 >
@@ -86,22 +86,22 @@ const users = await getUsers();
                   </span>
                 </label>
               </td>
-              <td class="text-xs text-gray-500 font-mono">
+              <td class="text-xs text-base-content/60 font-mono">
                 {new Date(u.createdAt).toLocaleDateString('es-ES')}
               </td>
               <td class="text-right">
                 {u.uid !== currentUser.uid && (
-                  <div class="flex justify-end gap-1">
+                  <div class="flex justify-end gap-2">
                     {!u.approved && (
                       <button 
-                        class="btn btn-xs bg-success text-white approve-btn" 
+                        class="btn btn-xs btn-primary approve-btn" 
                         data-uid={u.uid}
                       >
-                        ✓ Aprobar como Editora
+                        Aprobar Editora
                       </button>
                     )}
                     <button 
-                      class="btn btn-xs btn-error text-white delete-btn" 
+                      class="btn btn-xs btn-error delete-btn" 
                       data-uid={u.uid} 
                       data-name={u.displayName}
                     >

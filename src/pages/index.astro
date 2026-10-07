@@ -10,10 +10,10 @@ const sections = await getSections(true); // true = live published sections only
 
 <Layout title="Acampada Setas Sevilla | Movilización por la Vivienda">
   <!-- Sticky Navigation Header -->
-  <header class="sticky top-0 z-50 bg-[#fcf2df]/95 backdrop-blur-md border-b-2 border-[#1d1d1b] px-4 md:px-8 py-3 transition-all shadow-sm">
+  <header class="sticky top-0 z-50 bg-[#fcf2df]/95 backdrop-blur-md border-b border-black/10 px-4 md:px-8 py-3 transition-all shadow-sm">
     <div class="max-w-6xl mx-auto flex items-center justify-between">
       <a href="#" class="flex items-center gap-2 group">
-        <span class="text-3xl md:text-4xl font-londrina text-[#af0b56] tracking-wide group-hover:scale-105 transition-transform">
+        <span class="text-3xl md:text-4xl font-londrina text-primary tracking-wide group-hover:scale-105 transition-transform">
           ACAMPADA SETAS
         </span>
       </a>
@@ -23,40 +23,42 @@ const sections = await getSections(true); // true = live published sections only
         {sections.map((sec) => (
           <a 
             href={`#${sec.slug}`} 
-            class="hover:text-[#af0b56] uppercase tracking-wider transition-colors scroll-link"
+            class="hover:text-primary uppercase tracking-wider transition-colors scroll-link"
           >
             {sec.live?.title || sec.slug}
           </a>
         ))}
         <a 
           href="/gallery" 
-          class="hover:text-[#af0b56] uppercase tracking-wider transition-colors flex items-center gap-1 text-[#af0b56]"
+          class="hover:text-primary uppercase tracking-wider transition-colors text-primary"
         >
-          📷 Galería
+          Galería
         </a>
         <a 
           href="/login" 
-          class="btn btn-xs bg-[#1d1d1b] hover:bg-black text-white border-none font-mono text-[11px] px-3"
+          class="btn btn-sm btn-outline font-mono text-xs"
         >
-          CMS ↗
+          CMS
         </a>
       </nav>
 
       <!-- Mobile dropdown -->
       <div class="dropdown dropdown-end md:hidden">
-        <label tabindex="0" class="btn btn-ghost btn-sm border-2 border-[#1d1d1b]">
-          ☰
+        <label tabindex="0" class="btn btn-ghost btn-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
         </label>
-        <ul tabindex="0" class="dropdown-content menu p-2 shadow-lg bg-[#fcf2df] border-2 border-[#1d1d1b] rounded-box w-52 text-sm font-bold mt-2">
+        <ul tabindex="0" class="dropdown-content menu p-2 shadow-lg bg-[#fcf2df] border border-black/10 rounded-box w-52 text-sm font-bold mt-2">
           {sections.map((sec) => (
             <li>
-              <a href={`#${sec.slug}`} class="uppercase text-[#1d1d1b] hover:text-[#af0b56]">
+              <a href={`#${sec.slug}`} class="uppercase text-[#1d1d1b] hover:text-primary">
                 {sec.live?.title || sec.slug}
               </a>
             </li>
           ))}
-          <li class="border-t border-[#1d1d1b]/20 mt-1 pt-1">
-            <a href="/gallery" class="text-[#af0b56]">📷 Galería Oscura</a>
+          <li class="border-t border-black/10 mt-1 pt-1">
+            <a href="/gallery" class="text-primary">Galería Oscura</a>
           </li>
           <li>
             <a href="/login" class="text-gray-700">Acceso CMS</a>
@@ -67,8 +69,8 @@ const sections = await getSections(true); // true = live published sections only
   </header>
 
   <!-- Hero / Intro Banner -->
-  <section class="py-12 md:py-20 px-4 max-w-6xl mx-auto text-center border-b-2 border-[#1d1d1b]">
-    <div class="inline-block bg-[#af0b56] text-white px-4 py-1 text-sm md:text-base font-bold uppercase tracking-widest rounded-full mb-4 shadow-[2px_2px_0px_#1d1d1b] border border-[#1d1d1b]">
+  <section class="py-12 md:py-20 px-4 max-w-6xl mx-auto text-center border-b border-black/10">
+    <div class="inline-block bg-primary text-white px-4 py-1 text-sm md:text-base font-bold uppercase tracking-widest rounded-full mb-4 shadow-sm">
       Plaza de la Encarnación • Sevilla
     </div>
     <h1 class="text-6xl md:text-8xl font-londrina text-[#1d1d1b] leading-none mb-6">
@@ -80,21 +82,21 @@ const sections = await getSections(true); // true = live published sections only
     <div class="flex flex-wrap justify-center gap-4 mt-8">
       <a 
         href="#manifiesto" 
-        class="btn bg-[#af0b56] hover:bg-[#8f0946] text-white border-2 border-[#1d1d1b] font-bold px-6 text-base shadow-[3px_3px_0px_#1d1d1b]"
+        class="btn btn-primary px-6 text-base"
       >
-        Leer Manifiesto ↓
+        Leer Manifiesto
       </a>
       <a 
         href="#agenda" 
-        class="btn bg-[#fcf2df] hover:bg-amber-100 text-[#1d1d1b] border-2 border-[#1d1d1b] font-bold px-6 text-base shadow-[3px_3px_0px_#1d1d1b]"
+        class="btn btn-outline px-6 text-base"
       >
         Ver Programa de Actividades
       </a>
       <a 
         href="/gallery" 
-        class="btn bg-[#1d1d1b] hover:bg-black text-white border-2 border-[#1d1d1b] font-bold px-6 text-base shadow-[3px_3px_0px_#af0b56]"
+        class="btn btn-outline btn-primary px-6 text-base"
       >
-        Galería de Fotos 📸
+        Galería de Fotos
       </a>
     </div>
   </section>
@@ -104,7 +106,7 @@ const sections = await getSections(true); // true = live published sections only
     {sections.length === 0 ? (
       <div class="py-20 text-center text-gray-500">
         <p class="text-xl font-bold">No hay secciones publicadas actualmente.</p>
-        <p class="text-sm mt-1">Inicia sesión en el <a href="/login" class="underline text-[#af0b56]">CMS</a> para redactar y publicar contenidos.</p>
+        <p class="text-sm mt-1">Inicia sesión en el <a href="/login" class="underline text-primary">CMS</a> para redactar y publicar contenidos.</p>
       </div>
     ) : (
       sections.map((sec, index) => {
@@ -119,14 +121,14 @@ const sections = await getSections(true); // true = live published sections only
           return (
             <section 
               id={sec.slug} 
-              class={`py-16 md:py-24 px-4 border-b-2 border-[#1d1d1b] ${isAlternate ? 'bg-[#f7e9d0]' : 'bg-[#fcf2df]'}`}
+              class={`py-16 md:py-24 px-4 border-b border-black/10 ${isAlternate ? 'bg-[#f7e9d0]' : 'bg-[#fcf2df]'}`}
             >
               <div class="max-w-6xl mx-auto">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-10 pb-4 border-b-2 border-[#1d1d1b]">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-10 pb-4 border-b border-black/10">
                   <div>
                     {content.highlight && (
-                      <span class="inline-block bg-[#af0b56] text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-[#1d1d1b] mb-2 shadow-[2px_2px_0px_#1d1d1b]">
-                        ★ {content.highlight}
+                      <span class="inline-block bg-primary text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-2 shadow-sm">
+                        {content.highlight}
                       </span>
                     )}
                     <h2 class="text-5xl md:text-6xl font-londrina text-[#1d1d1b] m-0">
@@ -150,7 +152,7 @@ const sections = await getSections(true); // true = live published sections only
 
                   {content.illustrationUrl && (
                     <div class="lg:col-span-5 sticky top-24">
-                      <div class="border-2 border-[#1d1d1b] rounded-xl overflow-hidden bg-white shadow-[6px_6px_0px_#1d1d1b]">
+                      <div class="rounded-2xl overflow-hidden bg-white shadow-md">
                         <img 
                           src={content.illustrationUrl} 
                           alt={content.title} 
@@ -170,11 +172,11 @@ const sections = await getSections(true); // true = live published sections only
         return (
           <section 
             id={sec.slug} 
-            class={`py-16 md:py-24 px-4 border-b-2 border-[#1d1d1b] ${isAlternate ? 'bg-[#f7e9d0]' : 'bg-[#fcf2df]'}`}
+            class={`py-16 md:py-24 px-4 border-b border-black/10 ${isAlternate ? 'bg-[#f7e9d0]' : 'bg-[#fcf2df]'}`}
           >
             <div class="max-w-4xl mx-auto text-center">
               {content.highlight && (
-                <div class="inline-block bg-[#af0b56] text-white text-xs md:text-sm font-bold uppercase tracking-wider px-4 py-1 rounded-full border border-[#1d1d1b] mb-4 shadow-[2px_2px_0px_#1d1d1b]">
+                <div class="inline-block bg-primary text-white text-xs md:text-sm font-bold uppercase tracking-wider px-4 py-1 rounded-full mb-4 shadow-sm">
                   {content.highlight}
                 </div>
               )}
@@ -190,7 +192,7 @@ const sections = await getSections(true); // true = live published sections only
               )}
 
               {content.illustrationUrl && (
-                <div class="my-8 max-w-2xl mx-auto border-2 border-[#1d1d1b] rounded-xl overflow-hidden shadow-[6px_6px_0px_#1d1d1b] bg-white">
+                <div class="my-8 max-w-2xl mx-auto rounded-2xl overflow-hidden shadow-md bg-white">
                   <img 
                     src={content.illustrationUrl} 
                     alt={content.title} 
@@ -200,7 +202,7 @@ const sections = await getSections(true); // true = live published sections only
                 </div>
               )}
 
-              <div class="prose max-w-none text-left text-base md:text-lg leading-relaxed bg-white/80 p-6 md:p-10 border-2 border-[#1d1d1b] rounded-xl shadow-[4px_4px_0px_#1d1d1b] mt-6">
+              <div class="prose max-w-none text-left text-base md:text-lg leading-relaxed bg-white/80 p-6 md:p-10 rounded-2xl shadow-sm border border-black/5 mt-6">
                 <div set:html={renderedMarkdown} />
               </div>
             </div>
@@ -211,19 +213,19 @@ const sections = await getSections(true); // true = live published sections only
   </main>
 
   <!-- Footer -->
-  <footer class="bg-[#1d1d1b] text-[#fcf2df] py-12 px-4 border-t-4 border-[#af0b56]">
+  <footer class="bg-[#1d1d1b] text-[#fcf2df] py-12 px-4 border-t-4 border-primary">
     <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
       <div>
-        <h3 class="text-3xl font-londrina text-[#af0b56] tracking-wide">ACAMPADA SETAS SEVILLA</h3>
+        <h3 class="text-3xl font-londrina text-primary tracking-wide">ACAMPADA SETAS SEVILLA</h3>
         <p class="text-xs text-gray-400 mt-1">Contacto: arrendataria@zohomail.com • Dominio: acampadasetas.org</p>
       </div>
 
       <div class="flex items-center gap-4 text-sm font-bold">
-        <a href="/gallery" class="hover:text-[#af0b56] transition-colors">Galería Fotográfica</a>
+        <a href="/gallery" class="hover:text-primary transition-colors">Galería Fotográfica</a>
         <span>•</span>
-        <a href="/join-editor" class="hover:text-[#af0b56] transition-colors">Postularse como Editora</a>
+        <a href="/join-editor" class="hover:text-primary transition-colors">Postularse como Editora</a>
         <span>•</span>
-        <a href="/login" class="hover:text-[#af0b56] transition-colors">Acceso CMS</a>
+        <a href="/login" class="hover:text-primary transition-colors">Acceso CMS</a>
       </div>
     </div>
   </footer>
