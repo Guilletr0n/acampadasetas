@@ -11,10 +11,22 @@ export interface User {
   updatedAt?: string;
 }
 
-export type SectionTemplate = 'single-column' | 'multi-column';
+export type SectionTemplate = 'single-column' | 'multi-column' | 'schedule' | 'horario-actividades' | (string & {});
+
+export interface ScheduleActivity {
+  id: string;
+  time: string;
+  title: string;
+  description?: string;
+  status: 'published' | 'draft';
+  order: number;
+  createdAt: string;
+  updatedAt?: string;
+}
 
 export interface SectionContent {
   title: string;
+  navLabel?: string;
   subtitle?: string;
   highlight?: string;
   template: SectionTemplate;
@@ -38,6 +50,7 @@ export interface SectionHistoryEntry {
   authorName: string;
   template: SectionTemplate;
   title: string;
+  navLabel?: string;
   subtitle?: string;
   highlight?: string;
   body: string;

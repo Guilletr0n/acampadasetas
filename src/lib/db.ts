@@ -1,23 +1,24 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { Section, SectionContent, SectionHistoryEntry, GalleryItem } from './types';
+import type { Section, SectionContent, SectionHistoryEntry, GalleryItem, ScheduleActivity } from './types';
 import { Firestore } from '@google-cloud/firestore';
 
 let firestoreDb: Firestore | null = null;
 
 try {
   const projectId = process.env.GCP_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT || 'acampadasetas';
+  const databaseId = process.env.FIRESTORE_DATABASE_ID || '(default)';
   const defaultKeyPath = path.resolve(process.cwd(), 'service-account.json');
   const envKeyPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
   const keyPath = (envKeyPath && fs.existsSync(envKeyPath)) ? envKeyPath : (fs.existsSync(defaultKeyPath) ? defaultKeyPath : undefined);
 
   if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
     const credentials = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
-    firestoreDb = new Firestore({ projectId, credentials, databaseId: '(default)' });
+    firestoreDb = new Firestore({ projectId, credentials, databaseId });
   } else if (keyPath) {
-    firestoreDb = new Firestore({ projectId, keyFilename: keyPath, databaseId: '(default)' });
+    firestoreDb = new Firestore({ projectId, keyFilename: keyPath, databaseId });
   } else if (process.env.K_SERVICE || process.env.NODE_ENV === 'production') {
-    firestoreDb = new Firestore({ projectId, databaseId: '(default)' });
+    firestoreDb = new Firestore({ projectId, databaseId });
   }
 } catch (e) {
   console.warn('Firestore CMS init notice: using local fallback', e);
@@ -27,6 +28,7 @@ const DATA_DIR = path.resolve(process.cwd(), '.data');
 const SECTIONS_FILE = path.join(DATA_DIR, 'sections.json');
 const HISTORY_FILE = path.join(DATA_DIR, 'history.json');
 const GALLERY_FILE = path.join(DATA_DIR, 'gallery.json');
+const ACTIVITIES_FILE = path.join(DATA_DIR, 'activities.json');
 
 const INITIAL_SECTIONS: Section[] = [
   {
@@ -36,6 +38,7 @@ const INITIAL_SECTIONS: Section[] = [
     updatedAt: new Date().toISOString(),
     live: {
       title: 'Manifiesto Acampada Setas',
+      navLabel: 'Manifiesto',
       subtitle: 'Por el derecho a la vivienda y la ciudad para quienes la habitan',
       highlight: '¡La vivienda es un derecho, no un negocio!',
       template: 'single-column',
@@ -52,6 +55,7 @@ Nos concentramos en la Plaza de la Encarnación (Las Setas) para denunciar la em
     },
     draft: {
       title: 'Manifiesto Acampada Setas',
+      navLabel: 'Manifiesto',
       subtitle: 'Por el derecho a la vivienda y la ciudad para quienes la habitan',
       highlight: '¡La vivienda es un derecho, no un negocio!',
       template: 'single-column',
@@ -74,6 +78,7 @@ Nos concentramos en la Plaza de la Encarnación (Las Setas) para denunciar la em
     updatedAt: new Date().toISOString(),
     live: {
       title: 'Programa y Actividades',
+      navLabel: 'Programa',
       subtitle: 'Asambleas, talleres y formación colectiva',
       highlight: 'Asamblea diaria a las 20:00h',
       template: 'multi-column',
@@ -87,6 +92,7 @@ Nos concentramos en la Plaza de la Encarnación (Las Setas) para denunciar la em
     },
     draft: {
       title: 'Programa y Actividades',
+      navLabel: 'Programa',
       subtitle: 'Asambleas, talleres y formación colectiva',
       highlight: 'Asamblea diaria a las 20:00h',
       template: 'multi-column',
@@ -250,6 +256,7 @@ export async function saveSectionDraft(
     authorName,
     template: draftData.template,
     title: draftData.title,
+    navLabel: draftData.navLabel,
     subtitle: draftData.subtitle,
     highlight: draftData.highlight,
     body: draftData.body,
@@ -299,6 +306,7 @@ export async function publishSection(id: string, authorName: string): Promise<Se
     authorName,
     template: liveContent.template,
     title: liveContent.title,
+    navLabel: liveContent.navLabel,
     subtitle: liveContent.subtitle,
     highlight: liveContent.highlight,
     body: liveContent.body,
@@ -380,6 +388,7 @@ export async function restoreSectionDraft(sectionId: string, historyId: string):
 
   const restoredContent: SectionContent = {
     title: entry.title,
+    navLabel: entry.navLabel,
     subtitle: entry.subtitle,
     highlight: entry.highlight,
     template: entry.template,
@@ -470,3 +479,295 @@ export async function deleteGalleryItem(id: string): Promise<boolean> {
   writeLocal(GALLERY_FILE, filtered);
   return true;
 }
+
+// SCHEDULE / ACTIVITIES
+const INITIAL_ACTIVITIES: ScheduleActivity[] = [
+  {
+    id: 'act-1',
+    time: '17:30',
+    title: 'CHARLA',
+    description: 'Pasado y presente de la huelga general por Ángel Carrique',
+    status: 'published',
+    order: 1,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'act-2',
+    time: '18:00',
+    title: 'VEN Y ORGANIZA TU BARRIO',
+    description: 'Pasado y presente de la huelga general por Ángel Carrique',
+    status: 'published',
+    order: 2,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'act-3',
+    time: '19:00',
+    title: 'CONCENTRACIÓN',
+    description: 'Pasado y presente de la huelga general por Ángel Carrique',
+    status: 'published',
+    order: 3,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'act-4',
+    time: '20:00',
+    title: 'ASAMBLEA',
+    description: '',
+    status: 'published',
+    order: 4,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'act-5',
+    time: '20:00',
+    title: 'REUNIÓN',
+    description: 'de la Comisión de Actividades',
+    status: 'published',
+    order: 5,
+    createdAt: new Date().toISOString(),
+  },
+];
+
+/**
+ * Calculates the most recent 04:00 AM cutoff timestamp in Spain (Europe/Madrid).
+ * Any activity published before this timestamp belongs to a previous daily cycle.
+ */
+export function getMadrid4amCutoff(now = new Date()): Date {
+  const dtf = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Madrid',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+
+  const formatted = dtf.format(now);
+  const [datePart, timePart] = formatted.split(', ');
+  const [year, month, day] = datePart.split('-').map(Number);
+  const [hour] = timePart.split(':').map(Number);
+
+  // If current Madrid hour < 4, cutoff was yesterday at 04:00.
+  // If current Madrid hour >= 4, cutoff was today at 04:00.
+  const targetDate = new Date(Date.UTC(year, month - 1, hour < 4 ? day - 1 : day, 12));
+  const y = targetDate.getUTCFullYear();
+  const m = targetDate.getUTCMonth();
+  const d = targetDate.getUTCDate();
+
+  // Find exact UTC hour corresponding to 04:00 Madrid time
+  for (let h = 1; h <= 4; h++) {
+    const testUtc = new Date(Date.UTC(y, m, d, h, 0, 0));
+    const madridHour = parseInt(
+      new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Europe/Madrid',
+        hour: 'numeric',
+        hour12: false,
+      }).format(testUtc),
+      10
+    );
+    if (madridHour === 4) {
+      return testUtc;
+    }
+  }
+  return new Date(Date.UTC(y, m, d, 2, 0, 0));
+}
+
+/**
+ * Checks all activities and transitions any activity published before 04:00 AM into 'draft' status.
+ */
+export async function checkAndResetExpiredActivities(): Promise<number> {
+  const cutoff = getMadrid4amCutoff();
+  const list = readLocal<ScheduleActivity[]>(ACTIVITIES_FILE, INITIAL_ACTIVITIES);
+
+  let updatedCount = 0;
+  const expiredIds: string[] = [];
+
+  for (const act of list) {
+    if (act.status === 'published') {
+      const actTime = new Date(act.updatedAt || act.createdAt || 0).getTime();
+      if (actTime < cutoff.getTime()) {
+        act.status = 'draft';
+        act.updatedAt = new Date().toISOString();
+        expiredIds.push(act.id);
+        updatedCount++;
+      }
+    }
+  }
+
+  if (updatedCount > 0) {
+    writeLocal(ACTIVITIES_FILE, list);
+    if (firestoreDb) {
+      try {
+        const batch = firestoreDb.batch();
+        for (const id of expiredIds) {
+          batch.update(firestoreDb.collection('activities').doc(id), {
+            status: 'draft',
+            updatedAt: new Date().toISOString(),
+          });
+        }
+        await batch.commit();
+      } catch (e) {
+        console.warn('Firestore checkAndResetExpiredActivities fallback:', e);
+      }
+    }
+  }
+
+  return updatedCount;
+}
+
+// Background check every 5 minutes in running Node process
+if (typeof setInterval !== 'undefined') {
+  setInterval(() => {
+    checkAndResetExpiredActivities().catch(() => {});
+  }, 5 * 60 * 1000);
+}
+
+export async function getActivities(publishedOnly = false): Promise<ScheduleActivity[]> {
+  // Automatically rollover any activities from before 4:00 AM
+  await checkAndResetExpiredActivities();
+
+  let list: ScheduleActivity[] = [];
+  if (firestoreDb) {
+    try {
+      const snap = await firestoreDb.collection('activities').get();
+      if (!snap.empty) {
+        list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as ScheduleActivity));
+      } else {
+        const initial = readLocal<ScheduleActivity[]>(ACTIVITIES_FILE, INITIAL_ACTIVITIES);
+        for (const a of initial) {
+          await firestoreDb.collection('activities').doc(a.id).set(a);
+        }
+        list = initial;
+      }
+    } catch (e) {
+      console.warn('Firestore getActivities fallback:', e);
+      list = readLocal<ScheduleActivity[]>(ACTIVITIES_FILE, INITIAL_ACTIVITIES);
+    }
+  } else {
+    list = readLocal<ScheduleActivity[]>(ACTIVITIES_FILE, INITIAL_ACTIVITIES);
+  }
+
+  if (publishedOnly) {
+    list = list.filter(a => a.status === 'published');
+  }
+
+  return list.sort((a, b) => (a.order - b.order) || a.time.localeCompare(b.time));
+}
+
+export async function saveActivity(data: {
+  id?: string;
+  time: string;
+  title: string;
+  description?: string;
+  status?: 'published' | 'draft';
+  order?: number;
+}): Promise<ScheduleActivity> {
+  const now = new Date().toISOString();
+  const list = readLocal<ScheduleActivity[]>(ACTIVITIES_FILE, INITIAL_ACTIVITIES);
+
+  let item: ScheduleActivity;
+  if (data.id) {
+    const index = list.findIndex(a => a.id === data.id);
+    if (index >= 0) {
+      item = {
+        ...list[index],
+        time: data.time ?? list[index].time,
+        title: data.title ?? list[index].title,
+        description: data.description ?? list[index].description,
+        status: data.status ?? list[index].status,
+        order: data.order ?? list[index].order,
+        updatedAt: now,
+      };
+      list[index] = item;
+    } else {
+      item = {
+        id: data.id,
+        time: data.time,
+        title: data.title,
+        description: data.description || '',
+        status: data.status || 'published',
+        order: data.order ?? (list.length + 1),
+        createdAt: now,
+        updatedAt: now,
+      };
+      list.push(item);
+    }
+  } else {
+    const id = 'act-' + Math.random().toString(36).substring(2, 9);
+    item = {
+      id,
+      time: data.time,
+      title: data.title,
+      description: data.description || '',
+      status: data.status || 'published',
+      order: data.order ?? (list.length + 1),
+      createdAt: now,
+      updatedAt: now,
+    };
+    list.push(item);
+  }
+
+  if (firestoreDb) {
+    try {
+      await firestoreDb.collection('activities').doc(item.id).set(item, { merge: true });
+    } catch (e) {
+      console.warn('Firestore saveActivity fallback:', e);
+    }
+  }
+
+  writeLocal(ACTIVITIES_FILE, list);
+  return item;
+}
+
+export async function updateActivityStatus(id: string, status: 'published' | 'draft'): Promise<boolean> {
+  const now = new Date().toISOString();
+  if (firestoreDb) {
+    try {
+      await firestoreDb.collection('activities').doc(id).update({ status, updatedAt: now });
+    } catch (e) {
+      console.warn('Firestore updateActivityStatus fallback:', e);
+    }
+  }
+
+  const list = readLocal<ScheduleActivity[]>(ACTIVITIES_FILE, INITIAL_ACTIVITIES);
+  const index = list.findIndex(a => a.id === id);
+  if (index === -1) return false;
+
+  list[index].status = status;
+  list[index].updatedAt = now;
+  writeLocal(ACTIVITIES_FILE, list);
+  return true;
+}
+
+export async function deleteDraftActivities(ids: string[]): Promise<{ deleted: number; notAllowed: number }> {
+  const list = readLocal<ScheduleActivity[]>(ACTIVITIES_FILE, INITIAL_ACTIVITIES);
+  const targetIds = new Set(ids);
+
+  const draftsToDelete = list.filter(a => targetIds.has(a.id) && a.status === 'draft');
+  const publishedAttempted = list.filter(a => targetIds.has(a.id) && a.status === 'published');
+
+  const draftIdsSet = new Set(draftsToDelete.map(d => d.id));
+  const remaining = list.filter(a => !draftIdsSet.has(a.id));
+
+  if (firestoreDb) {
+    try {
+      const batch = firestoreDb.batch();
+      for (const d of draftsToDelete) {
+        batch.delete(firestoreDb.collection('activities').doc(d.id));
+      }
+      await batch.commit();
+    } catch (e) {
+      console.warn('Firestore deleteDraftActivities fallback:', e);
+    }
+  }
+
+  writeLocal(ACTIVITIES_FILE, remaining);
+  return {
+    deleted: draftsToDelete.length,
+    notAllowed: publishedAttempted.length,
+  };
+}
+

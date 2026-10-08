@@ -3,6 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import AdminNav from "../../components/AdminNav.astro";
 import { getGalleryItems } from "../../lib/db";
 import { getCurrentUser } from "../../lib/auth";
+import { Eye, Plus, Trash2 } from "lucide-astro";
 
 export const prerender = false;
 
@@ -24,8 +25,9 @@ const items = await getGalleryItems();
         <p class="text-xs text-base-content/70">Gestión de imágenes, créditos de autoría, enlaces sociales y orden del carrusel.</p>
       </div>
 
-      <a href="/gallery" target="_blank" class="btn btn-sm btn-outline">
-        Ver Galería Pública
+      <a href="/gallery" target="_blank" class="btn btn-sm btn-outline inline-flex items-center gap-1.5">
+        <Eye class="w-4 h-4" />
+        <span>Ver Galería Pública</span>
       </a>
     </div>
 
@@ -106,9 +108,10 @@ const items = await getGalleryItems();
             <button 
               type="submit" 
               id="btn-upload" 
-              class="btn btn-primary"
+              class="btn btn-primary inline-flex items-center gap-1.5"
             >
-              Añadir a la Galería
+              <Plus class="w-4 h-4" />
+              <span>Añadir a la Galería</span>
             </button>
           </div>
         </form>
@@ -188,8 +191,10 @@ const items = await getGalleryItems();
                   <button 
                     class="btn btn-xs btn-error delete-img-btn" 
                     data-id={img.id}
+                    title="Eliminar"
+                    aria-label="Eliminar"
                   >
-                    Eliminar
+                    <Trash2 class="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>

@@ -3,32 +3,64 @@ import Layout from "../../layouts/Layout.astro";
 import AdminNav from "../../components/AdminNav.astro";
 import { getSections } from "../../lib/db";
 import { getCurrentUser } from "../../lib/auth";
+import {
+  AVAILABLE_TEMPLATES,
+  getTemplateLabel,
+} from "../../components/sections";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  RotateCcw,
+  Save,
+  UploadCloud,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-astro";
 
 export const prerender = false;
 
 const currentUser = await getCurrentUser(Astro.cookies);
 if (!currentUser || !currentUser.approved) {
-  return Astro.redirect('/login');
+  return Astro.redirect("/login");
 }
 
 const sections = await getSections(false);
-const initialSectionId = sections[0]?.id || 'new';
+const initialSectionId = sections[0]?.id || "new";
+const templateLabels = Object.fromEntries(
+  AVAILABLE_TEMPLATES.map((t) => [t.id, t.label]),
+);
 ---
 
 <Layout title="Gestor de Inicio y Secciones | CMS" isDashboard={true}>
-  <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/easymde/dist/easymde.min.css"
+  />
   <AdminNav activeTab="home" user={currentUser} />
 
   <main class="max-w-6xl mx-auto p-6 space-y-8">
     <!-- Header -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div
+      class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+    >
       <div>
-        <h1 class="text-4xl font-londrina text-[#af0b56]">GESTIÓN DE CONTENIDOS Y SECCIONES</h1>
-        <p class="text-xs text-base-content/70">Listado dinámico de secciones, edición de borradores y control de versiones publicadas.</p>
+        <h1 class="text-4xl font-londrina text-[#af0b56]">
+          GESTIÓN DE CONTENIDOS Y SECCIONES
+        </h1>
+        <p class="text-xs text-base-content/70">
+          Listado dinámico de secciones, edición de borradores y control de
+          versiones publicadas.
+        </p>
       </div>
 
-      <button type="button" id="btn-create-new-top" class="btn btn-primary btn-sm">
-        + Crear Nueva Sección
+      <button
+        type="button"
+        id="btn-create-new-top"
+        class="btn btn-primary btn-sm inline-flex items-center"
+      >
+        <Plus class="w-4 h-4 mr-1.5" />
+        Crear Nueva Sección
       </button>
     </div>
 
@@ -36,63 +68,85 @@ const initialSectionId = sections[0]?.id || 'new';
     <div class="card bg-base-100 shadow">
       <div class="card-body p-6">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-2xl font-londrina text-[#af0b56]">LISTADO DE SECCIONES CREADAS ({sections.length})</h2>
-          <span class="text-xs text-base-content/60">Haz clic en "Editar" para cargar cualquier sección en el editor</span>
+          <h2 class="text-2xl font-londrina text-[#af0b56]">
+            LISTADO DE SECCIONES CREADAS ({sections.length})
+          </h2>
+          <span class="text-xs text-base-content/60"
+            >Haz clic en "Editar" para cargar cualquier sección en el editor</span
+          >
         </div>
 
         <div class="overflow-x-auto">
           <table class="table w-full">
-            <thead class="bg-base-200 text-base-content uppercase font-bold text-xs">
+            <thead
+              class="bg-base-200 text-base-content uppercase font-bold text-xs"
+            >
               <tr>
                 <th class="w-16">Orden</th>
                 <th>Título de la Sección</th>
                 <th>Slug / Enlace</th>
-                <th>Plantilla</th>
-                <th>Estado</th>
-                <th class="text-right">Acciones</th>
+                <th class="whitespace-nowrap">Plantilla</th>
+                <th class="whitespace-nowrap">Estado</th>
+                <th class="text-right whitespace-nowrap">Acciones</th>
               </tr>
             </thead>
             <tbody id="sections-table-body">
-              {sections.map((s, idx) => (
-                <tr 
-                  class={`hover border-b border-base-200 section-row cursor-pointer ${idx === 0 ? 'bg-primary/5 font-semibold' : ''}`}
-                  data-id={s.id}
-                  id={`row-${s.id}`}
-                >
-                  <td class="font-mono font-bold text-xs">#{s.order}</td>
-                  <td class="font-bold text-neutral">
-                    {s.draft.title || s.slug}
-                  </td>
-                  <td class="font-mono text-xs text-base-content/70">#{s.slug}</td>
-                  <td>
-                    <span class="badge badge-sm badge-outline">
-                      {s.draft.template === 'multi-column' ? 'Multi-Columna' : 'Columna Única'}
-                    </span>
-                  </td>
-                  <td>
-                    <span class={`badge badge-sm font-semibold ${s.live ? 'badge-success text-white' : 'badge-warning text-neutral'}`}>
-                      {s.live ? 'Publicada' : 'Borrador'}
-                    </span>
-                  </td>
-                  <td class="text-right space-x-1">
-                    <button 
-                      type="button" 
-                      class="btn btn-xs btn-outline btn-edit-section" 
-                      data-id={s.id}
-                    >
-                      Editar
-                    </button>
-                    <button 
-                      type="button" 
-                      class="btn btn-xs btn-error btn-delete-section" 
-                      data-id={s.id}
-                      data-title={s.draft.title || s.slug}
-                    >
-                      Eliminar
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {
+                sections.map((s, idx) => (
+                  <tr
+                    class={`hover border-b border-base-200 section-row cursor-pointer ${idx === 0 ? "bg-primary/5 font-semibold" : ""}`}
+                    data-id={s.id}
+                    id={`row-${s.id}`}
+                  >
+                    <td class="font-mono font-bold text-xs">#{s.order}</td>
+                    <td class="font-bold text-neutral">
+                      {s.draft.title || s.slug}
+                      {s.draft.navLabel && (
+                        <span class="block text-xs font-normal text-base-content/60">
+                          Menú: "{s.draft.navLabel}"
+                        </span>
+                      )}
+                    </td>
+                    <td class="font-mono text-xs text-base-content/70">
+                      #{s.slug}
+                    </td>
+                    <td class="whitespace-nowrap">
+                      <span
+                        class="badge badge-sm badge-outline max-w-[140px] truncate inline-block align-middle"
+                        title={getTemplateLabel(s.draft.template)}
+                      >
+                        {getTemplateLabel(s.draft.template)}
+                      </span>
+                    </td>
+                    <td class="whitespace-nowrap">
+                      <span
+                        class={`badge badge-sm font-semibold ${s.live ? "badge-success text-white" : "badge-warning text-neutral"}`}
+                      >
+                        {s.live ? "Publicada" : "Borrador"}
+                      </span>
+                    </td>
+                    <td class="text-right space-x-1 whitespace-nowrap">
+                      <button
+                        type="button"
+                        class="btn btn-xs btn-outline btn-edit-section whitespace-nowrap inline-flex items-center"
+                        data-id={s.id}
+                      >
+                        <Pencil class="w-3.5 h-3.5 mr-1" />
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-xs btn-error btn-delete-section whitespace-nowrap"
+                        data-id={s.id}
+                        data-title={s.draft.title || s.slug}
+                        title="Eliminar"
+                        aria-label="Eliminar"
+                      >
+                        <Trash2 class="w-3.5 h-3.5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              }
             </tbody>
           </table>
         </div>
@@ -102,45 +156,70 @@ const initialSectionId = sections[0]?.id || 'new';
     <!-- 2. SECTION EDITOR FORM -->
     <div id="editor-card" class="card bg-base-100 shadow scroll-mt-20">
       <div class="card-body p-6">
-        <div class="flex justify-between items-center mb-4 pb-2 border-b border-base-200">
+        <div
+          class="flex justify-between items-center mb-4 pb-2 border-b border-base-200"
+        >
           <div>
-            <h2 id="editor-title-heading" class="text-2xl font-londrina text-[#af0b56]">
+            <h2
+              id="editor-title-heading"
+              class="text-2xl font-londrina text-[#af0b56]"
+            >
               EDITANDO SECCIÓN
             </h2>
             <p id="editor-subtitle-status" class="text-xs text-base-content/60">
-              Modifica los campos y guarda un borrador o publica directamente en la web.
+              Modifica los campos y guarda un borrador o publica directamente en
+              la web.
             </p>
           </div>
-          <span id="save-status" class="text-xs font-semibold text-[#af0b56]"></span>
+          <span id="save-status" class="text-xs font-semibold text-[#af0b56]"
+          ></span>
         </div>
 
         <form id="section-form" class="space-y-4">
           <input type="hidden" id="section-id" value={initialSectionId} />
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="form-control md:col-span-2">
               <label class="label" for="title">
-                <span class="label-text font-bold text-xs">TÍTULO DE LA SECCIÓN</span>
+                <span class="label-text font-bold text-xs"
+                  >TÍTULO DE LA SECCIÓN</span
+                >
               </label>
-              <input 
-                type="text" 
-                id="title" 
-                class="input input-bordered w-full" 
-                placeholder="Ej: Manifiesto Acampada Setas" 
-                required 
+              <input
+                type="text"
+                id="title"
+                class="input input-bordered w-full"
+                placeholder="Ej: Manifiesto Acampada Setas"
+                required
+              />
+            </div>
+
+            <div class="form-control">
+              <label class="label" for="nav-label">
+                <span class="label-text font-bold text-xs"
+                  >TEXTO EN EL HEADER (NAV)</span
+                >
+              </label>
+              <input
+                type="text"
+                id="nav-label"
+                class="input input-bordered w-full"
+                placeholder="Ej: Manifiesto (más corto)"
               />
             </div>
 
             <div class="form-control">
               <label class="label" for="slug">
-                <span class="label-text font-bold text-xs">SLUG / ANCLA (#url)</span>
+                <span class="label-text font-bold text-xs"
+                  >SLUG / ANCLA (#url)</span
+                >
               </label>
-              <input 
-                type="text" 
-                id="slug" 
-                class="input input-bordered w-full font-mono text-xs" 
-                placeholder="manifiesto" 
-                required 
+              <input
+                type="text"
+                id="slug"
+                class="input input-bordered w-full font-mono text-xs"
+                placeholder="manifiesto"
+                required
               />
             </div>
           </div>
@@ -148,37 +227,46 @@ const initialSectionId = sections[0]?.id || 'new';
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="form-control">
               <label class="label" for="template">
-                <span class="label-text font-bold text-xs">PLANTILLA DE DISEÑO</span>
+                <span class="label-text font-bold text-xs"
+                  >PLANTILLA DE DISEÑO</span
+                >
               </label>
               <select id="template" class="select select-bordered w-full">
-                <option value="single-column">Columna Única (Manifiesto / Centrado)</option>
-                <option value="multi-column">Multi-Columna (Agenda / Horarios)</option>
+                {
+                  AVAILABLE_TEMPLATES.map((tmpl) => (
+                    <option value={tmpl.id}>{tmpl.label}</option>
+                  ))
+                }
               </select>
             </div>
 
             <div class="form-control">
               <label class="label" for="order">
-                <span class="label-text font-bold text-xs">ORDEN DE SECUENCIA</span>
+                <span class="label-text font-bold text-xs"
+                  >ORDEN DE SECUENCIA</span
+                >
               </label>
-              <input 
-                type="number" 
-                id="order" 
-                class="input input-bordered w-full" 
-                value="1" 
-                min="1" 
-                max="99" 
+              <input
+                type="number"
+                id="order"
+                class="input input-bordered w-full"
+                value="1"
+                min="1"
+                max="99"
               />
             </div>
 
             <div class="form-control">
               <label class="label" for="highlight">
-                <span class="label-text font-bold text-xs">DESTACADO / BADGE</span>
+                <span class="label-text font-bold text-xs"
+                  >DESTACADO / BADGE</span
+                >
               </label>
-              <input 
-                type="text" 
-                id="highlight" 
-                class="input input-bordered w-full" 
-                placeholder="Ej: Asamblea diaria 20:00h" 
+              <input
+                type="text"
+                id="highlight"
+                class="input input-bordered w-full"
+                placeholder="Ej: Asamblea diaria 20:00h"
               />
             </div>
           </div>
@@ -187,69 +275,85 @@ const initialSectionId = sections[0]?.id || 'new';
             <label class="label" for="subtitle">
               <span class="label-text font-bold text-xs">SUBTÍTULO</span>
             </label>
-            <input 
-              type="text" 
-              id="subtitle" 
-              class="input input-bordered w-full" 
-              placeholder="Breve introducción explicativa" 
+            <input
+              type="text"
+              id="subtitle"
+              class="input input-bordered w-full"
+              placeholder="Breve introducción explicativa"
             />
           </div>
 
           <!-- Illustration File Upload -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-bold text-xs">ILUSTRACIÓN O FOTOGRAFÍA (PNG, JPG, WebP menor o igual a 5 MB)</span>
+              <span class="label-text font-bold text-xs"
+                >ILUSTRACIÓN O FOTOGRAFÍA (PNG, JPG, WebP menor o igual a 5 MB)</span
+              >
             </label>
-            <div class="flex flex-col md:flex-row gap-3 items-start md:items-center">
-              <input 
-                type="file" 
-                id="illustration-file" 
-                accept="image/png, image/jpeg, image/webp" 
-                class="file-input file-input-bordered file-input-sm w-full md:w-auto" 
+            <div
+              class="flex flex-col md:flex-row gap-3 items-start md:items-center"
+            >
+              <input
+                type="file"
+                id="illustration-file"
+                accept="image/png, image/jpeg, image/webp"
+                class="file-input file-input-bordered file-input-sm w-full md:w-auto"
               />
-              <input 
-                type="text" 
-                id="illustration-url" 
-                placeholder="O pega una URL de imagen..." 
-                class="input input-bordered input-sm flex-1 font-mono text-xs" 
+              <input
+                type="text"
+                id="illustration-url"
+                placeholder="O pega una URL de imagen..."
+                class="input input-bordered input-sm flex-1 font-mono text-xs"
               />
             </div>
             <div id="illustration-preview-container" class="mt-2 hidden">
-              <img id="illustration-preview" src="" alt="Vista previa" class="h-28 rounded object-cover shadow" />
+              <img
+                id="illustration-preview"
+                src=""
+                alt="Vista previa"
+                class="h-28 rounded object-cover shadow"
+              />
             </div>
           </div>
 
           <!-- Markdown Body -->
           <div class="form-control">
             <label class="label" for="body-editor">
-              <span class="label-text font-bold text-xs">CUERPO DEL CONTENIDO (MARKDOWN)</span>
+              <span class="label-text font-bold text-xs"
+                >CUERPO DEL CONTENIDO</span
+              >
             </label>
             <textarea id="body-editor"></textarea>
           </div>
 
           <!-- Action Buttons -->
-          <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-base-200">
-            <button 
-              type="button" 
-              id="btn-cancel-edit" 
-              class="btn btn-ghost btn-sm"
+          <div
+            class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-base-200"
+          >
+            <button
+              type="button"
+              id="btn-cancel-edit"
+              class="btn btn-ghost btn-sm inline-flex items-center"
             >
+              <RotateCcw class="w-4 h-4 mr-1.5" />
               Limpiar Formulario
             </button>
 
             <div class="flex gap-3">
-              <button 
-                type="button" 
-                id="btn-save-draft" 
-                class="btn btn-outline"
+              <button
+                type="button"
+                id="btn-save-draft"
+                class="btn btn-outline inline-flex items-center"
               >
+                <Save class="w-4 h-4 mr-1.5" />
                 Guardar Borrador
               </button>
-              <button 
-                type="button" 
-                id="btn-publish" 
-                class="btn btn-primary"
+              <button
+                type="button"
+                id="btn-publish"
+                class="btn btn-primary inline-flex items-center"
               >
+                <UploadCloud class="w-4 h-4 mr-1.5" />
                 Publicar en Directo
               </button>
             </div>
@@ -263,117 +367,153 @@ const initialSectionId = sections[0]?.id || 'new';
       <div class="card-body p-6">
         <div class="flex justify-between items-center mb-4">
           <div>
-            <h2 class="text-2xl font-londrina text-[#af0b56]">HISTORIAL DE VERSIONES Y BORRADORES</h2>
-            <p class="text-xs text-base-content/70">Registro de todas las revisiones guardadas y publicaciones para restaurar al editor.</p>
+            <h2 class="text-2xl font-londrina text-[#af0b56]">
+              HISTORIAL DE VERSIONES Y BORRADORES
+            </h2>
+            <p class="text-xs text-base-content/70">
+              Registro de todas las revisiones guardadas y publicaciones para
+              restaurar al editor.
+            </p>
           </div>
-          <span id="history-section-badge" class="badge badge-sm badge-outline font-mono"></span>
+          <span
+            id="history-section-badge"
+            class="badge badge-sm badge-outline font-mono max-w-[200px] truncate inline-block align-middle"
+          ></span>
         </div>
 
         <div class="overflow-x-auto">
           <table class="table w-full text-xs">
             <thead class="bg-base-200 text-base-content uppercase font-bold">
               <tr>
-                <th>Fecha y Hora</th>
-                <th>Tipo</th>
-                <th>Autoría</th>
+                <th class="whitespace-nowrap">Fecha y Hora</th>
+                <th class="whitespace-nowrap">Tipo</th>
+                <th class="whitespace-nowrap">Autoría</th>
                 <th>Título</th>
-                <th>Plantilla</th>
-                <th class="text-right">Acción</th>
+                <th class="whitespace-nowrap">Plantilla</th>
+                <th class="text-right whitespace-nowrap">Acción</th>
               </tr>
             </thead>
             <tbody id="history-tbody">
               <tr>
-                <td colspan="6" class="text-center py-4 text-base-content/40">Cargando historial de la sección...</td>
+                <td colspan="6" class="text-center py-4 text-base-content/40"
+                  >Cargando historial de la sección...</td
+                >
               </tr>
             </tbody>
           </table>
         </div>
 
         <!-- History Pagination -->
-        <div id="history-pagination" class="flex justify-between items-center mt-4 hidden">
-          <span id="history-page-info" class="text-xs text-base-content/70">Página 1</span>
+        <div
+          id="history-pagination"
+          class="flex justify-between items-center mt-4 hidden"
+        >
+          <span id="history-page-info" class="text-xs text-base-content/70"
+            >Página 1</span
+          >
           <div class="join">
-            <button id="history-prev-btn" class="join-item btn btn-xs btn-outline">Anterior</button>
-            <button id="history-next-btn" class="join-item btn btn-xs btn-outline">Siguiente</button>
+            <button
+              id="history-prev-btn"
+              class="join-item btn btn-xs btn-outline inline-flex items-center"
+            >
+              <ChevronLeft class="w-3.5 h-3.5 mr-1" />
+              Anterior
+            </button>
+            <button
+              id="history-next-btn"
+              class="join-item btn btn-xs btn-outline inline-flex items-center"
+            >
+              <ChevronRight class="w-3.5 h-3.5 mr-1" />
+              Siguiente
+            </button>
           </div>
         </div>
       </div>
     </div>
   </main>
 
-  <script is:inline src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
-  <script is:inline>
+  <script is:inline src="https://unpkg.com/easymde/dist/easymde.min.js"
+  ></script>
+  <script is:inline define:vars={{ templateLabels }}>
     let easyMDE;
     let currentHistory = [];
     let currentHistoryPage = 1;
     const HISTORY_PER_PAGE = 10;
-    const initialId = document.getElementById('section-id').value;
+    const initialId = document.getElementById("section-id").value;
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener("DOMContentLoaded", () => {
       easyMDE = new EasyMDE({
-        element: document.getElementById('body-editor'),
+        element: document.getElementById("body-editor"),
         spellChecker: false,
         status: false,
-        placeholder: 'Escribe aquí el contenido en formato Markdown...',
-        minHeight: '220px',
+        placeholder: "Escribe aquí el contenido en formato Markdown...",
+        minHeight: "220px",
       });
 
       // Load initial section immediately on startup
-      if (initialId && initialId !== 'new') {
+      if (initialId && initialId !== "new") {
         loadSection(initialId);
       }
     });
 
     // Top button to create new section
-    document.getElementById('btn-create-new-top').addEventListener('click', () => {
-      resetForm();
-      document.getElementById('editor-card').scrollIntoView({ behavior: 'smooth' });
-    });
+    document
+      .getElementById("btn-create-new-top")
+      .addEventListener("click", () => {
+        resetForm();
+        document
+          .getElementById("editor-card")
+          .scrollIntoView({ behavior: "smooth" });
+      });
 
-    document.getElementById('btn-cancel-edit').addEventListener('click', () => {
+    document.getElementById("btn-cancel-edit").addEventListener("click", () => {
       resetForm();
     });
 
     // Bind edit buttons in section table
     function bindRowButtons() {
-      document.querySelectorAll('.btn-edit-section').forEach(btn => {
+      document.querySelectorAll(".btn-edit-section").forEach((btn) => {
         btn.onclick = (e) => {
           e.stopPropagation();
           const id = btn.dataset.id;
           loadSection(id);
-          document.getElementById('editor-card').scrollIntoView({ behavior: 'smooth' });
+          document
+            .getElementById("editor-card")
+            .scrollIntoView({ behavior: "smooth" });
         };
       });
 
-      document.querySelectorAll('.btn-delete-section').forEach(btn => {
+      document.querySelectorAll(".btn-delete-section").forEach((btn) => {
         btn.onclick = async (e) => {
           e.stopPropagation();
           const id = btn.dataset.id;
           const title = btn.dataset.title;
           if (confirm(`¿Estás segura de eliminar la sección "${title}"?`)) {
             try {
-              const res = await fetch('/api/admin/sections', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'delete', id }),
+              const res = await fetch("/api/admin/sections", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "delete", id }),
               });
               if (res.ok) {
                 window.location.reload();
               } else {
-                alert('Error al eliminar sección');
+                alert("Error al eliminar sección");
               }
             } catch {
-              alert('Error de conexión');
+              alert("Error de conexión");
             }
           }
         };
       });
 
-      document.querySelectorAll('.section-row').forEach(row => {
+      document.querySelectorAll(".section-row").forEach((row) => {
         row.onclick = () => {
           const id = row.dataset.id;
           loadSection(id);
-          document.getElementById('editor-card').scrollIntoView({ behavior: 'smooth' });
+          document
+            .getElementById("editor-card")
+            .scrollIntoView({ behavior: "smooth" });
         };
       });
     }
@@ -381,12 +521,14 @@ const initialSectionId = sections[0]?.id || 'new';
     bindRowButtons();
 
     async function loadSection(id) {
-      document.getElementById('save-status').innerText = 'Cargando datos...';
-      
+      document.getElementById("save-status").innerText = "Cargando datos...";
+
       // Highlight row in table
-      document.querySelectorAll('.section-row').forEach(r => r.classList.remove('bg-primary/5', 'font-semibold'));
+      document
+        .querySelectorAll(".section-row")
+        .forEach((r) => r.classList.remove("bg-primary/5", "font-semibold"));
       const activeRow = document.getElementById(`row-${id}`);
-      if (activeRow) activeRow.classList.add('bg-primary/5', 'font-semibold');
+      if (activeRow) activeRow.classList.add("bg-primary/5", "font-semibold");
 
       try {
         const res = await fetch(`/api/admin/sections?id=${id}`);
@@ -395,30 +537,41 @@ const initialSectionId = sections[0]?.id || 'new';
           const s = data.section;
           const content = s.draft || s.live || {};
 
-          document.getElementById('section-id').value = s.id;
-          document.getElementById('title').value = content.title || '';
-          document.getElementById('slug').value = s.slug || '';
-          document.getElementById('template').value = content.template || 'single-column';
-          document.getElementById('order').value = s.order || 1;
-          document.getElementById('highlight').value = content.highlight || '';
-          document.getElementById('subtitle').value = content.subtitle || '';
-          document.getElementById('illustration-url').value = content.illustrationUrl || '';
-          
-          document.getElementById('editor-title-heading').innerText = `EDITANDO: ${content.title || s.slug}`;
-          document.getElementById('history-section-badge').innerText = `Sección: ${s.slug}`;
+          document.getElementById("section-id").value = s.id;
+          document.getElementById("title").value = content.title || "";
+          document.getElementById("nav-label").value = content.navLabel || "";
+          document.getElementById("slug").value = s.slug || "";
+          document.getElementById("template").value =
+            content.template || "single-column";
+          document.getElementById("order").value = s.order || 1;
+          document.getElementById("highlight").value = content.highlight || "";
+          document.getElementById("subtitle").value = content.subtitle || "";
+          document.getElementById("illustration-url").value =
+            content.illustrationUrl || "";
+
+          document.getElementById("editor-title-heading").innerText =
+            `EDITANDO: ${content.title || s.slug}`;
+          const histBadge = document.getElementById("history-section-badge");
+          histBadge.innerText = `Sección: ${s.slug}`;
+          histBadge.title = `Sección: ${s.slug}`;
 
           if (content.illustrationUrl) {
-            document.getElementById('illustration-preview').src = content.illustrationUrl;
-            document.getElementById('illustration-preview-container').classList.remove('hidden');
+            document.getElementById("illustration-preview").src =
+              content.illustrationUrl;
+            document
+              .getElementById("illustration-preview-container")
+              .classList.remove("hidden");
           } else {
-            document.getElementById('illustration-preview-container').classList.add('hidden');
+            document
+              .getElementById("illustration-preview-container")
+              .classList.add("hidden");
           }
 
           if (easyMDE) {
-            easyMDE.value(content.body || '');
+            easyMDE.value(content.body || "");
           }
 
-          document.getElementById('save-status').innerText = '';
+          document.getElementById("save-status").innerText = "";
 
           // Render History
           currentHistory = data.history || [];
@@ -426,242 +579,310 @@ const initialSectionId = sections[0]?.id || 'new';
           renderHistory();
         }
       } catch (err) {
-        document.getElementById('save-status').innerText = 'Error al cargar';
+        document.getElementById("save-status").innerText = "Error al cargar";
       }
     }
 
     function resetForm() {
-      document.getElementById('section-id').value = 'new';
-      document.getElementById('title').value = '';
-      document.getElementById('slug').value = '';
-      document.getElementById('template').value = 'single-column';
-      document.getElementById('order').value = document.querySelectorAll('.section-row').length + 1;
-      document.getElementById('highlight').value = '';
-      document.getElementById('subtitle').value = '';
-      document.getElementById('illustration-url').value = '';
-      document.getElementById('illustration-preview-container').classList.add('hidden');
-      if (easyMDE) easyMDE.value('');
-      
-      document.getElementById('editor-title-heading').innerText = 'CREAR NUEVA SECCIÓN';
-      document.getElementById('history-section-badge').innerText = 'Nueva Sección';
+      document.getElementById("section-id").value = "new";
+      document.getElementById("title").value = "";
+      document.getElementById("nav-label").value = "";
+      document.getElementById("slug").value = "";
+      document.getElementById("template").value = "single-column";
+      document.getElementById("order").value =
+        document.querySelectorAll(".section-row").length + 1;
+      document.getElementById("highlight").value = "";
+      document.getElementById("subtitle").value = "";
+      document.getElementById("illustration-url").value = "";
+      document
+        .getElementById("illustration-preview-container")
+        .classList.add("hidden");
+      if (easyMDE) easyMDE.value("");
 
-      document.querySelectorAll('.section-row').forEach(r => r.classList.remove('bg-primary/5', 'font-semibold'));
+      document.getElementById("editor-title-heading").innerText =
+        "CREAR NUEVA SECCIÓN";
+      const histBadge = document.getElementById("history-section-badge");
+      histBadge.innerText = "Nueva Sección";
+      histBadge.title = "Nueva Sección";
+
+      document
+        .querySelectorAll(".section-row")
+        .forEach((r) => r.classList.remove("bg-primary/5", "font-semibold"));
       currentHistory = [];
       renderHistory();
     }
 
     // Auto-generate slug from title for new sections
-    document.getElementById('title').addEventListener('input', (e) => {
-      if (document.getElementById('section-id').value === 'new') {
-        const slug = e.target.value.toLowerCase()
-          .replace(/[^a-z0-9áéíóúñ]+/g, '-')
-          .replace(/^-+|-+$/g, '');
-        document.getElementById('slug').value = slug;
+    document.getElementById("title").addEventListener("input", (e) => {
+      if (document.getElementById("section-id").value === "new") {
+        const slug = e.target.value
+          .toLowerCase()
+          .replace(/[^a-z0-9áéíóúñ]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+        document.getElementById("slug").value = slug;
       }
     });
 
     // Image upload handler
-    document.getElementById('illustration-file').addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+    document
+      .getElementById("illustration-file")
+      .addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
 
-      const formData = new FormData();
-      formData.append('file', file);
-      document.getElementById('save-status').innerText = 'Optimizando imagen...';
+        const formData = new FormData();
+        formData.append("file", file);
+        document.getElementById("save-status").innerText =
+          "Optimizando imagen...";
 
-      try {
-        const res = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-        const data = await res.json();
-        if (res.ok && data.url) {
-          document.getElementById('illustration-url').value = data.url;
-          document.getElementById('illustration-preview').src = data.url;
-          document.getElementById('illustration-preview-container').classList.remove('hidden');
-          document.getElementById('save-status').innerText = 'Imagen subida';
-        } else {
-          alert(data.error || 'Error al subir');
-          document.getElementById('save-status').innerText = '';
+        try {
+          const res = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+          const data = await res.json();
+          if (res.ok && data.url) {
+            document.getElementById("illustration-url").value = data.url;
+            document.getElementById("illustration-preview").src = data.url;
+            document
+              .getElementById("illustration-preview-container")
+              .classList.remove("hidden");
+            document.getElementById("save-status").innerText = "Imagen subida";
+          } else {
+            alert(data.error || "Error al subir");
+            document.getElementById("save-status").innerText = "";
+          }
+        } catch {
+          alert("Error de conexión al subir imagen");
+          document.getElementById("save-status").innerText = "";
         }
-      } catch {
-        alert('Error de conexión al subir imagen');
-        document.getElementById('save-status').innerText = '';
-      }
-    });
+      });
 
     // Get Form Payload
     function getPayload() {
-      const id = document.getElementById('section-id').value;
-      const title = document.getElementById('title').value.trim();
-      const slug = document.getElementById('slug').value.trim();
-      const template = document.getElementById('template').value;
-      const order = parseInt(document.getElementById('order').value, 10) || 1;
-      const highlight = document.getElementById('highlight').value.trim();
-      const subtitle = document.getElementById('subtitle').value.trim();
-      const illustrationUrl = document.getElementById('illustration-url').value.trim();
-      const body = easyMDE ? easyMDE.value() : '';
+      const id = document.getElementById("section-id").value;
+      const title = document.getElementById("title").value.trim();
+      const navLabel = document.getElementById("nav-label").value.trim();
+      let slug = document.getElementById("slug").value.trim();
+      if (!slug && title) {
+        slug = title
+          .toLowerCase()
+          .replace(/[^a-z0-9áéíóúñ]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+      }
+      const template = document.getElementById("template").value;
+      const order = parseInt(document.getElementById("order").value, 10) || 1;
+      const highlight = document.getElementById("highlight").value.trim();
+      const subtitle = document.getElementById("subtitle").value.trim();
+      const illustrationUrl = document
+        .getElementById("illustration-url")
+        .value.trim();
+      const body = easyMDE ? easyMDE.value() : "";
 
       return {
-        id: id === 'new' ? undefined : id,
+        id: id === "new" ? undefined : id,
         title,
+        navLabel,
         slug,
         template,
         order,
         highlight,
         subtitle,
         illustrationUrl,
-        body
+        body,
       };
     }
 
     // Save Draft
-    document.getElementById('btn-save-draft').addEventListener('click', async () => {
-      const payload = getPayload();
-      if (!payload.title) {
-        alert('El título es obligatorio');
-        return;
-      }
-
-      document.getElementById('save-status').innerText = 'Guardando borrador...';
-      try {
-        const res = await fetch('/api/admin/sections', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'save-draft', ...payload }),
-        });
-        const data = await res.json();
-        if (res.ok && data.success) {
-          document.getElementById('save-status').innerText = 'Borrador guardado (' + new Date().toLocaleTimeString() + ')';
-          if (data.history) {
-            currentHistory = data.history;
-            currentHistoryPage = 1;
-            renderHistory();
-          }
-          if (payload.id === undefined) {
-            setTimeout(() => window.location.reload(), 1000);
-          }
-        } else {
-          alert(data.error || 'Error al guardar');
+    document
+      .getElementById("btn-save-draft")
+      .addEventListener("click", async () => {
+        const payload = getPayload();
+        if (!payload.title) {
+          alert("El título es obligatorio");
+          return;
         }
-      } catch {
-        alert('Error de conexión');
-      }
-    });
+
+        document.getElementById("save-status").innerText =
+          "Guardando borrador...";
+        try {
+          const res = await fetch("/api/admin/sections", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "save-draft", ...payload }),
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            document.getElementById("save-status").innerText =
+              "Borrador guardado (" + new Date().toLocaleTimeString() + ")";
+            if (data.section?.id) {
+              document.getElementById("section-id").value = data.section.id;
+            }
+            if (data.history) {
+              currentHistory = data.history;
+              currentHistoryPage = 1;
+              renderHistory();
+            }
+            if (payload.id === undefined) {
+              setTimeout(() => window.location.reload(), 1000);
+            }
+          } else {
+            alert(data.error || "Error al guardar");
+            document.getElementById("save-status").innerText = "";
+          }
+        } catch {
+          alert("Error de conexión");
+          document.getElementById("save-status").innerText = "";
+        }
+      });
 
     // Publish Live
-    document.getElementById('btn-publish').addEventListener('click', async () => {
-      const payload = getPayload();
-      if (!payload.title) {
-        alert('El título es obligatorio');
-        return;
-      }
-
-      if (!confirm('¿Deseas publicar esta versión en la web en directo? Se creará una instantánea en el historial.')) {
-        return;
-      }
-
-      document.getElementById('save-status').innerText = 'Publicando en directo...';
-      try {
-        const res = await fetch('/api/admin/sections', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'publish', ...payload }),
-        });
-        const data = await res.json();
-        if (res.ok && data.success) {
-          document.getElementById('save-status').innerText = 'Publicado con éxito';
-          if (data.history) {
-            currentHistory = data.history;
-            currentHistoryPage = 1;
-            renderHistory();
-          }
-          setTimeout(() => window.location.reload(), 1000);
-        } else {
-          alert(data.error || 'Error al publicar');
+    document
+      .getElementById("btn-publish")
+      .addEventListener("click", async () => {
+        const payload = getPayload();
+        if (!payload.title) {
+          alert("El título es obligatorio");
+          return;
         }
-      } catch {
-        alert('Error de conexión');
-      }
-    });
+
+        if (
+          !confirm(
+            "¿Deseas publicar esta versión en la web en directo? Se creará una instantánea en el historial.",
+          )
+        ) {
+          return;
+        }
+
+        document.getElementById("save-status").innerText =
+          "Publicando en directo...";
+        try {
+          const res = await fetch("/api/admin/sections", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "publish", ...payload }),
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            document.getElementById("save-status").innerText =
+              "Publicado con éxito";
+            if (data.section?.id) {
+              document.getElementById("section-id").value = data.section.id;
+            }
+            if (data.history) {
+              currentHistory = data.history;
+              currentHistoryPage = 1;
+              renderHistory();
+            }
+            setTimeout(() => window.location.reload(), 1000);
+          } else {
+            alert(data.error || "Error al publicar");
+            document.getElementById("save-status").innerText = "";
+          }
+        } catch {
+          alert("Error de conexión");
+          document.getElementById("save-status").innerText = "";
+        }
+      });
 
     // Render Paginated History
     function renderHistory() {
-      const tbody = document.getElementById('history-tbody');
-      const pag = document.getElementById('history-pagination');
+      const tbody = document.getElementById("history-tbody");
+      const pag = document.getElementById("history-pagination");
 
       if (!currentHistory || currentHistory.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-base-content/40">No hay versiones registradas para esta sección todavía.</td></tr>';
-        pag.classList.add('hidden');
+        tbody.innerHTML =
+          '<tr><td colspan="6" class="text-center py-4 text-base-content/40">No hay versiones registradas para esta sección todavía.</td></tr>';
+        pag.classList.add("hidden");
         return;
       }
 
-      pag.classList.remove('hidden');
+      pag.classList.remove("hidden");
       const totalPages = Math.ceil(currentHistory.length / HISTORY_PER_PAGE);
-      document.getElementById('history-page-info').innerText = `Página ${currentHistoryPage} de ${totalPages} (${currentHistory.length} revisiones)`;
+      document.getElementById("history-page-info").innerText =
+        `Página ${currentHistoryPage} de ${totalPages} (${currentHistory.length} revisiones)`;
 
       const start = (currentHistoryPage - 1) * HISTORY_PER_PAGE;
       const pageEntries = currentHistory.slice(start, start + HISTORY_PER_PAGE);
 
-      tbody.innerHTML = pageEntries.map(h => {
-        const isPublished = h.status === 'published';
-        return `
+      tbody.innerHTML = pageEntries
+        .map((h) => {
+          const isPublished = h.status === "published";
+          const templateName =
+            (templateLabels && templateLabels[h.template]) ||
+            h.template ||
+            "Columna Única";
+          return `
           <tr class="border-b border-base-200 hover">
-            <td class="font-mono text-xs">${new Date(h.timestamp).toLocaleString('es-ES')}</td>
-            <td>
-              <span class="badge badge-xs font-semibold ${isPublished ? 'badge-success text-white' : 'badge-warning text-neutral'}">
-                ${isPublished ? 'Publicada' : 'Borrador'}
+            <td class="font-mono text-xs whitespace-nowrap">${new Date(h.timestamp).toLocaleString("es-ES")}</td>
+            <td class="whitespace-nowrap">
+              <span class="badge badge-xs font-semibold ${isPublished ? "badge-success text-white" : "badge-warning text-neutral"}">
+                ${isPublished ? "Publicada" : "Borrador"}
               </span>
             </td>
-            <td class="font-bold">${h.authorName || 'Admin'}</td>
-            <td>${h.title}</td>
-            <td><span class="badge badge-sm badge-outline">${h.template === 'multi-column' ? 'Multi-Columna' : 'Columna Única'}</span></td>
-            <td class="text-right">
-              <button class="btn btn-xs btn-outline restore-btn" data-hid="${h.id}">
-                Restaurar al Editor
+            <td class="font-bold whitespace-nowrap">${h.authorName || "Admin"}</td>
+            <td class="max-w-[200px] truncate" title="${h.title || ""}">${h.title}</td>
+            <td class="whitespace-nowrap">
+              <span class="badge badge-sm badge-outline max-w-[140px] truncate inline-block align-middle" title="${templateName}">
+                ${templateName}
+              </span>
+            </td>
+            <td class="text-right whitespace-nowrap">
+              <button class="btn btn-xs btn-outline restore-btn whitespace-nowrap inline-flex items-center" data-hid="${h.id}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3 mr-1"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                
               </button>
             </td>
           </tr>
         `;
-      }).join('');
+        })
+        .join("");
 
-      document.querySelectorAll('.restore-btn').forEach(b => {
+      document.querySelectorAll(".restore-btn").forEach((b) => {
         b.onclick = async (e) => {
           const hid = b.dataset.hid;
-          const secId = document.getElementById('section-id').value;
-          if (confirm('¿Restaurar esta versión archivada al editor?')) {
+          const secId = document.getElementById("section-id").value;
+          if (confirm("¿Restaurar esta versión archivada al editor?")) {
             try {
-              const res = await fetch('/api/admin/sections', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'restore', id: secId, historyId: hid }),
+              const res = await fetch("/api/admin/sections", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  action: "restore",
+                  id: secId,
+                  historyId: hid,
+                }),
               });
               const data = await res.json();
               if (res.ok && data.success) {
-                alert('Versión restaurada con éxito.');
+                alert("Versión restaurada con éxito.");
                 loadSection(secId);
               }
             } catch {
-              alert('Error al restaurar');
+              alert("Error al restaurar");
             }
           }
         };
       });
     }
 
-    document.getElementById('history-prev-btn').addEventListener('click', () => {
-      if (currentHistoryPage > 1) {
-        currentHistoryPage--;
-        renderHistory();
-      }
-    });
+    document
+      .getElementById("history-prev-btn")
+      .addEventListener("click", () => {
+        if (currentHistoryPage > 1) {
+          currentHistoryPage--;
+          renderHistory();
+        }
+      });
 
-    document.getElementById('history-next-btn').addEventListener('click', () => {
-      const totalPages = Math.ceil(currentHistory.length / HISTORY_PER_PAGE);
-      if (currentHistoryPage < totalPages) {
-        currentHistoryPage++;
-        renderHistory();
-      }
-    });
+    document
+      .getElementById("history-next-btn")
+      .addEventListener("click", () => {
+        const totalPages = Math.ceil(currentHistory.length / HISTORY_PER_PAGE);
+        if (currentHistoryPage < totalPages) {
+          currentHistoryPage++;
+          renderHistory();
+        }
+      });
   </script>
 </Layout>

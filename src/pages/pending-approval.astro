@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { getCurrentUser } from "../lib/auth";
+import { Globe, LogOut } from "lucide-astro";
 
 export const prerender = false;
 
@@ -19,8 +20,14 @@ const user = await getCurrentUser(Astro.cookies);
       </p>
 
       <div class="flex justify-center gap-3 mt-6">
-        <a href="/" class="btn btn-outline btn-sm">Ver la Web</a>
-        <a href="/api/auth/logout" class="btn btn-primary btn-sm">Cerrar Sesión</a>
+        <a href="/" class="btn btn-outline btn-sm inline-flex items-center gap-1.5">
+          <Globe class="w-4 h-4" />
+          <span>Ver la Web</span>
+        </a>
+        <a href="/api/auth/logout" class="btn btn-primary btn-sm inline-flex items-center gap-1.5">
+          <LogOut class="w-4 h-4" />
+          <span>Cerrar Sesión</span>
+        </a>
       </div>
     </div>
   </main>

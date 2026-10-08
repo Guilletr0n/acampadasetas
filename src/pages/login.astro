@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { getCurrentUser } from "../lib/auth";
+import { LogIn } from "lucide-astro";
 
 export const prerender = false;
 
@@ -69,9 +70,10 @@ if (user && user.approved) {
             <button
               type="submit"
               id="submit-btn"
-              class="btn btn-primary w-full"
+              class="btn btn-primary w-full inline-flex items-center justify-center gap-2"
             >
-              Iniciar Sesión
+              <LogIn class="w-4 h-4" />
+              <span id="submit-text">Iniciar Sesión</span>
             </button>
           </div>
         </form>
@@ -99,13 +101,14 @@ if (user && user.approved) {
 
     const form = document.getElementById("login-form");
     const submitBtn = document.getElementById("submit-btn");
+    const submitText = document.getElementById("submit-text");
     const errorBox = document.getElementById("error-box");
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       errorBox.classList.add("hidden");
       submitBtn.disabled = true;
-      submitBtn.innerText = "Verificando...";
+      if (submitText) submitText.innerText = "Verificando...";
 
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
@@ -127,13 +130,13 @@ if (user && user.approved) {
           errorBox.innerText = data.error || "Credenciales inválidas";
           errorBox.classList.remove("hidden");
           submitBtn.disabled = false;
-          submitBtn.innerText = "Iniciar Sesión";
+          if (submitText) submitText.innerText = "Iniciar Sesión";
         }
       } catch (err) {
         errorBox.innerText = "Error de conexión con el servidor.";
         errorBox.classList.remove("hidden");
         submitBtn.disabled = false;
-        submitBtn.innerText = "Iniciar Sesión";
+        if (submitText) submitText.innerText = "Iniciar Sesión";
       }
     });
   </script>

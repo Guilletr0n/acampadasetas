@@ -3,6 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import AdminNav from "../../components/AdminNav.astro";
 import { getUsers } from "../../lib/users";
 import { getCurrentUser } from "../../lib/auth";
+import { Check, Trash2 } from "lucide-astro";
 
 export const prerender = false;
 
@@ -47,10 +48,10 @@ const users = await getUsers();
           <tr>
             <th>Nombre / Colectivo</th>
             <th>Email</th>
-            <th>Rol</th>
-            <th>Estado Aprobación</th>
-            <th>Fecha Registro</th>
-            <th class="text-right">Acciones</th>
+            <th class="whitespace-nowrap">Rol</th>
+            <th class="whitespace-nowrap">Estado Aprobación</th>
+            <th class="whitespace-nowrap">Fecha Registro</th>
+            <th class="text-right whitespace-nowrap">Acciones</th>
           </tr>
         </thead>
         <tbody id="users-tbody">
@@ -61,7 +62,7 @@ const users = await getUsers();
                 {u.uid === currentUser.uid && <span class="badge badge-xs badge-neutral ml-1">Tú</span>}
               </td>
               <td class="font-mono text-xs text-base-content/70">{u.email}</td>
-              <td>
+              <td class="whitespace-nowrap">
                 <select 
                   class="select select-bordered select-xs role-select font-semibold" 
                   data-uid={u.uid}
@@ -72,7 +73,7 @@ const users = await getUsers();
                   <option value="admin" selected={u.role === 'admin'}>Admin</option>
                 </select>
               </td>
-              <td>
+              <td class="whitespace-nowrap">
                 <label class="cursor-pointer label justify-start gap-2">
                   <input 
                     type="checkbox" 
@@ -86,26 +87,29 @@ const users = await getUsers();
                   </span>
                 </label>
               </td>
-              <td class="text-xs text-base-content/60 font-mono">
+              <td class="text-xs text-base-content/60 font-mono whitespace-nowrap">
                 {new Date(u.createdAt).toLocaleDateString('es-ES')}
               </td>
-              <td class="text-right">
+              <td class="text-right whitespace-nowrap">
                 {u.uid !== currentUser.uid && (
                   <div class="flex justify-end gap-2">
                     {!u.approved && (
                       <button 
-                        class="btn btn-xs btn-primary approve-btn" 
+                        class="btn btn-xs btn-primary approve-btn whitespace-nowrap inline-flex items-center gap-1" 
                         data-uid={u.uid}
                       >
-                        Aprobar Editora
+                        <Check class="w-3.5 h-3.5" />
+                        <span>Aprobar Editora</span>
                       </button>
                     )}
                     <button 
-                      class="btn btn-xs btn-error delete-btn" 
+                      class="btn btn-xs btn-error delete-btn whitespace-nowrap" 
                       data-uid={u.uid} 
                       data-name={u.displayName}
+                      title="Eliminar"
+                      aria-label="Eliminar"
                     >
-                      Eliminar
+                      <Trash2 class="w-3.5 h-3.5" />
                     </button>
                   </div>
                 )}

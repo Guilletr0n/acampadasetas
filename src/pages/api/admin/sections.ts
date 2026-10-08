@@ -35,39 +35,61 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   try {
     const data = await request.json();
-    const { action, id, title, subtitle, highlight, template, body, illustrationUrl, slug, order, historyId } = data;
+    const { action, id, title, navLabel, subtitle, highlight, template, body, illustrationUrl, slug, order, historyId } = data;
     const authorName = locals.user.displayName || locals.user.email || 'Editor';
 
+    const cleanSlug = (slug || (title ? title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') : '') || 'seccion').toLowerCase();
+    const generateId = () => `sec-${cleanSlug || Math.random().toString(36).substring(2, 7)}`;
+
     if (action === 'save-draft') {
-      const sectionId = id || ('sec-' + (slug || title.toLowerCase().replace(/[^a-z0-9]/g, '-')));
+      let sectionId = (id && id !== 'new') ? id : generateId();
+      if (!id || id === 'new') {
+        const existing = await getSectionById(sectionId);
+        if (existing) {
+          sectionId = `${sectionId}-${Date.now().toString().slice(-4)}`;
+        }
+      }
+
       const saved = await saveSectionDraft(sectionId, {
-        title,
+        title: title || 'Sin título',
+        navLabel: navLabel || '',
         subtitle: subtitle || '',
         highlight: highlight || '',
         template: template || 'single-column',
         body: body || '',
         illustrationUrl: illustrationUrl || '',
-      }, slug, order, authorName);
+      }, cleanSlug, order, authorName);
 
       const history = await getSectionHistory(sectionId);
       return new Response(JSON.stringify({ success: true, section: saved, history }), { status: 200 });
     }
 
     if (action === 'publish') {
-      if (!id) return new Response(JSON.stringify({ error: 'ID de sección requerido' }), { status: 400 });
-      if (title) {
-        await saveSectionDraft(id, {
-          title,
+      let sectionId = (id && id !== 'new') ? id : generateId();
+      if (!id || id === 'new') {
+        const existing = await getSectionById(sectionId);
+        if (existing) {
+          sectionId = `${sectionId}-${Date.now().toString().slice(-4)}`;
+        }
+      }
+
+      if (title || (!id || id === 'new')) {
+        await saveSectionDraft(sectionId, {
+          title: title || 'Sin título',
+          navLabel: navLabel || '',
           subtitle: subtitle || '',
           highlight: highlight || '',
           template: template || 'single-column',
           body: body || '',
           illustrationUrl: illustrationUrl || '',
-        }, slug, order, authorName);
+        }, cleanSlug, order, authorName);
       }
 
-      const published = await publishSection(id, authorName);
-      const history = await getSectionHistory(id);
+      const published = await publishSection(sectionId, authorName);
+      if (!published) {
+        return new Response(JSON.stringify({ error: 'No se pudo publicar la sección' }), { status: 500 });
+      }
+      const history = await getSectionHistory(sectionId);
       return new Response(JSON.stringify({ success: true, section: published, history }), { status: 200 });
     }
 

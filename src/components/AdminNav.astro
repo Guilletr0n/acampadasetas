@@ -1,8 +1,9 @@
 ---
 import type { User } from '../lib/types';
+import { LayoutDashboard, Calendar, Image, Users, ExternalLink, LogOut } from 'lucide-astro';
 
 interface Props {
-  activeTab: 'home' | 'sections' | 'gallery' | 'users';
+  activeTab: 'home' | 'sections' | 'gallery' | 'users' | 'schedule';
   user: User | null;
 }
 
@@ -10,37 +11,47 @@ const { activeTab, user } = Astro.props;
 const isHomeActive = activeTab === 'home' || activeTab === 'sections';
 ---
 
-<div class="navbar bg-base-100 shadow-md border-b border-base-300 px-6">
+<div class="navbar bg-base-100 shadow-md border-b border-base-300 px-4 md:px-6">
   <div class="flex-1 items-center gap-3">
-    <a href="/admin/home" class="text-2xl font-londrina tracking-wide text-[#af0b56]">
+    <a href="/admin/home" class="text-xl md:text-2xl font-londrina tracking-wide text-[#af0b56]">
       ACAMPADA SETAS CMS
     </a>
-    <span class="badge badge-outline text-xs uppercase font-bold tracking-wider">
+    <span class="badge badge-outline text-xs uppercase font-bold tracking-wider hidden sm:inline-flex">
       {user?.role || 'editor'}
     </span>
   </div>
 
   <div class="flex-none gap-2">
-    <ul class="menu menu-horizontal px-1 font-semibold gap-1">
+    <ul class="menu menu-horizontal menu-sm md:menu-md px-1 font-semibold gap-1">
       <li>
         <a href="/admin/home" class={isHomeActive ? 'active' : ''}>
-          Inicio / Secciones
+          <LayoutDashboard class="w-4 h-4 mr-1" />
+          Inicio
+        </a>
+      </li>
+      <li>
+        <a href="/admin/schedule" class={activeTab === 'schedule' ? 'active' : ''}>
+          <Calendar class="w-4 h-4 mr-1" />
+          Programa
         </a>
       </li>
       <li>
         <a href="/admin/gallery" class={activeTab === 'gallery' ? 'active' : ''}>
+          <Image class="w-4 h-4 mr-1" />
           Galería
         </a>
       </li>
       {user?.role === 'admin' && (
         <li>
           <a href="/admin/users" class={activeTab === 'users' ? 'active' : ''}>
+            <Users class="w-4 h-4 mr-1" />
             Usuarios
           </a>
         </li>
       )}
       <li>
         <a href="/" target="_blank" class="text-gray-500 hover:text-black">
+          <ExternalLink class="w-4 h-4 mr-1" />
           Ver Web
         </a>
       </li>
@@ -57,7 +68,12 @@ const isHomeActive = activeTab === 'home' || activeTab === 'sections';
           <div class="font-bold">{user?.displayName || 'Usuario'}</div>
           <div class="text-xs opacity-60 truncate">{user?.email}</div>
         </li>
-        <li><a href="/api/auth/logout" class="text-error font-semibold mt-1">Cerrar Sesión</a></li>
+        <li>
+          <a href="/api/auth/logout" class="text-error font-semibold mt-1 flex items-center">
+            <LogOut class="w-4 h-4 mr-1.5" />
+            Cerrar Sesión
+          </a>
+        </li>
       </ul>
     </div>
   </div>

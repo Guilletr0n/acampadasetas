@@ -1,0 +1,110 @@
+---
+import type { SectionContent } from '../../lib/types';
+import { getActivities } from '../../lib/db';
+
+interface Props {
+  slug: string;
+  content: SectionContent;
+  isAlternate?: boolean;
+  renderedMarkdown?: string;
+}
+
+const { slug, content, isAlternate = false } = Astro.props;
+
+// Date calculations using Europe/Madrid timezone
+const now = new Date();
+const daysOfWeek = ['DOMINGO', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO'];
+
+const parts = new Intl.DateTimeFormat('es-ES', {
+  timeZone: 'Europe/Madrid',
+  weekday: 'long',
+  day: 'numeric',
+  month: 'numeric',
+}).formatToParts(now);
+
+const dayName = (parts.find(p => p.type === 'weekday')?.value || daysOfWeek[now.getDay()]).toUpperCase();
+const dayNum = parts.find(p => p.type === 'day')?.value || now.getDate();
+const monthNum = parts.find(p => p.type === 'month')?.value || (now.getMonth() + 1);
+const dateNumberLabel = `${dayNum} – ${monthNum}`;
+
+// Retrieve published activities from database (4:00 AM cutoff handled automatically)
+const activities = await getActivities(true);
+---
+
+{activities.length > 0 && (
+  <section 
+    id={slug} 
+    class={`py-16 md:py-24 px-4 border-b border-black/10 overflow-hidden ${isAlternate ? 'bg-[#f7e9d0]' : 'bg-[#fcf2df]'}`}
+  >
+    <div class="max-w-4xl mx-auto">
+      <!-- Header with Dynamic Date on Top-Left and Centered Title -->
+      <div class="relative mb-8 md:mb-10">
+        <!-- Date on top left: Day in uppercase letters + Day - Month numbers -->
+        <div class="md:absolute md:left-2 md:top-1 text-left mb-4 md:mb-0">
+          <div class="text-3xl md:text-5xl font-londrina text-[#af0b56] tracking-wider uppercase leading-none schedule-day-text">
+            {dayName}
+          </div>
+          <div class="text-2xl md:text-4xl font-londrina text-[#af0b56] tracking-wider leading-none mt-1 schedule-date-text">
+            {dateNumberLabel}
+          </div>
+        </div>
+
+        <!-- Centered Title -->
+        <div class="text-center px-4">
+          {content.highlight && (
+            <span class="inline-block bg-[#af0b56] text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-3 shadow-sm">
+              {content.highlight}
+            </span>
+          )}
+          <h2 class="text-5xl md:text-7xl font-londrina text-[#af0b56] m-0 tracking-wide leading-tight">
+            {content.title || 'HORARIO DE ACTIVIDADES'}
+          </h2>
+          {content.subtitle && (
+            <p class="text-lg md:text-xl text-gray-700 font-medium mt-1">
+              {content.subtitle}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <!-- Cream Tilted Card matching the mockup design -->
+      <div class="relative transition-transform duration-300 md:-rotate-1 hover:rotate-0">
+        <div class="bg-[#fef6e4] border border-black/5 rounded-3xl p-6 sm:p-10 md:p-14 shadow-xl shadow-black/5">
+          <div class="space-y-6 md:space-y-8">
+            {activities.map((act) => (
+              <div class="flex items-start gap-4 sm:gap-6 md:gap-8 group">
+                <div class="text-[#af0b56] font-extrabold text-2xl sm:text-3xl md:text-4xl font-sans tracking-tight min-w-[70px] sm:min-w-[85px] md:min-w-[100px] flex-shrink-0 leading-tight">
+                  {act.time}
+                </div>
+                <div class="flex-1 pt-0.5">
+                  <h3 class="text-xl sm:text-2xl md:text-3xl font-bold tracking-wide text-[#1d1d1b] uppercase m-0 leading-tight">
+                    {act.title}
+                  </h3>
+                  {act.description && (
+                    <p class="text-sm sm:text-base md:text-lg text-[#1d1d1b]/80 font-normal mt-1 mb-0 leading-relaxed">
+                      {act.description}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Client-side hydration script to keep date 100% synchronized with client midnight rollover -->
+  <script is:inline>
+    (function updateLiveDate() {
+      const days = ['DOMINGO', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO'];
+      const now = new Date();
+      const dayEl = document.querySelector('.schedule-day-text');
+      const dateEl = document.querySelector('.schedule-date-text');
+      if (dayEl && dateEl) {
+        dayEl.textContent = days[now.getDay()];
+        dateEl.textContent = now.getDate() + ' – ' + (now.getMonth() + 1);
+      }
+    })();
+  </script>
+)}

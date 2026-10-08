@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { getCurrentUser } from "../lib/auth";
+import { UserPlus, ArrowLeft } from "lucide-astro";
 
 export const prerender = false;
 
@@ -36,7 +37,10 @@ if (user) {
           <div>
             <h3 class="font-bold text-sm">Solicitud recibida con éxito</h3>
             <p class="mt-1">Tu cuenta está pendiente de revisión por el equipo de administración.</p>
-            <a href="/login" class="btn btn-sm btn-outline mt-3">Ir al Inicio de Sesión</a>
+            <a href="/login" class="btn btn-sm btn-outline mt-3 inline-flex items-center gap-1.5">
+              <ArrowLeft class="w-4 h-4" />
+              <span>Ir al Inicio de Sesión</span>
+            </a>
           </div>
         </div>
 
@@ -88,9 +92,10 @@ if (user) {
             <button 
               type="submit" 
               id="submit-btn" 
-              class="btn btn-primary w-full"
+              class="btn btn-primary w-full inline-flex items-center justify-center gap-2"
             >
-              Enviar Solicitud de Editora
+              <UserPlus class="w-4 h-4" />
+              <span id="submit-text">Enviar Solicitud de Editora</span>
             </button>
           </div>
         </form>
@@ -108,6 +113,7 @@ if (user) {
   <script is:inline>
     const form = document.getElementById('join-form');
     const submitBtn = document.getElementById('submit-btn');
+    const submitText = document.getElementById('submit-text');
     const errorBox = document.getElementById('error-box');
     const successBox = document.getElementById('success-box');
 
@@ -115,7 +121,7 @@ if (user) {
       e.preventDefault();
       errorBox.classList.add('hidden');
       submitBtn.disabled = true;
-      submitBtn.innerText = 'Enviando...';
+      if (submitText) submitText.innerText = 'Enviando...';
 
       const name = document.getElementById('name').value.trim();
       const email = document.getElementById('email').value.trim();
@@ -137,13 +143,13 @@ if (user) {
           errorBox.innerText = data.error || 'Error al procesar la solicitud';
           errorBox.classList.remove('hidden');
           submitBtn.disabled = false;
-          submitBtn.innerText = 'Enviar Solicitud de Editora';
+          if (submitText) submitText.innerText = 'Enviar Solicitud de Editora';
         }
       } catch (err) {
         errorBox.innerText = 'Error de conexión con el servidor.';
         errorBox.classList.remove('hidden');
         submitBtn.disabled = false;
-        submitBtn.innerText = 'Enviar Solicitud de Editora';
+        if (submitText) submitText.innerText = 'Enviar Solicitud de Editora';
       }
     });
   </script>

@@ -7,17 +7,18 @@ let firestoreDb: Firestore | null = null;
 
 try {
   const projectId = process.env.GCP_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT || 'acampadasetas';
+  const databaseId = process.env.FIRESTORE_DATABASE_ID || '(default)';
   const defaultKeyPath = path.resolve(process.cwd(), 'service-account.json');
   const envKeyPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
   const keyPath = (envKeyPath && fs.existsSync(envKeyPath)) ? envKeyPath : (fs.existsSync(defaultKeyPath) ? defaultKeyPath : undefined);
 
   if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
     const credentials = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
-    firestoreDb = new Firestore({ projectId, credentials, databaseId: '(default)' });
+    firestoreDb = new Firestore({ projectId, credentials, databaseId });
   } else if (keyPath) {
-    firestoreDb = new Firestore({ projectId, keyFilename: keyPath, databaseId: '(default)' });
+    firestoreDb = new Firestore({ projectId, keyFilename: keyPath, databaseId });
   } else if (process.env.K_SERVICE || process.env.NODE_ENV === 'production') {
-    firestoreDb = new Firestore({ projectId, databaseId: '(default)' });
+    firestoreDb = new Firestore({ projectId, databaseId });
   }
 } catch (e) {
   console.warn('Firestore users init notice: using local fallback', e);
