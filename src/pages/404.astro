@@ -1,0 +1,102 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { ArrowLeft, Home, Image as GalleryIcon } from "lucide-astro";
+
+export const prerender = false;
+Astro.response.status = 404;
+Astro.response.statusText = "Not Found";
+---
+
+<Layout title="404 - Página no encontrada">
+  <main
+    class="min-h-screen flex flex-col justify-between px-6 py-8 selection:bg-[#af0b56] selection:text-white"
+  >
+    <!-- Header minimalista -->
+    <header class="w-full max-w-4xl mx-auto flex items-center justify-between">
+      <a
+        href="/"
+        class="inline-flex items-center gap-2 group text-[#af0b56] transition-transform hover:scale-102"
+        aria-label="Volver a Acampada Setas"
+      >
+        <img
+          src="/favicon/favicon.svg"
+          alt="Logo Acampada Setas"
+          class="w-8 h-8 object-contain"
+        />
+        <span
+          class="text-2xl sm:text-3xl font-londrina tracking-wide text-[#af0b56]"
+        >
+          ACAMPADA SETAS
+        </span>
+      </a>
+
+      <a
+        href="/"
+        class="text-xs uppercase tracking-widest font-semibold text-[#1d1d1b]/70 hover:text-[#af0b56] transition-colors inline-flex items-center gap-1.5"
+      >
+        <ArrowLeft class="w-4 h-4" />
+        <span>Inicio</span>
+      </a>
+    </header>
+
+    <!-- Contenido central 404 -->
+    <section
+      class="w-full max-w-xl mx-auto my-auto text-center py-12 flex flex-col items-center"
+    >
+      <!-- Número 404 estilizado con tipografía Londrina y rojo carmín -->
+      <div class="relative select-none mb-2">
+        <span
+          class="text-8xl sm:text-9xl md:text-[11rem] font-londrina text-[#af0b56] leading-none tracking-tight block drop-shadow-sm"
+        >
+          404
+        </span>
+        <div
+          class="w-16 h-1 bg-[#af0b56] mx-auto rounded-full mt-2 mb-4 opacity-80"
+        >
+        </div>
+      </div>
+
+      <!-- Título y mensaje -->
+      <h1
+        class="text-3xl sm:text-4xl font-londrina text-[#1d1d1b] tracking-wide mb-3"
+      >
+        PÁGINA NO ENCONTRADA
+      </h1>
+
+      <p
+        class="text-sm sm:text-base text-[#1d1d1b]/75 max-w-md mx-auto leading-relaxed mb-8 font-normal"
+      >
+        La carpa o documento que buscas no está en esta ubicación. Ha podido
+        cambiar de lugar o nunca existió.
+      </p>
+
+      <!-- Botones de navegación minimalistas -->
+      <div
+        class="flex flex-col items-center justify-center gap-3 w-full sm:w-auto"
+      >
+        <a
+          href="/"
+          class="btn btn-primary px-6 py-2.5 rounded-full inline-flex items-center justify-center gap-2 font-medium text-sm shadow-md hover:shadow-lg transition-all w-full sm:w-auto"
+        >
+          <Home class="w-4 h-4" />
+          <span>Volver a la portada</span>
+        </a>
+
+        <a
+          href="/gallery"
+          class="btn btn-outline border-[#1d1d1b]/20 hover:border-[#af0b56] hover:bg-[#af0b56]/5 text-[#1d1d1b] hover:text-[#af0b56] px-5 py-2.5 rounded-full inline-flex items-center justify-center gap-2 font-medium text-sm transition-all w-full sm:w-auto"
+        >
+          <GalleryIcon class="w-4 h-4 text-[#af0b56]" />
+          <span>Ver galería</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Footer minimalista -->
+    <footer
+      class="w-full max-w-4xl mx-auto text-center text-xs text-[#1d1d1b]/50 pt-8 border-t border-[#1d1d1b]/10"
+    >
+      <p>Acampada Setas Sevilla</p>
+    </footer>
+  </main>
+</Layout>

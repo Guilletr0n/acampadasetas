@@ -1,0 +1,504 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import AdminNav from "../../components/AdminNav.astro";
+import { getActivities } from "../../lib/db";
+import { getCurrentUser, canEditContent } from "../../lib/auth";
+import { ExternalLink, Plus, FileEdit, UploadCloud, Trash2 } from "lucide-astro";
+
+export const prerender = false;
+
+const currentUser = await getCurrentUser(Astro.cookies);
+if (!currentUser || !currentUser.approved || !canEditContent(currentUser)) {
+  return Astro.redirect('/login');
+}
+
+const allActivities = await getActivities(false);
+const published = allActivities.filter((a) => a.status === 'published');
+const drafts = allActivities.filter((a) => a.status === 'draft');
+---
+
+<Layout title="Editor del Programa y Actividades | CMS Móvil" isDashboard={true}>
+  <AdminNav activeTab="schedule" user={currentUser} />
+
+  <!-- Mobile-optimized container -->
+  <main class="max-w-xl mx-auto px-4 py-5 space-y-6 pb-24">
+    <!-- Header banner -->
+    <div class="flex items-center justify-between gap-3 border-b border-base-200 pb-3">
+      <div>
+        <h1 class="text-3xl font-londrina text-[#af0b56] tracking-wide m-0">
+          PROGRAMA DE ACTIVIDADES
+        </h1>
+        <p class="text-xs text-base-content/70 m-0">
+          Gestión rápida para el horario diario visible en la home.
+        </p>
+      </div>
+      <a 
+        href="/#agenda" 
+        target="_blank" 
+        class="btn btn-xs btn-outline font-mono text-[11px] whitespace-nowrap inline-flex items-center gap-1.5"
+      >
+        <ExternalLink class="w-3.5 h-3.5" />
+        <span>Ver en Web</span>
+      </a>
+    </div>
+
+    <!-- Live Toast / Status Bar -->
+    <div id="status-toast" class="hidden alert alert-info py-2 px-3 text-xs font-semibold shadow">
+      <span id="status-text">Operación completada</span>
+    </div>
+
+    <!-- 1. FORMULARIO PARA AÑADIR ACTIVIDAD -->
+    <section class="card bg-base-100 shadow border border-base-300">
+      <div class="card-body p-4 sm:p-5">
+        <h2 class="text-lg font-bold text-neutral flex items-center gap-2 m-0">
+          <span class="w-2.5 h-2.5 rounded-full bg-primary inline-block"></span>
+          Añadir Actividad
+        </h2>
+
+        <form id="activity-form" class="space-y-3 mt-2">
+          <!-- Campo para la Hora -->
+          <div class="form-control">
+            <label class="label py-1" for="act-time">
+              <span class="label-text font-bold text-xs">HORA</span>
+            </label>
+            <input 
+              type="text" 
+              id="act-time" 
+              class="input input-bordered input-md w-full font-mono text-base font-bold placeholder:font-normal placeholder:text-gray-400" 
+              placeholder="Ej: 17:30" 
+              required 
+            />
+          </div>
+
+          <!-- Campo para el Título -->
+          <div class="form-control">
+            <label class="label py-1" for="act-title">
+              <span class="label-text font-bold text-xs">TÍTULO</span>
+            </label>
+            <input 
+              type="text" 
+              id="act-title" 
+              class="input input-bordered input-md w-full uppercase font-bold text-base placeholder:normal-case placeholder:font-normal placeholder:text-gray-400" 
+              placeholder="Ej: CHARLA o ASAMBLEA GENERAL" 
+              required 
+            />
+          </div>
+
+          <!-- Campo para la Descripción -->
+          <div class="form-control">
+            <label class="label py-1" for="act-desc">
+              <span class="label-text font-bold text-xs">DESCRIPCIÓN (SUBTÍTULO)</span>
+            </label>
+            <textarea 
+              id="act-desc" 
+              class="textarea textarea-bordered w-full text-sm leading-snug placeholder:text-gray-400" 
+              placeholder="Ej: Pasado y presente de la huelga general por Ángel Carrique" 
+              rows="2"
+            ></textarea>
+          </div>
+
+          <!-- Opciones y Botón Añadir -->
+          <div class="pt-1 flex flex-col gap-2">
+            <label class="label cursor-pointer justify-start gap-2 py-0">
+              <input type="checkbox" id="act-as-draft" class="checkbox checkbox-xs" />
+              <span class="label-text text-xs text-base-content/70">Guardar directamente como borrador (no publicado)</span>
+            </label>
+
+            <button 
+              type="submit" 
+              id="btn-add-activity" 
+              class="btn btn-primary w-full text-base font-bold tracking-wide mt-1 shadow-md shadow-primary/20 inline-flex items-center justify-center gap-1.5"
+            >
+              <Plus class="w-4 h-4" />
+              <span>Añadir al Programa</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- 2. ACTIVIDADES PUBLICADAS -->
+    <section class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold text-neutral flex items-center gap-2 m-0">
+          <span class="w-2.5 h-2.5 rounded-full bg-success inline-block"></span>
+          Publicadas en Directo
+          <span class="badge badge-success text-white badge-sm font-bold">
+            {published.length}
+          </span>
+        </h2>
+        <span class="text-[11px] text-base-content/60">Visibles en la web</span>
+      </div>
+
+      <div class="space-y-2.5" id="published-list">
+        {published.length === 0 ? (
+          <div class="p-6 text-center bg-base-100 rounded-2xl border border-dashed border-base-300 text-base-content/50 text-sm">
+            No hay actividades publicadas actualmente.
+          </div>
+        ) : (
+          published.map((act) => (
+            <div 
+              class="card bg-base-100 shadow-sm border border-base-200 hover:border-base-300 transition-colors"
+              id={`card-${act.id}`}
+            >
+              <div class="p-4 flex flex-col gap-2">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="flex items-baseline gap-2.5">
+                    <span class="text-xl sm:text-2xl font-extrabold text-[#af0b56] font-mono tracking-tight">
+                      {act.time}
+                    </span>
+                    <span class="badge badge-success text-white badge-xs font-semibold">
+                      Publicada
+                    </span>
+                  </div>
+
+                  <!-- Botón para convertir en borrador -->
+                  <button 
+                    type="button" 
+                    class="btn btn-xs btn-outline btn-warning btn-to-draft whitespace-nowrap inline-flex items-center gap-1"
+                    data-id={act.id}
+                  >
+                    <FileEdit class="w-3 h-3" />
+                    <span>Convertir en borrador</span>
+                  </button>
+                </div>
+
+                <div>
+                  <h3 class="text-base font-bold uppercase text-[#1d1d1b] m-0 leading-snug">
+                    {act.title}
+                  </h3>
+                  {act.description && (
+                    <p class="text-xs text-base-content/70 mt-1 mb-0 leading-relaxed">
+                      {act.description}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </section>
+
+    <!-- 3. BORRADORES (CON SELECCIÓN Y BOTÓN BORRAR SELECCIONADOS ARRIBA) -->
+    <section class="space-y-3 pt-2">
+      <!-- Barra superior con botón para borrar los seleccionados -->
+      <div class="card bg-base-100 border border-warning/30 shadow-sm p-3.5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-lg font-bold text-neutral flex items-center gap-2 m-0">
+              <span class="w-2.5 h-2.5 rounded-full bg-warning inline-block"></span>
+              Borradores
+              <span class="badge badge-warning text-neutral badge-sm font-bold">
+                {drafts.length}
+              </span>
+            </h2>
+            <p class="text-[11px] text-base-content/60 m-0 mt-0.5">
+              Solo las actividades en borrador pueden eliminarse.
+            </p>
+          </div>
+
+          <!-- Botón Borrar seleccionados arriba -->
+          <div class="flex items-center gap-2 self-end sm:self-auto">
+            <button 
+              type="button" 
+              id="btn-delete-selected" 
+              class="btn btn-error btn-sm font-bold text-white shadow-sm disabled:opacity-40 inline-flex items-center gap-1.5"
+              disabled
+              title="Borrar seleccionados"
+              aria-label="Borrar seleccionados"
+            >
+              <Trash2 class="w-4 h-4" />
+              <span id="selected-counter" class="hidden font-mono text-xs">(0)</span>
+            </button>
+          </div>
+        </div>
+
+        {drafts.length > 0 && (
+          <div class="mt-3 pt-2.5 border-t border-base-200 flex items-center justify-between text-xs">
+            <label class="label cursor-pointer gap-2 py-0">
+              <input type="checkbox" id="select-all-drafts" class="checkbox checkbox-sm checkbox-primary" />
+              <span class="label-text font-bold text-xs">Seleccionar todos los borradores</span>
+            </label>
+            <span class="text-base-content/50 text-[11px]">
+              Selecciona para borrar
+            </span>
+          </div>
+        )}
+      </div>
+
+      <!-- Listado de borradores -->
+      <div class="space-y-2.5" id="drafts-list">
+        {drafts.length === 0 ? (
+          <div class="p-6 text-center bg-base-100 rounded-2xl border border-dashed border-base-300 text-base-content/50 text-sm">
+            No hay borradores actualmente.
+          </div>
+        ) : (
+          drafts.map((act) => (
+            <div 
+              class="card bg-base-100 shadow-sm border border-warning/20 hover:border-warning/50 transition-colors draft-card"
+              id={`card-${act.id}`}
+            >
+              <div class="p-4 flex items-start gap-3">
+                <!-- Checkbox para seleccionar este borrador -->
+                <div class="pt-1">
+                  <input 
+                    type="checkbox" 
+                    class="checkbox checkbox-md checkbox-primary draft-checkbox" 
+                    value={act.id} 
+                    aria-label={`Seleccionar borrador ${act.title}`}
+                  />
+                </div>
+
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="flex items-baseline gap-2">
+                      <span class="text-xl sm:text-2xl font-extrabold text-[#af0b56] font-mono tracking-tight">
+                        {act.time}
+                      </span>
+                      <span class="badge badge-warning text-neutral badge-xs font-semibold">
+                        Borrador
+                      </span>
+                    </div>
+
+                    <!-- Botón para publicar directamente -->
+                    <button 
+                      type="button" 
+                      class="btn btn-xs btn-outline btn-success btn-to-publish whitespace-nowrap inline-flex items-center gap-1"
+                      data-id={act.id}
+                    >
+                      <UploadCloud class="w-3 h-3" />
+                      <span>Publicar</span>
+                    </button>
+                  </div>
+
+                  <h3 class="text-base font-bold uppercase text-[#1d1d1b] m-0 leading-snug mt-1">
+                    {act.title}
+                  </h3>
+                  {act.description && (
+                    <p class="text-xs text-base-content/70 mt-1 mb-0 leading-relaxed">
+                      {act.description}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </section>
+  </main>
+
+  <!-- Client-side script handling mobile actions -->
+  <script is:inline>
+    const form = document.getElementById('activity-form');
+    const timeInput = document.getElementById('act-time');
+    const titleInput = document.getElementById('act-title');
+    const descInput = document.getElementById('act-desc');
+    const draftCheckbox = document.getElementById('act-as-draft');
+    const btnSubmit = document.getElementById('btn-add-activity');
+    const btnDeleteSelected = document.getElementById('btn-delete-selected');
+    const selectAllCheckbox = document.getElementById('select-all-drafts');
+    const selectedCounter = document.getElementById('selected-counter');
+    const toast = document.getElementById('status-toast');
+    const toastText = document.getElementById('status-text');
+
+    function showToast(msg, type = 'info') {
+      if (!toast || !toastText) return;
+      toastText.textContent = msg;
+      toast.className = `alert alert-${type} py-2 px-3 text-xs font-semibold shadow fixed top-16 left-4 right-4 z-50 max-w-xl mx-auto`;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3000);
+    }
+
+    // Update delete button state and counter based on selected drafts
+    function updateSelectedState() {
+      const checked = document.querySelectorAll('.draft-checkbox:checked');
+      const totalDrafts = document.querySelectorAll('.draft-checkbox').length;
+      const count = checked.length;
+
+      if (btnDeleteSelected) {
+        btnDeleteSelected.disabled = count === 0;
+      }
+      if (selectedCounter) {
+        if (count > 0) {
+          selectedCounter.textContent = `(${count})`;
+          selectedCounter.classList.remove('hidden');
+        } else {
+          selectedCounter.classList.add('hidden');
+        }
+      }
+      if (selectAllCheckbox) {
+        selectAllCheckbox.checked = totalDrafts > 0 && count === totalDrafts;
+        selectAllCheckbox.indeterminate = count > 0 && count < totalDrafts;
+      }
+    }
+
+    // Attach checkbox change handlers
+    document.querySelectorAll('.draft-checkbox').forEach((cb) => {
+      cb.addEventListener('change', updateSelectedState);
+    });
+
+    if (selectAllCheckbox) {
+      selectAllCheckbox.addEventListener('change', (e) => {
+        const isChecked = e.target.checked;
+        document.querySelectorAll('.draft-checkbox').forEach((cb) => {
+          cb.checked = isChecked;
+        });
+        updateSelectedState();
+      });
+    }
+
+    // 1. Submit Form: Añadir Actividad
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const time = timeInput.value.trim();
+        const title = titleInput.value.trim();
+        const description = descInput.value.trim();
+        const status = draftCheckbox.checked ? 'draft' : 'published';
+
+        if (!time || !title) {
+          alert('Por favor, indica hora y título');
+          return;
+        }
+
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = 'Añadiendo...';
+
+        try {
+          const res = await fetch('/api/admin/activities', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'add',
+              time,
+              title,
+              description,
+              status,
+            }),
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            showToast(status === 'published' ? '¡Actividad publicada en el programa!' : 'Borrador guardado', 'success');
+            setTimeout(() => window.location.reload(), 600);
+          } else {
+            alert(data.error || 'Error al añadir actividad');
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = '+ Añadir al Programa';
+          }
+        } catch {
+          alert('Error de conexión con el servidor');
+          btnSubmit.disabled = false;
+          btnSubmit.textContent = '+ Añadir al Programa';
+        }
+      });
+    }
+
+    // 2. Convertir a borrador
+    document.querySelectorAll('.btn-to-draft').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        btn.disabled = true;
+        btn.textContent = 'Moviendo...';
+
+        try {
+          const res = await fetch('/api/admin/activities', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'status',
+              id,
+              status: 'draft',
+            }),
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            showToast('Actividad convertida en borrador', 'warning');
+            setTimeout(() => window.location.reload(), 500);
+          } else {
+            alert(data.error || 'Error al cambiar estado');
+            btn.disabled = false;
+            btn.textContent = 'Convertir en borrador';
+          }
+        } catch {
+          alert('Error de conexión');
+          btn.disabled = false;
+          btn.textContent = 'Convertir en borrador';
+        }
+      });
+    });
+
+    // 3. Publicar borrador
+    document.querySelectorAll('.btn-to-publish').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        btn.disabled = true;
+        btn.textContent = 'Publicando...';
+
+        try {
+          const res = await fetch('/api/admin/activities', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'status',
+              id,
+              status: 'published',
+            }),
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            showToast('Actividad publicada en directo', 'success');
+            setTimeout(() => window.location.reload(), 500);
+          } else {
+            alert(data.error || 'Error al publicar');
+            btn.disabled = false;
+            btn.textContent = 'Publicar';
+          }
+        } catch {
+          alert('Error de conexión');
+          btn.disabled = false;
+          btn.textContent = 'Publicar';
+        }
+      });
+    });
+
+    // 4. Borrar seleccionados (arriba)
+    if (btnDeleteSelected) {
+      btnDeleteSelected.addEventListener('click', async () => {
+        const checked = Array.from(document.querySelectorAll('.draft-checkbox:checked')).map((c) => c.value);
+        if (checked.length === 0) return;
+
+        if (!confirm(`¿Estás segura de borrar los ${checked.length} borradores seleccionados? Esta acción es irreversible.`)) {
+          return;
+        }
+
+        btnDeleteSelected.disabled = true;
+
+        try {
+          const res = await fetch('/api/admin/activities', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'delete-bulk',
+              ids: checked,
+            }),
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            showToast(`Se han eliminado ${data.deleted} borradores`, 'success');
+            setTimeout(() => window.location.reload(), 500);
+          } else {
+            alert(data.error || 'Error al eliminar');
+            btnDeleteSelected.disabled = false;
+          }
+        } catch {
+          alert('Error de conexión');
+          btnDeleteSelected.disabled = false;
+        }
+      });
+    }
+  </script>
+</Layout>

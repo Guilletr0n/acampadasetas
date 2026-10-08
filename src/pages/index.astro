@@ -1,83 +1,228 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { adminDb } from "../lib/firebase/admin";
+import { getSections, getActivities } from "../lib/db";
 import { marked } from "marked";
+import { getTemplateComponent } from "../components/sections";
+import { Image, Lock, FileText, Calendar } from "lucide-astro";
 
-// Fetch published sections
-let sections: any[] = [];
-try {
-  const sectionsSnap = await adminDb.collection("sections").get();
-  sections = sectionsSnap.docs
-    .map(doc => ({ id: doc.id, ...doc.data() }))
-    .filter((sec: any) => sec.live)
-    .map((sec: any) => sec.live);
-    
-  // Simple order logic if order field doesn't exist
-  // We can just rely on the order they are stored or add a fallback
-} catch (error) {
-  console.error("Failed to fetch sections", error);
-}
+export const prerender = false;
+
+// Fetch published activities (this triggers the 4:00 AM expiration check if past 4 AM!)
+const publishedActivities = await getActivities(true);
+const rawSections = await getSections(true); // true = live published sections only
+
+// If there are no published activities for today, do not render the schedule section
+const sections = rawSections.filter((sec) => {
+  const isSchedule = sec.live?.template === 'schedule' || sec.live?.template === 'horario-actividades';
+  if (isSchedule && publishedActivities.length === 0) {
+    return false;
+  }
+  return true;
+});
+
+const hasAgenda = sections.some((s) => s.slug === 'agenda' || s.live?.template === 'schedule' || s.live?.template === 'horario-actividades');
 ---
 
-<Layout title="Home">
-  <!-- Sticky Header -->
-  <header class="sticky top-0 z-50 bg-brand-bg/90 backdrop-blur border-b border-brand-primary p-4 flex justify-between items-center">
-    <h1 class="text-2xl font-brand text-brand-primary">Acampada Setas</h1>
-    <nav class="hidden md:flex gap-4">
-      {sections.map((section: any) => (
-        <a href={`#${section.slug}`} class="hover:text-brand-primary transition-colors font-bold uppercase text-sm">
-          {section.title}
+<Layout title="Acampada Setas Sevilla | Movilización por la Vivienda">
+  <!-- Sticky Navigation Header -->
+  <header
+    class="sticky top-0 z-50 bg-[#fcf2df]/95 backdrop-blur-md border-b border-black/10 px-4 md:px-8 py-3 transition-all shadow-sm"
+  >
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2 group">
+        <span
+          class="text-3xl md:text-4xl font-londrina text-[#af0b56] tracking-wide group-hover:scale-105 transition-transform"
+        >
+          ACAMPADA SETAS
+        </span>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav
+        class="hidden md:flex items-center gap-6 font-bold text-sm text-[#1d1d1b]"
+      >
+        {
+          sections.map((sec) => (
+            <a
+              href={`#${sec.slug}`}
+              class="hover:text-[#af0b56] uppercase tracking-wider transition-colors scroll-link"
+            >
+              {sec.live?.navLabel || sec.live?.title || sec.slug}
+            </a>
+          ))
+        }
+        <a
+          href="/gallery"
+          class="hover:text-[#af0b56] uppercase tracking-wider transition-colors text-[#af0b56] inline-flex items-center gap-1.5"
+        >
+          <Image class="w-4 h-4" />
+          <span>Galería</span>
         </a>
-      ))}
-      <a href="/gallery" class="hover:text-brand-primary transition-colors font-bold uppercase text-sm">Gallery</a>
-    </nav>
+        <a href="/login" class="btn btn-sm btn-outline font-mono text-xs inline-flex items-center gap-1.5">
+          <Lock class="w-3.5 h-3.5" />
+          <span>CMS</span>
+        </a>
+      </nav>
+
+      <!-- Mobile dropdown -->
+      <div class="dropdown dropdown-end md:hidden">
+        <label tabindex="0" class="btn btn-ghost btn-sm">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </label>
+        <ul
+          tabindex="0"
+          class="dropdown-content menu p-2 shadow-lg bg-[#fcf2df] border border-black/10 rounded-box w-52 text-sm font-bold mt-2"
+        >
+          {
+            sections.map((sec) => (
+              <li>
+                <a
+                  href={`#${sec.slug}`}
+                  class="uppercase text-[#1d1d1b] hover:text-[#af0b56]"
+                >
+                  {sec.live?.navLabel || sec.live?.title || sec.slug}
+                </a>
+              </li>
+            ))
+          }
+          <li class="border-t border-black/10 mt-1 pt-1">
+            <a href="/gallery" class="text-[#af0b56] inline-flex items-center gap-1.5">
+              <Image class="w-4 h-4" />
+              <span>Galería Oscura</span>
+            </a>
+          </li>
+          <li>
+            <a href="/login" class="text-gray-700 inline-flex items-center gap-1.5">
+              <Lock class="w-4 h-4" />
+              <span>Acceso CMS</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
   </header>
 
-  <main>
-    {sections.length === 0 && (
-      <div class="min-h-screen flex items-center justify-center">
-        <p class="text-xl">No content published yet.</p>
-      </div>
-    )}
-    
-    {sections.map((section: any) => {
-      const htmlBody = section.body ? marked.parse(section.body) : "";
-
-      if (section.template === "multi-column") {
-        return (
-          <section id={section.slug} class="min-h-screen py-16 px-4 md:px-8 max-w-6xl mx-auto flex flex-col md:flex-row gap-8 items-center">
-            <div class="flex-1">
-              <h2 class="text-6xl font-brand text-brand-primary mb-2">{section.title}</h2>
-              {section.subtitle && <h3 class="text-2xl mb-4 font-bold">{section.subtitle}</h3>}
-              {section.highlight && <div class="badge badge-primary mb-4 p-4 text-lg">{section.highlight}</div>}
-              
-              <div class="prose prose-lg" set:html={htmlBody} />
-            </div>
-            {section.illustrationUrl && (
-              <div class="flex-1">
-                <img src={section.illustrationUrl} alt={section.title} class="rounded-xl shadow-2xl max-w-full" />
-              </div>
-            )}
-          </section>
-        );
+  <!-- Hero / Intro Banner -->
+  <section
+    class="py-12 md:py-20 px-4 max-w-6xl mx-auto text-center border-b border-black/10"
+  >
+    <div
+      class="inline-block bg-[#af0b56] text-white px-4 py-1 text-sm md:text-base font-bold uppercase tracking-widest rounded-full mb-4 shadow-sm"
+    >
+      Plaza de la Encarnación • Sevilla
+    </div>
+    <h1
+      class="text-6xl md:text-8xl font-londrina text-[#1d1d1b] leading-none mb-6"
+    >
+      POR EL DERECHO A LA CIUDAD Y A LA VIVIENDA
+    </h1>
+    <p
+      class="max-w-2xl mx-auto text-lg md:text-xl text-[#1d1d1b] font-medium leading-relaxed"
+    >
+      Frente a la especulación rentista, los desahucios y la turistificación
+      masiva: autoorganización popular y asamblea abierta permanente.
+    </p>
+    <div class="flex flex-wrap justify-center gap-4 mt-8">
+      <a href="#manifiesto" class="btn btn-primary px-6 text-base inline-flex items-center gap-2">
+        <FileText class="w-5 h-5" />
+        <span>Leer Manifiesto</span>
+      </a>
+      {
+        hasAgenda && (
+          <a href="#agenda" class="btn btn-outline px-6 text-base inline-flex items-center gap-2">
+            <Calendar class="w-5 h-5" />
+            <span>Ver Programa de Actividades</span>
+          </a>
+        )
       }
+      <a href="/gallery" class="btn btn-outline btn-primary px-6 text-base inline-flex items-center gap-2">
+        <Image class="w-5 h-5" />
+        <span>Galería de Fotos</span>
+      </a>
+    </div>
+  </section>
 
-      // Default single-column template
-      return (
-        <section id={section.slug} class="min-h-screen py-16 px-4 md:px-8 max-w-4xl mx-auto text-center flex flex-col items-center justify-center">
-          <h2 class="text-6xl font-brand text-brand-primary mb-2">{section.title}</h2>
-          {section.subtitle && <h3 class="text-2xl mb-4 font-bold">{section.subtitle}</h3>}
-          {section.highlight && <div class="badge badge-primary mb-6 p-4 text-lg border-none bg-brand-primary text-white">{section.highlight}</div>}
-          
-          {section.illustrationUrl && (
-            <img src={section.illustrationUrl} alt={section.title} class="rounded-xl shadow-xl w-full max-w-2xl mb-8 object-cover mx-auto" />
-          )}
-          
-          <div class="prose prose-lg text-left w-full" set:html={htmlBody} />
-        </section>
-      );
-    })}
+  <!-- Dynamic Sections Rendered by Template -->
+  <main class="space-y-0">
+    {
+      sections.length === 0 ? (
+        <div class="py-20 text-center text-gray-500">
+          <p class="text-xl font-bold">
+            No hay secciones publicadas actualmente.
+          </p>
+          <p class="text-sm mt-1">
+            Inicia sesión en el{" "}
+            <a href="/login" class="underline text-[#af0b56]">
+              CMS
+            </a>{" "}
+            para redactar y publicar contenidos.
+          </p>
+        </div>
+      ) : (
+        sections.map((sec, index) => {
+          const content = sec.live;
+          if (!content) return null;
+
+          const TemplateComponent = getTemplateComponent(content.template);
+          const renderedMarkdown = marked.parse(content.body || "");
+          const isAlternate = index % 2 === 1;
+
+          return (
+            <TemplateComponent
+              slug={sec.slug}
+              content={content}
+              isAlternate={isAlternate}
+              renderedMarkdown={renderedMarkdown}
+            />
+          );
+        })
+      )
+    }
   </main>
+
+  <!-- Footer -->
+  <footer
+    class="bg-[#1d1d1b] text-[#fcf2df] py-12 px-4 border-t-4 border-[#af0b56]"
+  >
+    <div
+      class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left"
+    >
+      <div>
+        <h3 class="text-3xl font-londrina text-[#af0b56] tracking-wide">
+          ACAMPADA SETAS SEVILLA
+        </h3>
+        <p class="text-xs text-gray-400 mt-1">
+          Contacto: <a href="mailto:acampadasetas@gmail.com" class="hover:underline hover:text-white transition-colors">acampadasetas@gmail.com</a> • Instagram: <a href="https://www.instagram.com/acampadasetas/" target="_blank" rel="noopener noreferrer" class="hover:underline hover:text-white transition-colors">@acampadasetas</a>
+        </p>
+      </div>
+
+      <div class="flex items-center gap-4 text-sm font-bold">
+        <a href="/gallery" class="hover:text-[#af0b56] transition-colors"
+          >Galería Fotográfica</a
+        >
+        <span>•</span>
+        <a href="/join-editor" class="hover:text-[#af0b56] transition-colors"
+          >Postularse como Editora</a
+        >
+        <span>•</span>
+        <a href="/login" class="hover:text-[#af0b56] transition-colors"
+          >Acceso CMS</a
+        >
+      </div>
+    </div>
+  </footer>
 </Layout>
 
 <style>

@@ -1,0 +1,143 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { getCurrentUser } from "../lib/auth";
+import { LogIn } from "lucide-astro";
+
+export const prerender = false;
+
+const user = await getCurrentUser(Astro.cookies);
+if (user && user.approved) {
+  return Astro.redirect("/admin/home");
+}
+---
+
+<Layout title="Iniciar Sesión" isDashboard={true}>
+  <main class="min-h-screen flex items-center justify-center p-4 bg-base-200">
+    <div class="card w-full max-w-md bg-base-100 shadow-xl">
+      <div class="card-body">
+        <div class="text-center mb-4">
+          <span
+            class="text-xs uppercase tracking-widest font-bold text-[#af0b56] block"
+          >
+            ACCESO PANEL DE CONTROL
+          </span>
+          <h2 class="text-4xl font-londrina text-neutral m-0">
+            ACAMPADA SETAS
+          </h2>
+          <p class="text-xs text-base-content/70 mt-1">
+            Gestión de contenidos, secciones y galería
+          </p>
+        </div>
+
+        <div
+          id="error-box"
+          class="hidden alert alert-error text-xs font-semibold py-2"
+        >
+        </div>
+
+        <form id="login-form" class="space-y-4">
+          <div class="form-control">
+            <label class="label" for="email">
+              <span class="label-text font-bold text-xs"
+                >CORREO ELECTRÓNICO</span
+              >
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="input input-bordered w-full"
+              placeholder="arrendataria@zohomail.com"
+              required
+            />
+          </div>
+
+          <div class="form-control">
+            <label class="label" for="password">
+              <span class="label-text font-bold text-xs">CONTRASEÑA</span>
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="input input-bordered w-full"
+              placeholder="Contraseña"
+              required
+            />
+          </div>
+
+          <div class="form-control mt-4">
+            <button
+              type="submit"
+              id="submit-btn"
+              class="btn btn-primary w-full inline-flex items-center justify-center gap-2"
+            >
+              <LogIn class="w-4 h-4" />
+              <span id="submit-text">Iniciar Sesión</span>
+            </button>
+          </div>
+        </form>
+
+        <div class="mt-4 pt-3 border-t border-base-200 text-center text-xs">
+          <span class="text-base-content/70"
+            >¿Quieres colaborar redactando?</span
+          >
+          <a
+            href="/join-editor"
+            class="text-[#af0b56] font-bold underline hover:opacity-80 block mt-1"
+          >
+            Postularse como Editora
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script is:inline>
+    function fillCreds(email, pass) {
+      document.getElementById("email").value = email;
+      document.getElementById("password").value = pass;
+    }
+
+    const form = document.getElementById("login-form");
+    const submitBtn = document.getElementById("submit-btn");
+    const submitText = document.getElementById("submit-text");
+    const errorBox = document.getElementById("error-box");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorBox.classList.add("hidden");
+      submitBtn.disabled = true;
+      if (submitText) submitText.innerText = "Verificando...";
+
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      try {
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          const params = new URLSearchParams(window.location.search);
+          const redirect = params.get("redirect") || "/admin/home";
+          window.location.href = redirect;
+        } else {
+          errorBox.innerText = data.error || "Credenciales inválidas";
+          errorBox.classList.remove("hidden");
+          submitBtn.disabled = false;
+          if (submitText) submitText.innerText = "Iniciar Sesión";
+        }
+      } catch (err) {
+        errorBox.innerText = "Error de conexión con el servidor.";
+        errorBox.classList.remove("hidden");
+        submitBtn.disabled = false;
+        if (submitText) submitText.innerText = "Iniciar Sesión";
+      }
+    });
+  </script>
+</Layout>

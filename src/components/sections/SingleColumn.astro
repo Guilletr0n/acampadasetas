@@ -1,0 +1,56 @@
+---
+import type { SectionContent } from '../../lib/types';
+import { marked } from 'marked';
+
+interface Props {
+  slug: string;
+  content: SectionContent;
+  isAlternate?: boolean;
+  renderedMarkdown?: string;
+}
+
+const { 
+  slug, 
+  content, 
+  isAlternate = false, 
+  renderedMarkdown = marked.parse(content.body || '') 
+} = Astro.props;
+---
+
+<section 
+  id={slug} 
+  class={`py-16 md:py-24 px-4 border-b border-black/10 ${isAlternate ? 'bg-[#f7e9d0]' : 'bg-[#fcf2df]'}`}
+>
+  <div class="max-w-4xl mx-auto text-center">
+    {content.highlight && (
+      <div class="inline-block bg-[#af0b56] text-white text-xs md:text-sm font-bold uppercase tracking-wider px-4 py-1 rounded-full mb-4 shadow-sm">
+        {content.highlight}
+      </div>
+    )}
+
+    <h2 class="text-5xl md:text-7xl font-londrina text-[#1d1d1b] mb-3 leading-tight">
+      {content.title}
+    </h2>
+
+    {content.subtitle && (
+      <p class="text-xl md:text-2xl text-gray-700 font-medium mb-8 max-w-2xl mx-auto">
+        {content.subtitle}
+      </p>
+    )}
+
+    {content.illustrationUrl && (
+      <div class="my-8 max-w-2xl mx-auto rounded-2xl overflow-hidden shadow-md bg-white">
+        <img 
+          src={content.illustrationUrl} 
+          alt={content.title} 
+          class="w-full h-auto object-cover max-h-[400px]" 
+          loading="lazy"
+        />
+      </div>
+    )}
+
+    <div class="prose max-w-none text-left text-base md:text-lg leading-relaxed bg-white/80 p-6 md:p-10 rounded-2xl shadow-sm border border-black/5 mt-6">
+      <div set:html={renderedMarkdown} />
+    </div>
+  </div>
+</section>
