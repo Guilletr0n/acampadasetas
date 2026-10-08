@@ -3,9 +3,15 @@ import Layout from "../../layouts/Layout.astro";
 import AdminNav from "../../components/AdminNav.astro";
 import { getUsers } from "../../lib/users";
 import { getCurrentUser } from "../../lib/auth";
-import { Check, Trash2, Key } from "lucide-astro";
+import { Check, Trash2, Key, UserPlus, X } from "lucide-astro";
 
 export const prerender = false;
+
+const isGoogleCloud = Boolean(
+  process.env.K_SERVICE || 
+  process.env.ENABLE_ADD_USER === 'true' ||
+  (!import.meta.env.DEV && process.env.NODE_ENV === 'production')
+);
 
 const currentUser = await getCurrentUser(Astro.cookies);
 if (!currentUser || currentUser.role !== 'admin') {
@@ -25,21 +31,174 @@ const users = await getUsers();
         <p class="text-xs text-base-content/70">Aprobación de postulaciones a editora, cambio de roles y moderación de cuentas.</p>
       </div>
 
-      <!-- Filters -->
-      <div class="flex items-center gap-2">
-        <select id="filter-role" class="select select-bordered select-sm">
-          <option value="all">Todos los roles</option>
-          <option value="admin">Admin</option>
-          <option value="editor">Editor</option>
-          <option value="reader">Reader</option>
-        </select>
-        <select id="filter-status" class="select select-bordered select-sm">
-          <option value="all">Todos los estados</option>
-          <option value="pending">Pendientes</option>
-          <option value="approved">Aprobados</option>
-        </select>
+      <!-- Actions & Filters -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+        {isGoogleCloud && (
+          <button 
+            type="button"
+            id="btn-toggle-new-user" 
+            class="btn btn-primary text-2xl md:text-sm h-16 md:h-9 px-6 md:px-4 rounded-2xl md:rounded-lg font-bold shadow-md hover:shadow-lg transition-all inline-flex items-center justify-center gap-3 md:gap-2 w-full sm:w-auto"
+          >
+            <UserPlus class="w-7 h-7 md:w-4 md:h-4" />
+            <span>Añadir nuevo usuario</span>
+          </button>
+        )}
+
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <select id="filter-role" class="select select-bordered select-sm flex-1 sm:flex-none">
+            <option value="all">Todos los roles</option>
+            <option value="admin">Admin</option>
+            <option value="editor">Editor</option>
+            <option value="reader">Reader</option>
+          </select>
+          <select id="filter-status" class="select select-bordered select-sm flex-1 sm:flex-none">
+            <option value="all">Todos los estados</option>
+            <option value="pending">Pendientes</option>
+            <option value="approved">Aprobados</option>
+          </select>
+        </div>
       </div>
     </div>
+
+    {isGoogleCloud && (
+      <div id="new-user-panel" class="new-user-accordion overflow-hidden" aria-hidden="true">
+        <div class="new-user-content">
+          <div class="bg-base-100 border-2 border-primary/20 rounded-3xl md:rounded-2xl p-6 md:p-6 shadow-xl mb-6">
+            <div class="flex items-center justify-between mb-5 border-b border-base-200 pb-3">
+              <div class="flex items-center gap-3">
+                <div class="p-3 md:p-2 bg-primary/10 text-primary rounded-2xl md:rounded-lg">
+                  <UserPlus class="w-8 h-8 md:w-5 md:h-5" />
+                </div>
+                <div>
+                  <h2 class="text-3xl md:text-xl font-bold font-londrina text-neutral tracking-wide">
+                    AÑADIR NUEVO USUARIO
+                  </h2>
+                  <p class="text-sm md:text-xs text-base-content/70">
+                    Crea una nueva cuenta con rol asignado y credenciales directas.
+                  </p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                id="btn-close-new-user" 
+                class="btn btn-sm btn-circle btn-ghost text-base-content/60 hover:text-base-content"
+                aria-label="Cerrar formulario"
+              >
+                <X class="w-5 h-5" />
+              </button>
+            </div>
+
+            <form id="form-add-user" class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Nombre / Colectivo (2XL en móvil) */}
+                <div class="form-control">
+                  <label class="label py-1">
+                    <span class="label-text text-xl md:text-xs font-bold text-neutral">
+                      Nombre o Colectivo *
+                    </span>
+                  </label>
+                  <input 
+                    type="text" 
+                    id="add-displayName" 
+                    required 
+                    placeholder="ej. Asamblea Triana o Laura Sánchez" 
+                    class="input input-bordered w-full text-2xl md:text-sm h-16 md:h-10 px-5 md:px-3 rounded-2xl md:rounded-lg font-medium"
+                  />
+                </div>
+
+                {/* Correo Electrónico (2XL en móvil) */}
+                <div class="form-control">
+                  <label class="label py-1">
+                    <span class="label-text text-xl md:text-xs font-bold text-neutral">
+                      Correo Electrónico *
+                    </span>
+                  </label>
+                  <input 
+                    type="email" 
+                    id="add-email" 
+                    required 
+                    placeholder="ej. laura@acampadasetas.org" 
+                    class="input input-bordered w-full text-2xl md:text-sm h-16 md:h-10 px-5 md:px-3 rounded-2xl md:rounded-lg font-medium"
+                  />
+                </div>
+
+                {/* Contraseña (2XL en móvil) */}
+                <div class="form-control">
+                  <label class="label py-1">
+                    <span class="label-text text-xl md:text-xs font-bold text-neutral">
+                      Contraseña * (mín. 6 caracteres)
+                    </span>
+                  </label>
+                  <input 
+                    type="password" 
+                    id="add-password" 
+                    required 
+                    minlength="6" 
+                    placeholder="••••••••" 
+                    class="input input-bordered w-full text-2xl md:text-sm h-16 md:h-10 px-5 md:px-3 rounded-2xl md:rounded-lg font-medium"
+                  />
+                </div>
+
+                {/* Rol Inicial (2XL en móvil) */}
+                <div class="form-control">
+                  <label class="label py-1">
+                    <span class="label-text text-xl md:text-xs font-bold text-neutral">
+                      Rol Asignado
+                    </span>
+                  </label>
+                  <select 
+                    id="add-role" 
+                    class="select select-bordered w-full text-2xl md:text-sm h-16 md:h-10 px-5 md:px-3 rounded-2xl md:rounded-lg font-medium"
+                  >
+                    <option value="editor" selected>Editor (Gestión de contenidos y agenda)</option>
+                    <option value="admin">Admin (Control total del CMS y usuarios)</option>
+                    <option value="reader">Reader (Solo lectura)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Toggle Aprobado directamente (Grande en móvil) */}
+              <div class="form-control pt-2">
+                <label class="cursor-pointer label justify-start gap-4">
+                  <input 
+                    type="checkbox" 
+                    id="add-approved" 
+                    checked 
+                    class="toggle toggle-success scale-125 md:scale-100 origin-left" 
+                  />
+                  <div>
+                    <span class="label-text text-xl md:text-sm font-bold text-neutral">Activar cuenta inmediatamente</span>
+                    <p class="text-sm md:text-xs text-base-content/60">El usuario podrá iniciar sesión sin esperar moderación previa.</p>
+                  </div>
+                </label>
+              </div>
+
+              {/* Mensaje de Error */}
+              <div id="add-user-error" class="alert alert-error hidden text-lg md:text-sm py-3 rounded-2xl md:rounded-lg"></div>
+
+              {/* Botones de Acción (2XL en móvil) */}
+              <div class="flex flex-col-reverse md:flex-row justify-end items-center gap-3 pt-4 border-t border-base-200">
+                <button 
+                  type="button" 
+                  id="btn-cancel-new-user" 
+                  class="btn btn-ghost w-full md:w-auto text-xl md:text-sm h-16 md:h-10 px-6 rounded-2xl md:rounded-lg font-semibold"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  id="btn-submit-new-user" 
+                  class="btn btn-primary w-full md:w-auto text-2xl md:text-sm h-16 md:h-10 px-8 rounded-2xl md:rounded-lg font-bold shadow-md inline-flex items-center justify-center gap-3 md:gap-2"
+                >
+                  <UserPlus class="w-7 h-7 md:w-4 md:h-4 inline" />
+                  <span>Crear y Guardar Usuario</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    )}
 
     <!-- User Table -->
     <div class="overflow-x-auto bg-base-100 rounded-box shadow">
@@ -114,15 +273,16 @@ const users = await getUsers();
                           <span>Aprobar</span>
                         </button>
                       )}
-                      <button 
-                        class="btn btn-xs btn-error delete-btn whitespace-nowrap" 
-                        data-uid={u.uid} 
-                        data-name={u.displayName}
-                        title="Eliminar"
-                        aria-label="Eliminar"
-                      >
-                        <Trash2 class="w-3.5 h-3.5" />
-                      </button>
+                      <div class="tooltip tooltip-top" data-tip="Eliminar">
+                        <button 
+                          class="btn btn-xs btn-error delete-btn whitespace-nowrap" 
+                          data-uid={u.uid} 
+                          data-name={u.displayName}
+                          aria-label="Eliminar"
+                        >
+                          <Trash2 class="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </>
                   )}
                 </div>
@@ -309,5 +469,133 @@ const users = await getUsers();
         alert('Error de conexión');
       }
     });
+
+    // New User Accordion & Form Logic (Google Cloud feature)
+    const btnToggleNewUser = document.getElementById('btn-toggle-new-user');
+    const newUserPanel = document.getElementById('new-user-panel');
+    const btnCloseNewUser = document.getElementById('btn-close-new-user');
+    const btnCancelNewUser = document.getElementById('btn-cancel-new-user');
+    const formAddUser = document.getElementById('form-add-user');
+    const addUserError = document.getElementById('add-user-error');
+    const btnSubmitNewUser = document.getElementById('btn-submit-new-user');
+
+    function openNewUserPanel() {
+      if (!newUserPanel) return;
+      newUserPanel.classList.add('is-open');
+      newUserPanel.setAttribute('aria-hidden', 'false');
+      setTimeout(() => {
+        const nameInput = document.getElementById('add-displayName');
+        if (nameInput) nameInput.focus();
+      }, 250);
+    }
+
+    function closeNewUserPanel() {
+      if (!newUserPanel) return;
+      newUserPanel.classList.remove('is-open');
+      newUserPanel.setAttribute('aria-hidden', 'true');
+      if (addUserError) {
+        addUserError.classList.add('hidden');
+        addUserError.textContent = '';
+      }
+      if (formAddUser) {
+        formAddUser.reset();
+      }
+    }
+
+    if (btnToggleNewUser) {
+      btnToggleNewUser.addEventListener('click', () => {
+        if (newUserPanel && newUserPanel.classList.contains('is-open')) {
+          closeNewUserPanel();
+        } else {
+          openNewUserPanel();
+        }
+      });
+    }
+
+    if (btnCloseNewUser) {
+      btnCloseNewUser.addEventListener('click', closeNewUserPanel);
+    }
+
+    if (btnCancelNewUser) {
+      btnCancelNewUser.addEventListener('click', closeNewUserPanel);
+    }
+
+    if (formAddUser) {
+      formAddUser.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (addUserError) {
+          addUserError.classList.add('hidden');
+          addUserError.textContent = '';
+        }
+
+        const displayName = document.getElementById('add-displayName')?.value?.trim();
+        const email = document.getElementById('add-email')?.value?.trim();
+        const password = document.getElementById('add-password')?.value;
+        const role = document.getElementById('add-role')?.value;
+        const approved = document.getElementById('add-approved')?.checked;
+
+        if (!displayName || !email || !password) {
+          if (addUserError) {
+            addUserError.textContent = 'Por favor, completa todos los campos requeridos.';
+            addUserError.classList.remove('hidden');
+          }
+          return;
+        }
+
+        const originalBtnHtml = btnSubmitNewUser ? btnSubmitNewUser.innerHTML : '';
+        if (btnSubmitNewUser) {
+          btnSubmitNewUser.disabled = true;
+          btnSubmitNewUser.innerHTML = '<span class="loading loading-spinner"></span> Guardando...';
+        }
+
+        try {
+          const res = await fetch('/api/admin/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ displayName, email, password, role, approved }),
+          });
+
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            throw new Error(data.error || 'Error al crear el usuario');
+          }
+
+          window.location.reload();
+        } catch (err) {
+          if (addUserError) {
+            addUserError.textContent = err.message || 'Error de conexión';
+            addUserError.classList.remove('hidden');
+          }
+          if (btnSubmitNewUser) {
+            btnSubmitNewUser.disabled = false;
+            btnSubmitNewUser.innerHTML = originalBtnHtml;
+          }
+        }
+      });
+    }
   </script>
+
+  <style>
+    .new-user-accordion {
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      visibility: hidden;
+      will-change: grid-template-rows, opacity;
+      transition: grid-template-rows 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                  opacity 0.3s ease,
+                  visibility 0.4s;
+    }
+
+    .new-user-accordion.is-open {
+      grid-template-rows: 1fr;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .new-user-content {
+      min-height: 0;
+      overflow: hidden;
+    }
+  </style>
 </Layout>

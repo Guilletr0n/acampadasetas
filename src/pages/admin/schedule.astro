@@ -200,17 +200,18 @@ const drafts = allActivities.filter((a) => a.status === 'draft');
 
           <!-- Botón Borrar seleccionados arriba -->
           <div class="flex items-center gap-2 self-end sm:self-auto">
-            <button 
-              type="button" 
-              id="btn-delete-selected" 
-              class="btn btn-error btn-sm font-bold text-white shadow-sm disabled:opacity-40 inline-flex items-center gap-1.5"
-              disabled
-              title="Borrar seleccionados"
-              aria-label="Borrar seleccionados"
-            >
-              <Trash2 class="w-4 h-4" />
-              <span id="selected-counter" class="hidden font-mono text-xs">(0)</span>
-            </button>
+            <div class="tooltip tooltip-bottom" data-tip="Borrar seleccionados">
+              <button 
+                type="button" 
+                id="btn-delete-selected" 
+                class="btn btn-error btn-sm font-bold text-white shadow-sm disabled:opacity-40 inline-flex items-center gap-1.5"
+                disabled
+                aria-label="Borrar seleccionados"
+              >
+                <Trash2 class="w-4 h-4" />
+                <span id="selected-counter" class="hidden font-mono text-xs">(0)</span>
+              </button>
+            </div>
           </div>
         </div>
 

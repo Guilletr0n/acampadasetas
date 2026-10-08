@@ -116,6 +116,15 @@
   vertical-align: middle;
 }
 
+/* DaisyUI Tooltips: ensure proper z-index and visibility */
+.tooltip {
+  overflow: visible !important;
+}
+.tooltip:before,
+.tooltip:after {
+  z-index: 50 !important;
+}
+
 /* Ensure markdown headings within .prose use Londrina and text uses Poppins */
 .prose h1,
 .prose h2,

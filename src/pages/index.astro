@@ -17,14 +17,21 @@ const rawSections = await getSections(true); // true = live published sections o
 
 // If there are no published activities for today, do not render the schedule section
 const sections = rawSections.filter((sec) => {
-  const isSchedule = sec.live?.template === 'schedule' || sec.live?.template === 'horario-actividades';
+  const isSchedule =
+    sec.live?.template === "schedule" ||
+    sec.live?.template === "horario-actividades";
   if (isSchedule && publishedActivities.length === 0) {
     return false;
   }
   return true;
 });
 
-const hasAgenda = sections.some((s) => s.slug === 'agenda' || s.live?.template === 'schedule' || s.live?.template === 'horario-actividades');
+const hasAgenda = sections.some(
+  (s) =>
+    s.slug === "agenda" ||
+    s.live?.template === "schedule" ||
+    s.live?.template === "horario-actividades",
+);
 ---
 
 <Layout title="Acampada Setas Sevilla | Movilización por la Vivienda">
@@ -62,7 +69,10 @@ const hasAgenda = sections.some((s) => s.slug === 'agenda' || s.live?.template =
           <Image class="w-4 h-4" />
           <span>Galería</span>
         </a>
-        <a href="/login" class="btn btn-sm btn-outline font-mono text-xs inline-flex items-center gap-1.5">
+        <a
+          href="/login"
+          class="btn btn-sm btn-outline font-mono text-xs inline-flex items-center gap-1.5"
+        >
           <Lock class="w-3.5 h-3.5" />
           <span>CMS</span>
         </a>
@@ -102,15 +112,21 @@ const hasAgenda = sections.some((s) => s.slug === 'agenda' || s.live?.template =
             ))
           }
           <li class="border-t border-black/10 mt-1 pt-1">
-            <a href="/gallery" class="text-[#af0b56] inline-flex items-center gap-1.5">
+            <a
+              href="/gallery"
+              class="text-[#af0b56] inline-flex items-center gap-1.5"
+            >
               <Image class="w-4 h-4" />
-              <span>Galería Oscura</span>
+              <span>Galería</span>
             </a>
           </li>
           <li>
-            <a href="/login" class="text-gray-700 inline-flex items-center gap-1.5">
+            <a
+              href="/login"
+              class="text-gray-700 inline-flex items-center gap-1.5"
+            >
               <Lock class="w-4 h-4" />
-              <span>Acceso CMS</span>
+              <span>Administración</span>
             </a>
           </li>
         </ul>
@@ -139,19 +155,28 @@ const hasAgenda = sections.some((s) => s.slug === 'agenda' || s.live?.template =
       masiva: autoorganización popular y asamblea abierta permanente.
     </p>
     <div class="flex flex-wrap justify-center gap-4 mt-8">
-      <a href="#manifiesto" class="btn btn-primary px-6 text-base inline-flex items-center gap-2">
+      <a
+        href="#manifiesto"
+        class="btn btn-primary px-6 text-base inline-flex items-center gap-2"
+      >
         <FileText class="w-5 h-5" />
         <span>Leer Manifiesto</span>
       </a>
       {
         hasAgenda && (
-          <a href="#agenda" class="btn btn-outline px-6 text-base inline-flex items-center gap-2">
+          <a
+            href="#agenda"
+            class="btn btn-outline px-6 text-base inline-flex items-center gap-2"
+          >
             <Calendar class="w-5 h-5" />
             <span>Ver Programa de Actividades</span>
           </a>
         )
       }
-      <a href="/gallery" class="btn btn-outline btn-primary px-6 text-base inline-flex items-center gap-2">
+      <a
+        href="/gallery"
+        class="btn btn-outline btn-primary px-6 text-base inline-flex items-center gap-2"
+      >
         <Image class="w-5 h-5" />
         <span>Galería de Fotos</span>
       </a>
@@ -208,7 +233,17 @@ const hasAgenda = sections.some((s) => s.slug === 'agenda' || s.live?.template =
           ACAMPADA SETAS SEVILLA
         </h3>
         <p class="text-xs text-gray-400 mt-1">
-          Contacto: <a href="mailto:acampadasetas@gmail.com" class="hover:underline hover:text-white transition-colors">acampadasetas@gmail.com</a> • Instagram: <a href="https://www.instagram.com/acampadasetas/" target="_blank" rel="noopener noreferrer" class="hover:underline hover:text-white transition-colors">@acampadasetas</a>
+          Contacto: <a
+            href="mailto:acampadasetas@gmail.com"
+            class="hover:underline hover:text-white transition-colors"
+            >acampadasetas@gmail.com</a
+          > • Instagram: <a
+            href="https://www.instagram.com/acampadasetas/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline hover:text-white transition-colors"
+            >@acampadasetas</a
+          >
         </p>
       </div>
 

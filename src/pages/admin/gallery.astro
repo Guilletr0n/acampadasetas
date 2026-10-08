@@ -9,7 +9,7 @@ export const prerender = false;
 
 const currentUser = await getCurrentUser(Astro.cookies);
 if (!currentUser || !currentUser.approved) {
-  return Astro.redirect('/login');
+  return Astro.redirect("/login");
 }
 
 const items = await getGalleryItems();
@@ -19,13 +19,22 @@ const items = await getGalleryItems();
   <AdminNav activeTab="gallery" user={currentUser} />
 
   <main class="max-w-6xl mx-auto p-6">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+    <div
+      class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6"
+    >
       <div>
         <h1 class="text-4xl font-londrina text-neutral">GALERÍA FOTOGRÁFICA</h1>
-        <p class="text-xs text-base-content/70">Gestión de imágenes, créditos de autoría, enlaces sociales y orden del carrusel.</p>
+        <p class="text-xs text-base-content/70">
+          Gestión de imágenes, créditos de autoría, enlaces sociales y orden del
+          carrusel.
+        </p>
       </div>
 
-      <a href="/gallery" target="_blank" class="btn btn-sm btn-outline inline-flex items-center gap-1.5">
+      <a
+        href="/gallery"
+        target="_blank"
+        class="btn btn-sm btn-outline inline-flex items-center gap-1.5"
+      >
         <Eye class="w-4 h-4" />
         <span>Ver Galería Pública</span>
       </a>
@@ -34,19 +43,23 @@ const items = await getGalleryItems();
     <!-- Upload Card -->
     <div class="card bg-base-100 shadow mb-8">
       <div class="card-body p-6">
-        <h2 class="text-2xl font-londrina text-neutral mb-4">AÑADIR NUEVA FOTOGRAFÍA</h2>
+        <h2 class="text-2xl font-londrina text-neutral mb-4">
+          AÑADIR NUEVA FOTOGRAFÍA
+        </h2>
 
         <form id="gallery-upload-form" class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="form-control">
               <label class="label" for="photo-file">
-                <span class="label-text font-bold text-xs">ARCHIVO DE IMAGEN (PNG, JPG, WebP menor o igual a 5 MB)</span>
+                <span class="label-text font-bold text-xs"
+                  >ARCHIVO DE IMAGEN (PNG, JPG, WebP menor o igual a 5 MB)</span
+                >
               </label>
-              <input 
-                type="file" 
-                id="photo-file" 
-                accept="image/png, image/jpeg, image/webp" 
-                class="file-input file-input-bordered w-full" 
+              <input
+                type="file"
+                id="photo-file"
+                accept="image/png, image/jpeg, image/webp"
+                class="file-input file-input-bordered w-full"
               />
             </div>
 
@@ -54,11 +67,11 @@ const items = await getGalleryItems();
               <label class="label" for="photo-url">
                 <span class="label-text font-bold text-xs">O URL DIRECTA</span>
               </label>
-              <input 
-                type="url" 
-                id="photo-url" 
-                placeholder="https://..." 
-                class="input input-bordered w-full font-mono text-xs" 
+              <input
+                type="url"
+                id="photo-url"
+                placeholder="https://..."
+                class="input input-bordered w-full font-mono text-xs"
               />
             </div>
           </div>
@@ -66,48 +79,56 @@ const items = await getGalleryItems();
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="form-control">
               <label class="label" for="caption">
-                <span class="label-text font-bold text-xs">PIE DE FOTO / DESCRIPCIÓN</span>
+                <span class="label-text font-bold text-xs"
+                  >PIE DE FOTO / DESCRIPCIÓN</span
+                >
               </label>
-              <input 
-                type="text" 
-                id="caption" 
-                placeholder="Ej: Vista de la asamblea vecinal" 
-                class="input input-bordered w-full" 
-                required 
+              <input
+                type="text"
+                id="caption"
+                placeholder="Ej: Vista de la asamblea vecinal"
+                class="input input-bordered w-full"
+                required
               />
             </div>
 
             <div class="form-control">
               <label class="label" for="author">
-                <span class="label-text font-bold text-xs">AUTORÍA / FOTÓGRAFA</span>
+                <span class="label-text font-bold text-xs"
+                  >AUTORÍA / FOTÓGRAFA</span
+                >
               </label>
-              <input 
-                type="text" 
-                id="author" 
-                placeholder="Ej: Lucía Méndez" 
-                class="input input-bordered w-full" 
-                required 
+              <input
+                type="text"
+                id="author"
+                placeholder="Ej: Lucía Méndez"
+                class="input input-bordered w-full"
+                required
               />
             </div>
 
             <div class="form-control">
               <label class="label" for="social">
-                <span class="label-text font-bold text-xs">ENLACE SOCIAL / PERFIL (OPCIONAL)</span>
+                <span class="label-text font-bold text-xs"
+                  >ENLACE SOCIAL / PERFIL (OPCIONAL)</span
+                >
               </label>
-              <input 
-                type="url" 
-                id="social" 
-                placeholder="https://instagram.com/..." 
-                class="input input-bordered w-full text-xs font-mono" 
+              <input
+                type="url"
+                id="social"
+                placeholder="https://instagram.com/..."
+                class="input input-bordered w-full text-xs font-mono"
               />
             </div>
           </div>
 
           <div class="flex justify-between items-center pt-2">
-            <span id="upload-status" class="text-xs font-semibold text-base-content/70"></span>
-            <button 
-              type="submit" 
-              id="btn-upload" 
+            <span
+              id="upload-status"
+              class="text-xs font-semibold text-base-content/70"></span>
+            <button
+              type="submit"
+              id="btn-upload"
               class="btn btn-primary inline-flex items-center gap-1.5"
             >
               <Plus class="w-4 h-4" />
@@ -121,101 +142,120 @@ const items = await getGalleryItems();
     <!-- Gallery Grid with Inline Edits -->
     <div class="card bg-base-100 shadow">
       <div class="card-body p-6">
-        <h2 class="text-2xl font-londrina text-neutral mb-4">FOTOGRAFÍAS ACTIVAS ({items.length})</h2>
+        <h2 class="text-2xl font-londrina text-neutral mb-4">
+          FOTOGRAFÍAS ACTIVAS ({items.length})
+        </h2>
 
-        {items.length === 0 ? (
-          <p class="text-center py-8 text-base-content/40">No hay fotografías añadidas todavía.</p>
-        ) : (
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {items.map((img) => (
-              <div class="card bg-base-100 border border-base-200 overflow-hidden shadow-sm flex flex-col justify-between">
-                <div class="relative bg-neutral-900 h-48 flex items-center justify-center overflow-hidden">
-                  <img src={img.url} alt={img.caption} class="w-full h-full object-cover" />
-                  <span class="absolute top-2 left-2 badge badge-neutral text-xs font-mono">
-                    #{img.order}
-                  </span>
-                </div>
-
-                <div class="p-4 space-y-2 flex-1">
-                  <div>
-                    <label class="text-[10px] uppercase font-bold text-base-content/60">Pie de foto</label>
-                    <input 
-                      type="text" 
-                      value={img.caption} 
-                      class="input input-bordered input-xs w-full edit-field font-semibold" 
-                      data-id={img.id} 
-                      data-field="caption" 
+        {
+          items.length === 0 ? (
+            <p class="text-center py-8 text-base-content/40">
+              No hay fotografías añadidas todavía.
+            </p>
+          ) : (
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {items.map((img) => (
+                <div class="card bg-base-100 border border-base-200 overflow-hidden shadow-sm flex flex-col justify-between">
+                  <div class="relative bg-neutral-900 h-48 flex items-center justify-center overflow-hidden">
+                    <img
+                      src={img.url}
+                      alt={img.caption}
+                      class="w-full h-full object-cover"
                     />
+                    <span class="absolute top-2 left-2 badge badge-neutral text-xs font-mono">
+                      #{img.order}
+                    </span>
                   </div>
 
-                  <div class="grid grid-cols-2 gap-2">
+                  <div class="p-4 space-y-2 flex-1">
                     <div>
-                      <label class="text-[10px] uppercase font-bold text-base-content/60">Fotógrafa</label>
-                      <input 
-                        type="text" 
-                        value={img.author} 
-                        class="input input-bordered input-xs w-full edit-field" 
-                        data-id={img.id} 
-                        data-field="author" 
+                      <label class="text-[10px] uppercase font-bold text-base-content/60">
+                        Pie de foto
+                      </label>
+                      <input
+                        type="text"
+                        value={img.caption}
+                        class="input input-bordered input-xs w-full edit-field font-semibold"
+                        data-id={img.id}
+                        data-field="caption"
                       />
                     </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                      <div>
+                        <label class="text-[10px] uppercase font-bold text-base-content/60">
+                          Fotógrafa
+                        </label>
+                        <input
+                          type="text"
+                          value={img.author}
+                          class="input input-bordered input-xs w-full edit-field"
+                          data-id={img.id}
+                          data-field="author"
+                        />
+                      </div>
+                      <div>
+                        <label class="text-[10px] uppercase font-bold text-base-content/60">
+                          Orden
+                        </label>
+                        <input
+                          type="number"
+                          value={img.order}
+                          class="input input-bordered input-xs w-full edit-field"
+                          data-id={img.id}
+                          data-field="order"
+                        />
+                      </div>
+                    </div>
+
                     <div>
-                      <label class="text-[10px] uppercase font-bold text-base-content/60">Orden</label>
-                      <input 
-                        type="number" 
-                        value={img.order} 
-                        class="input input-bordered input-xs w-full edit-field" 
-                        data-id={img.id} 
-                        data-field="order" 
+                      <label class="text-[10px] uppercase font-bold text-base-content/60">
+                        Enlace Social
+                      </label>
+                      <input
+                        type="url"
+                        value={img.social || ""}
+                        placeholder="https://..."
+                        class="input input-bordered input-xs w-full edit-field font-mono text-[10px]"
+                        data-id={img.id}
+                        data-field="social"
                       />
                     </div>
                   </div>
 
-                  <div>
-                    <label class="text-[10px] uppercase font-bold text-base-content/60">Enlace Social</label>
-                    <input 
-                      type="url" 
-                      value={img.social || ''} 
-                      placeholder="https://..." 
-                      class="input input-bordered input-xs w-full edit-field font-mono text-[10px]" 
-                      data-id={img.id} 
-                      data-field="social" 
-                    />
+                  <div class="p-3 bg-base-200/50 border-t border-base-200 flex justify-between items-center">
+                    <span class="text-[10px] text-base-content/50 font-mono">
+                      {new Date(img.createdAt).toLocaleDateString("es-ES")}
+                    </span>
+                    <div class="tooltip tooltip-left" data-tip="Eliminar">
+                      <button
+                        class="btn btn-xs btn-error delete-img-btn"
+                        data-id={img.id}
+                        aria-label="Eliminar"
+                      >
+                        <Trash2 class="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-
-                <div class="p-3 bg-base-200/50 border-t border-base-200 flex justify-between items-center">
-                  <span class="text-[10px] text-base-content/50 font-mono">
-                    {new Date(img.createdAt).toLocaleDateString('es-ES')}
-                  </span>
-                  <button 
-                    class="btn btn-xs btn-error delete-img-btn" 
-                    data-id={img.id}
-                    title="Eliminar"
-                    aria-label="Eliminar"
-                  >
-                    <Trash2 class="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )
+        }
       </div>
     </div>
   </main>
 
   <script is:inline>
     // Upload form
-    const form = document.getElementById('gallery-upload-form');
-    const photoFile = document.getElementById('photo-file');
-    const photoUrl = document.getElementById('photo-url');
-    const uploadStatus = document.getElementById('upload-status');
-    const btnUpload = document.getElementById('btn-upload');
+    const form = document.getElementById("gallery-upload-form");
+    const photoFile = document.getElementById("photo-file");
+    const photoUrl = document.getElementById("photo-url");
+    const uploadStatus = document.getElementById("upload-status");
+    const btnUpload = document.getElementById("btn-upload");
 
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      uploadStatus.innerText = 'Procesando imagen...';
+      uploadStatus.innerText = "Procesando imagen...";
       btnUpload.disabled = true;
 
       let finalUrl = photoUrl.value.trim();
@@ -223,103 +263,103 @@ const items = await getGalleryItems();
       // If file selected, upload first
       if (photoFile.files && photoFile.files[0]) {
         const formData = new FormData();
-        formData.append('file', photoFile.files[0]);
+        formData.append("file", photoFile.files[0]);
 
         try {
-          const uploadRes = await fetch('/api/upload', {
-            method: 'POST',
+          const uploadRes = await fetch("/api/upload", {
+            method: "POST",
             body: formData,
           });
           const uploadData = await uploadRes.json();
           if (uploadRes.ok && uploadData.url) {
             finalUrl = uploadData.url;
           } else {
-            alert(uploadData.error || 'Error al subir imagen');
-            uploadStatus.innerText = '';
+            alert(uploadData.error || "Error al subir imagen");
+            uploadStatus.innerText = "";
             btnUpload.disabled = false;
             return;
           }
         } catch {
-          alert('Error de conexión al subir imagen');
-          uploadStatus.innerText = '';
+          alert("Error de conexión al subir imagen");
+          uploadStatus.innerText = "";
           btnUpload.disabled = false;
           return;
         }
       }
 
       if (!finalUrl) {
-        alert('Debes seleccionar un archivo o indicar una URL');
-        uploadStatus.innerText = '';
+        alert("Debes seleccionar un archivo o indicar una URL");
+        uploadStatus.innerText = "";
         btnUpload.disabled = false;
         return;
       }
 
-      const caption = document.getElementById('caption').value.trim();
-      const author = document.getElementById('author').value.trim();
-      const social = document.getElementById('social').value.trim();
+      const caption = document.getElementById("caption").value.trim();
+      const author = document.getElementById("author").value.trim();
+      const social = document.getElementById("social").value.trim();
 
       try {
-        const res = await fetch('/api/admin/gallery', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const res = await fetch("/api/admin/gallery", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             url: finalUrl,
             caption,
             author,
             social,
-            order: document.querySelectorAll('.delete-img-btn').length + 1
+            order: document.querySelectorAll(".delete-img-btn").length + 1,
           }),
         });
 
         if (res.ok) {
-          uploadStatus.innerText = 'Fotografía añadida con éxito';
+          uploadStatus.innerText = "Fotografía añadida con éxito";
           setTimeout(() => window.location.reload(), 800);
         } else {
-          alert('Error al guardar en galería');
+          alert("Error al guardar en galería");
           btnUpload.disabled = false;
         }
       } catch {
-        alert('Error de conexión');
+        alert("Error de conexión");
         btnUpload.disabled = false;
       }
     });
 
     // Inline field updates
-    document.querySelectorAll('.edit-field').forEach(input => {
-      input.addEventListener('change', async (e) => {
+    document.querySelectorAll(".edit-field").forEach((input) => {
+      input.addEventListener("change", async (e) => {
         const id = e.target.dataset.id;
         const field = e.target.dataset.field;
         let value = e.target.value;
-        if (field === 'order') value = parseInt(value, 10) || 1;
+        if (field === "order") value = parseInt(value, 10) || 1;
 
         try {
-          await fetch('/api/admin/gallery', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+          await fetch("/api/admin/gallery", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id, [field]: value }),
           });
         } catch {
-          alert('Error al guardar cambio');
+          alert("Error al guardar cambio");
         }
       });
     });
 
     // Delete item
-    document.querySelectorAll('.delete-img-btn').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
+    document.querySelectorAll(".delete-img-btn").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
         const id = e.target.dataset.id;
-        if (confirm('¿Eliminar esta fotografía de la galería?')) {
+        if (confirm("¿Eliminar esta fotografía de la galería?")) {
           try {
-            const res = await fetch('/api/admin/gallery', {
-              method: 'DELETE',
-              headers: { 'Content-Type': 'application/json' },
+            const res = await fetch("/api/admin/gallery", {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ id }),
             });
             if (res.ok) {
               window.location.reload();
             }
           } catch {
-            alert('Error de conexión');
+            alert("Error de conexión");
           }
         }
       });
