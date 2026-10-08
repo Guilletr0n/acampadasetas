@@ -403,9 +403,10 @@ export async function restoreSectionDraft(sectionId: string, historyId: string):
 export async function getGalleryItems(): Promise<GalleryItem[]> {
   if (firestoreDb) {
     try {
-      const snap = await firestoreDb.collection('gallery').orderBy('order', 'asc').get();
+      const snap = await firestoreDb.collection('gallery').get();
       if (!snap.empty) {
-        return snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as GalleryItem));
+        const items = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as GalleryItem));
+        return items.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
       }
       const initial = readLocal<GalleryItem[]>(GALLERY_FILE, INITIAL_GALLERY);
       for (const g of initial) {
@@ -418,7 +419,7 @@ export async function getGalleryItems(): Promise<GalleryItem[]> {
   }
 
   const list = readLocal<GalleryItem[]>(GALLERY_FILE, INITIAL_GALLERY);
-  return [...list].sort((a, b) => a.order - b.order);
+  return [...list].sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
 }
 
 export async function addGalleryItem(data: Omit<GalleryItem, 'id' | 'createdAt'>): Promise<GalleryItem> {
@@ -446,9 +447,17 @@ export async function addGalleryItem(data: Omit<GalleryItem, 'id' | 'createdAt'>
 }
 
 export async function updateGalleryItem(id: string, updates: Partial<GalleryItem>): Promise<GalleryItem | null> {
+  // Strip out undefined values to avoid Firestore rejection and local corruption
+  const cleanUpdates: Partial<GalleryItem> = {};
+  for (const [key, value] of Object.entries(updates)) {
+    if (value !== undefined) {
+      (cleanUpdates as any)[key] = value;
+    }
+  }
+
   if (firestoreDb) {
     try {
-      await firestoreDb.collection('gallery').doc(id).set(updates, { merge: true });
+      await firestoreDb.collection('gallery').doc(id).set(cleanUpdates, { merge: true });
     } catch (e) {
       console.warn('Firestore updateGalleryItem fallback:', e);
     }
@@ -456,17 +465,34 @@ export async function updateGalleryItem(id: string, updates: Partial<GalleryItem
 
   const list = readLocal<GalleryItem[]>(GALLERY_FILE, INITIAL_GALLERY);
   const index = list.findIndex(g => g.id === id);
-  if (index === -1) return null;
+  if (index === -1) {
+    if (firestoreDb) {
+      try {
+        const snap = await firestoreDb.collection('gallery').doc(id).get();
+        if (snap.exists) {
+          const item = { id, ...snap.data(), ...cleanUpdates } as GalleryItem;
+          list.push(item);
+          writeLocal(GALLERY_FILE, list);
+          return item;
+        }
+      } catch (e) {
+        console.warn('Firestore read fallback:', e);
+      }
+    }
+    return null;
+  }
 
-  list[index] = { ...list[index], ...updates };
+  list[index] = { ...list[index], ...cleanUpdates };
   writeLocal(GALLERY_FILE, list);
   return list[index];
 }
 
 export async function deleteGalleryItem(id: string): Promise<boolean> {
+  let firestoreSuccess = false;
   if (firestoreDb) {
     try {
       await firestoreDb.collection('gallery').doc(id).delete();
+      firestoreSuccess = true;
     } catch (e) {
       console.warn('Firestore deleteGalleryItem fallback:', e);
     }
@@ -474,10 +500,9 @@ export async function deleteGalleryItem(id: string): Promise<boolean> {
 
   const list = readLocal<GalleryItem[]>(GALLERY_FILE, INITIAL_GALLERY);
   const filtered = list.filter(g => g.id !== id);
-  if (filtered.length === list.length) return false;
-
   writeLocal(GALLERY_FILE, filtered);
-  return true;
+
+  return firestoreDb ? firestoreSuccess : true;
 }
 
 // SCHEDULE / ACTIVITIES

@@ -18,12 +18,27 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }
 
   try {
-    const data = await request.json();
+    const data = await request.json().catch(() => ({}));
     const { id, url, caption, author, social, order } = data;
 
     if (id) {
-      const updated = await updateGalleryItem(id, { url, caption, author, social, order });
-      return new Response(JSON.stringify({ success: true, item: updated }), { status: 200 });
+      const updates: any = {};
+      if (url !== undefined && url !== null) updates.url = String(url).trim();
+      if (caption !== undefined && caption !== null) updates.caption = String(caption).trim();
+      if (author !== undefined && author !== null) updates.author = String(author).trim();
+      if (social !== undefined && social !== null) updates.social = String(social).trim();
+      if (order !== undefined && order !== null && order !== '') {
+        updates.order = parseInt(String(order), 10) || 1;
+      }
+
+      const updated = await updateGalleryItem(id, updates);
+      if (!updated) {
+        return new Response(JSON.stringify({ error: 'Fotografía no encontrada' }), { status: 404 });
+      }
+      return new Response(JSON.stringify({ success: true, item: updated }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     if (!url) {
@@ -31,32 +46,60 @@ export const POST: APIRoute = async ({ request, locals }) => {
     }
 
     const newItem = await addGalleryItem({
-      url,
-      caption: caption || '',
-      author: author || 'Anónimo',
-      social: social || '',
-      order: order ?? 1,
+      url: String(url).trim(),
+      caption: caption ? String(caption).trim() : '',
+      author: author ? String(author).trim() : 'Anónimo',
+      social: social ? String(social).trim() : '',
+      order: order !== undefined && order !== '' ? (parseInt(String(order), 10) || 1) : 1,
     });
 
-    return new Response(JSON.stringify({ success: true, item: newItem }), { status: 201 });
+    return new Response(JSON.stringify({ success: true, item: newItem }), {
+      status: 201,
+      headers: { 'Content-Type': 'application/json' },
+    });
   } catch (err: any) {
     return new Response(JSON.stringify({ error: err.message || 'Error en galería' }), { status: 500 });
   }
 };
 
-export const DELETE: APIRoute = async ({ request, locals }) => {
+export const DELETE: APIRoute = async ({ request, locals, url }) => {
   if (!locals.user || !canEditContent(locals.user)) {
-    return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 403 });
+    return new Response(JSON.stringify({ error: 'No autorizado' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   try {
-    const data = await request.json();
-    const { id } = data;
-    if (!id) return new Response(JSON.stringify({ error: 'ID requerido' }), { status: 400 });
+    let id = url.searchParams.get('id');
+    if (!id) {
+      const data = await request.json().catch(() => ({}));
+      id = data.id;
+    }
+
+    if (!id) {
+      return new Response(JSON.stringify({ error: 'ID requerido para eliminar fotografía' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
 
     const ok = await deleteGalleryItem(id);
-    return new Response(JSON.stringify({ success: ok }), { status: 200 });
+    if (!ok) {
+      return new Response(JSON.stringify({ error: 'No se pudo eliminar la fotografía' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
   } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message || 'Error al eliminar' }), { status: 500 });
+    return new Response(JSON.stringify({ error: err.message || 'Error al eliminar' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 };

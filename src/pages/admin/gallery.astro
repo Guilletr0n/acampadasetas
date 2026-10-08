@@ -3,7 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import AdminNav from "../../components/AdminNav.astro";
 import { getGalleryItems } from "../../lib/db";
 import { getCurrentUser } from "../../lib/auth";
-import { Eye, Plus, Trash2 } from "lucide-astro";
+import { Eye, Plus, Trash2, Save, Check } from "lucide-astro";
 
 export const prerender = false;
 
@@ -154,86 +154,117 @@ const items = await getGalleryItems();
           ) : (
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {items.map((img) => (
-                <div class="card bg-base-100 border border-base-200 overflow-hidden shadow-sm flex flex-col justify-between">
+                <div 
+                  class="card bg-base-100 border border-base-200 overflow-hidden shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow photo-card"
+                  data-card-id={img.id}
+                >
                   <div class="relative bg-neutral-900 h-48 flex items-center justify-center overflow-hidden">
                     <img
                       src={img.url}
                       alt={img.caption}
-                      class="w-full h-full object-cover"
+                      class="w-full h-full object-cover photo-preview-img"
+                      data-id={img.id}
                     />
-                    <span class="absolute top-2 left-2 badge badge-neutral text-xs font-mono">
+                    <span 
+                      class="absolute top-2 left-2 badge badge-neutral text-xs font-mono photo-order-badge"
+                      data-id={img.id}
+                    >
                       #{img.order}
                     </span>
                   </div>
 
-                  <div class="p-4 space-y-2 flex-1">
+                  <div class="p-4 space-y-3 flex-1">
                     <div>
-                      <label class="text-[10px] uppercase font-bold text-base-content/60">
-                        Pie de foto
+                      <label class="text-[10px] uppercase font-bold text-base-content/60 block mb-1">
+                        Pie de foto / Descripción
                       </label>
                       <input
                         type="text"
                         value={img.caption}
-                        class="input input-bordered input-xs w-full edit-field font-semibold"
+                        placeholder="Descripción o pie de foto..."
+                        class="input input-bordered input-sm w-full font-semibold photo-input-caption"
                         data-id={img.id}
-                        data-field="caption"
                       />
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
                       <div>
-                        <label class="text-[10px] uppercase font-bold text-base-content/60">
-                          Fotógrafa
+                        <label class="text-[10px] uppercase font-bold text-base-content/60 block mb-1">
+                          Fotógrafa / Autoría
                         </label>
                         <input
                           type="text"
                           value={img.author}
-                          class="input input-bordered input-xs w-full edit-field"
+                          placeholder="Autoría..."
+                          class="input input-bordered input-sm w-full photo-input-author"
                           data-id={img.id}
-                          data-field="author"
                         />
                       </div>
                       <div>
-                        <label class="text-[10px] uppercase font-bold text-base-content/60">
+                        <label class="text-[10px] uppercase font-bold text-base-content/60 block mb-1">
                           Orden
                         </label>
                         <input
                           type="number"
                           value={img.order}
-                          class="input input-bordered input-xs w-full edit-field"
+                          min="1"
+                          class="input input-bordered input-sm w-full photo-input-order font-mono"
                           data-id={img.id}
-                          data-field="order"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label class="text-[10px] uppercase font-bold text-base-content/60">
-                        Enlace Social
+                      <label class="text-[10px] uppercase font-bold text-base-content/60 block mb-1">
+                        Enlace Social / Perfil
                       </label>
                       <input
                         type="url"
                         value={img.social || ""}
-                        placeholder="https://..."
-                        class="input input-bordered input-xs w-full edit-field font-mono text-[10px]"
+                        placeholder="https://instagram.com/..."
+                        class="input input-bordered input-sm w-full font-mono text-xs photo-input-social"
                         data-id={img.id}
-                        data-field="social"
+                      />
+                    </div>
+
+                    <div>
+                      <label class="text-[10px] uppercase font-bold text-base-content/60 block mb-1">
+                        URL directa de la imagen
+                      </label>
+                      <input
+                        type="url"
+                        value={img.url}
+                        placeholder="https://..."
+                        class="input input-bordered input-xs w-full font-mono text-[10px] text-base-content/70 photo-input-url"
+                        data-id={img.id}
                       />
                     </div>
                   </div>
 
-                  <div class="p-3 bg-base-200/50 border-t border-base-200 flex justify-between items-center">
+                  <div class="p-3 bg-base-200/50 border-t border-base-200 flex justify-between items-center gap-2">
                     <span class="text-[10px] text-base-content/50 font-mono">
                       {new Date(img.createdAt).toLocaleDateString("es-ES")}
                     </span>
-                    <div class="tooltip tooltip-left" data-tip="Eliminar">
+                    <div class="flex items-center gap-2">
                       <button
-                        class="btn btn-xs btn-error delete-img-btn"
+                        type="button"
+                        class="btn btn-xs btn-primary save-img-btn inline-flex items-center gap-1 font-semibold"
                         data-id={img.id}
-                        aria-label="Eliminar"
+                        title="Guardar cambios de esta fotografía"
                       >
-                        <Trash2 class="w-3.5 h-3.5" />
+                        <Save class="w-3.5 h-3.5" />
+                        <span>Guardar</span>
                       </button>
+                      <div class="tooltip tooltip-left" data-tip="Eliminar">
+                        <button
+                          type="button"
+                          class="btn btn-xs btn-error delete-img-btn"
+                          data-id={img.id}
+                          aria-label="Eliminar"
+                        >
+                          <Trash2 class="w-3.5 h-3.5 pointer-events-none" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -324,42 +355,135 @@ const items = await getGalleryItems();
       }
     });
 
-    // Inline field updates
-    document.querySelectorAll(".edit-field").forEach((input) => {
-      input.addEventListener("change", async (e) => {
-        const id = e.target.dataset.id;
-        const field = e.target.dataset.field;
-        let value = e.target.value;
-        if (field === "order") value = parseInt(value, 10) || 1;
+    // Save individual photo changes
+    document.querySelectorAll(".save-img-btn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const id = btn.dataset.id;
+        if (!id) return;
+
+        const card = btn.closest(".photo-card") || document.querySelector(`.photo-card[data-card-id="${id}"]`);
+        if (!card) return;
+
+        const captionInput = card.querySelector(".photo-input-caption");
+        const authorInput = card.querySelector(".photo-input-author");
+        const orderInput = card.querySelector(".photo-input-order");
+        const socialInput = card.querySelector(".photo-input-social");
+        const urlInput = card.querySelector(".photo-input-url");
+
+        const caption = captionInput ? captionInput.value.trim() : "";
+        const author = authorInput ? authorInput.value.trim() : "";
+        const order = orderInput ? (parseInt(orderInput.value, 10) || 1) : 1;
+        const social = socialInput ? socialInput.value.trim() : "";
+        const url = urlInput ? urlInput.value.trim() : "";
+
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading loading-spinner loading-xs"></span> Guardando...';
 
         try {
-          await fetch("/api/admin/gallery", {
+          const res = await fetch("/api/admin/gallery", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, [field]: value }),
+            body: JSON.stringify({
+              id,
+              caption,
+              author,
+              order,
+              social,
+              url,
+            }),
           });
-        } catch {
-          alert("Error al guardar cambio");
+
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            throw new Error(data.error || "Error al guardar cambios");
+          }
+
+          // Update order badge on photo preview
+          const badge = card.querySelector(".photo-order-badge");
+          if (badge) badge.textContent = `#${order}`;
+
+          // Update preview image if url was changed
+          if (url) {
+            const previewImg = card.querySelector(".photo-preview-img");
+            if (previewImg) previewImg.src = url;
+          }
+
+          // Visual feedback on button
+          btn.classList.remove("btn-primary");
+          btn.classList.add("btn-success", "text-white");
+          btn.innerHTML = '<span>✓ ¡Guardado!</span>';
+
+          setTimeout(() => {
+            btn.disabled = false;
+            btn.classList.remove("btn-success", "text-white");
+            btn.classList.add("btn-primary");
+            btn.innerHTML = originalContent;
+          }, 2000);
+        } catch (err) {
+          alert("Error al guardar: " + (err.message || "Desconocido"));
+          btn.disabled = false;
+          btn.innerHTML = originalContent;
+        }
+      });
+    });
+
+    // Enter key submits the card's save action
+    document.querySelectorAll(".photo-card input").forEach((input) => {
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          const card = input.closest(".photo-card");
+          const saveBtn = card ? card.querySelector(".save-img-btn") : null;
+          if (saveBtn && !saveBtn.disabled) saveBtn.click();
         }
       });
     });
 
     // Delete item
     document.querySelectorAll(".delete-img-btn").forEach((btn) => {
-      btn.addEventListener("click", async (e) => {
-        const id = e.target.dataset.id;
-        if (confirm("¿Eliminar esta fotografía de la galería?")) {
+      btn.addEventListener("click", async () => {
+        const id = btn.dataset.id || btn.getAttribute("data-id");
+        if (!id) {
+          alert("Identificador de fotografía no encontrado.");
+          return;
+        }
+
+        if (confirm("¿Eliminar esta fotografía de la galería? Esta acción no se puede deshacer.")) {
+          const originalContent = btn.innerHTML;
+          btn.disabled = true;
+          btn.innerHTML = '<span class="loading loading-spinner loading-xs"></span>';
+
           try {
-            const res = await fetch("/api/admin/gallery", {
+            const res = await fetch(`/api/admin/gallery?id=${encodeURIComponent(id)}`, {
               method: "DELETE",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ id }),
             });
-            if (res.ok) {
-              window.location.reload();
+
+            const data = await res.json().catch(() => ({}));
+            if (res.ok && data.success) {
+              const card = btn.closest(".photo-card") || document.querySelector(`.photo-card[data-card-id="${id}"]`);
+              if (card) {
+                card.style.transition = "all 0.35s ease";
+                card.style.opacity = "0";
+                card.style.transform = "scale(0.95)";
+                setTimeout(() => {
+                  card.remove();
+                  window.location.reload();
+                }, 350);
+              } else {
+                window.location.reload();
+              }
+            } else {
+              alert(data.error || "Error al eliminar fotografía");
+              btn.disabled = false;
+              btn.innerHTML = originalContent;
             }
           } catch {
-            alert("Error de conexión");
+            alert("Error de conexión al eliminar fotografía");
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
           }
         }
       });
