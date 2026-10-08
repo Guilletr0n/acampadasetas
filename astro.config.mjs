@@ -11,6 +11,17 @@ export default defineConfig({
   }),
 
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    build: {
+      rollupOptions: {
+        output: {
+          assetFileNames: (assetInfo) => {
+            let cleanName = (assetInfo.names?.[0] || assetInfo.name || 'asset').replace(/^\.+/, '');
+            cleanName = cleanName.replace(/\.[^/.]+$/, '');
+            return `_astro/${cleanName || 'style'}.[hash][extname]`;
+          }
+        }
+      }
+    }
   }
 });
