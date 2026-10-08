@@ -13,7 +13,26 @@ steps:
       - 'push'
       - 'europe-southwest1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/acampadasetas-web:$COMMIT_SHA'
 
-  # 3. Desplegar en Cloud Run
+  # 3. Desplegar en Cloud Run (europe-west1 - Dominio personalizado)
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'acampadasetas-web'
+      - '--image'
+      - 'europe-southwest1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/acampadasetas-web:$COMMIT_SHA'
+      - '--region'
+      - 'europe-west1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'NODE_ENV=production,GCP_PROJECT_ID=$PROJECT_ID,FIRESTORE_DATABASE_ID=acampadasetas,GCS_BUCKET_NAME=acampadasetas-media'
+      - '--port'
+      - '8080'
+
+  # 4. Desplegar en Cloud Run (europe-southwest1 - Madrid)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
