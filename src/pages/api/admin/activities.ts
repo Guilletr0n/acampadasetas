@@ -25,12 +25,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const data = await request.json();
     const { action, id, time, title, description, status, ids } = data;
 
-    if (action === 'add') {
+    if (action === 'add' || action === 'edit') {
       if (!time || !title) {
         return new Response(JSON.stringify({ error: 'La hora y el título son obligatorios' }), { status: 400 });
       }
 
       const activity = await saveActivity({
+        id: id ? String(id).trim() : undefined,
         time: time.trim(),
         title: title.trim(),
         description: (description || '').trim(),

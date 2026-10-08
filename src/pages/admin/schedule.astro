@@ -3,7 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import AdminNav from "../../components/AdminNav.astro";
 import { getActivities } from "../../lib/db";
 import { getCurrentUser, canEditContent } from "../../lib/auth";
-import { ExternalLink, Plus, FileEdit, UploadCloud, Trash2 } from "lucide-astro";
+import { ExternalLink, Plus, FileEdit, UploadCloud, Trash2, Pencil, X } from "lucide-astro";
 
 export const prerender = false;
 
@@ -47,15 +47,23 @@ const drafts = allActivities.filter((a) => a.status === 'draft');
       <span id="status-text">Operación completada</span>
     </div>
 
-    <!-- 1. FORMULARIO PARA AÑADIR ACTIVIDAD -->
-    <section class="card bg-base-100 shadow border border-base-300">
+    <!-- 1. FORMULARIO PARA AÑADIR O EDITAR ACTIVIDAD -->
+    <section class="card bg-base-100 shadow border border-base-300 transition-all" id="form-container">
       <div class="card-body p-4 sm:p-5">
-        <h2 class="text-lg font-bold text-neutral flex items-center gap-2 m-0">
-          <span class="w-2.5 h-2.5 rounded-full bg-primary inline-block"></span>
-          Añadir Actividad
-        </h2>
+        <div class="flex items-center justify-between gap-2">
+          <h2 id="form-title" class="text-lg font-bold text-neutral flex items-center gap-2 m-0">
+            <span id="form-badge-dot" class="w-2.5 h-2.5 rounded-full bg-primary inline-block"></span>
+            <span id="form-title-text">Añadir Actividad</span>
+          </h2>
+          <span id="form-mode-badge" class="badge badge-accent text-white font-bold text-xs hidden">
+            Modo Edición
+          </span>
+        </div>
 
         <form id="activity-form" class="space-y-3 mt-2">
+          <!-- Campo oculto para el ID en modo edición -->
+          <input type="hidden" id="act-edit-id" value="" />
+
           <!-- Campo para la Hora -->
           <div class="form-control">
             <label class="label py-1" for="act-time">
@@ -97,21 +105,35 @@ const drafts = allActivities.filter((a) => a.status === 'draft');
             ></textarea>
           </div>
 
-          <!-- Opciones y Botón Añadir -->
+          <!-- Opciones y Botones -->
           <div class="pt-1 flex flex-col gap-2">
             <label class="label cursor-pointer justify-start gap-2 py-0">
               <input type="checkbox" id="act-as-draft" class="checkbox checkbox-xs" />
-              <span class="label-text text-xs text-base-content/70">Guardar directamente como borrador (no publicado)</span>
+              <span id="act-as-draft-label" class="label-text text-xs text-base-content/70">Guardar directamente como borrador (no publicado)</span>
             </label>
 
-            <button 
-              type="submit" 
-              id="btn-add-activity" 
-              class="btn btn-primary w-full text-base font-bold tracking-wide mt-1 shadow-md shadow-primary/20 inline-flex items-center justify-center gap-1.5"
-            >
-              <Plus class="w-4 h-4" />
-              <span>Añadir al Programa</span>
-            </button>
+            <div class="flex items-center gap-2 mt-1 w-full">
+              <button 
+                type="button" 
+                id="btn-cancel-edit" 
+                class="btn btn-ghost btn-md flex-1 text-sm font-semibold !hidden justify-center gap-1.5"
+                style="display: none;"
+              >
+                <X class="w-4 h-4" />
+                <span>Cancelar edición</span>
+              </button>
+
+              <button 
+                type="submit" 
+                id="btn-add-activity" 
+                class="btn btn-primary w-full text-base font-bold tracking-wide shadow-md shadow-primary/20 inline-flex items-center justify-center gap-1.5"
+              >
+                <span id="btn-submit-icon" class="inline-flex items-center">
+                  <Plus class="w-4 h-4" />
+                </span>
+                <span id="btn-submit-text">Añadir al Programa</span>
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -152,15 +174,31 @@ const drafts = allActivities.filter((a) => a.status === 'draft');
                     </span>
                   </div>
 
-                  <!-- Botón para convertir en borrador -->
-                  <button 
-                    type="button" 
-                    class="btn btn-xs btn-outline btn-warning btn-to-draft whitespace-nowrap inline-flex items-center gap-1"
-                    data-id={act.id}
-                  >
-                    <FileEdit class="w-3 h-3" />
-                    <span>Convertir en borrador</span>
-                  </button>
+                  <div class="flex items-center gap-1.5 flex-wrap justify-end">
+                    <button 
+                      type="button" 
+                      class="btn btn-xs btn-outline btn-primary btn-edit-activity whitespace-nowrap inline-flex items-center gap-1"
+                      data-id={act.id}
+                      data-time={act.time}
+                      data-title={act.title}
+                      data-description={act.description || ""}
+                      data-status={act.status}
+                      title="Editar esta actividad"
+                    >
+                      <Pencil class="w-3 h-3 pointer-events-none" />
+                      <span>Editar</span>
+                    </button>
+
+                    <!-- Botón para convertir en borrador -->
+                    <button 
+                      type="button" 
+                      class="btn btn-xs btn-outline btn-warning btn-to-draft whitespace-nowrap inline-flex items-center gap-1"
+                      data-id={act.id}
+                    >
+                      <FileEdit class="w-3 h-3 pointer-events-none" />
+                      <span>Convertir en borrador</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div>
@@ -262,15 +300,31 @@ const drafts = allActivities.filter((a) => a.status === 'draft');
                       </span>
                     </div>
 
-                    <!-- Botón para publicar directamente -->
-                    <button 
-                      type="button" 
-                      class="btn btn-xs btn-outline btn-success btn-to-publish whitespace-nowrap inline-flex items-center gap-1"
-                      data-id={act.id}
-                    >
-                      <UploadCloud class="w-3 h-3" />
-                      <span>Publicar</span>
-                    </button>
+                    <div class="flex items-center gap-1.5 flex-wrap justify-end">
+                      <button 
+                        type="button" 
+                        class="btn btn-xs btn-outline btn-primary btn-edit-activity whitespace-nowrap inline-flex items-center gap-1"
+                        data-id={act.id}
+                        data-time={act.time}
+                        data-title={act.title}
+                        data-description={act.description || ""}
+                        data-status={act.status}
+                        title="Editar este borrador"
+                      >
+                        <Pencil class="w-3 h-3 pointer-events-none" />
+                        <span>Editar</span>
+                      </button>
+
+                      <!-- Botón para publicar directamente -->
+                      <button 
+                        type="button" 
+                        class="btn btn-xs btn-outline btn-success btn-to-publish whitespace-nowrap inline-flex items-center gap-1"
+                        data-id={act.id}
+                      >
+                        <UploadCloud class="w-3 h-3 pointer-events-none" />
+                        <span>Publicar</span>
+                      </button>
+                    </div>
                   </div>
 
                   <h3 class="text-base font-bold uppercase text-[#1d1d1b] m-0 leading-snug mt-1">
@@ -292,12 +346,21 @@ const drafts = allActivities.filter((a) => a.status === 'draft');
 
   <!-- Client-side script handling mobile actions -->
   <script is:inline>
+    const formContainer = document.getElementById('form-container');
     const form = document.getElementById('activity-form');
+    const editIdInput = document.getElementById('act-edit-id');
     const timeInput = document.getElementById('act-time');
     const titleInput = document.getElementById('act-title');
     const descInput = document.getElementById('act-desc');
     const draftCheckbox = document.getElementById('act-as-draft');
+    const draftCheckboxLabel = document.getElementById('act-as-draft-label');
+    const formTitleText = document.getElementById('form-title-text');
+    const formBadgeDot = document.getElementById('form-badge-dot');
+    const formModeBadge = document.getElementById('form-mode-badge');
+    const btnCancelEdit = document.getElementById('btn-cancel-edit');
     const btnSubmit = document.getElementById('btn-add-activity');
+    const btnSubmitText = document.getElementById('btn-submit-text');
+    const btnSubmitIcon = document.getElementById('btn-submit-icon');
     const btnDeleteSelected = document.getElementById('btn-delete-selected');
     const selectAllCheckbox = document.getElementById('select-all-drafts');
     const selectedCounter = document.getElementById('selected-counter');
@@ -313,6 +376,87 @@ const drafts = allActivities.filter((a) => a.status === 'draft');
         toast.classList.add('hidden');
       }, 3000);
     }
+
+    // Switch between mode a) "Añadir nueva" and mode b) "Editar actividad"
+    function setCreateMode() {
+      if (editIdInput) editIdInput.value = '';
+      if (form) form.reset();
+      if (formTitleText) formTitleText.textContent = 'Añadir Actividad';
+      if (formBadgeDot) formBadgeDot.className = 'w-2.5 h-2.5 rounded-full bg-primary inline-block';
+      if (formModeBadge) formModeBadge.classList.add('hidden');
+      if (formContainer) {
+        formContainer.classList.remove('border-accent', 'ring-2', 'ring-accent/20');
+        formContainer.classList.add('border-base-300');
+      }
+      if (btnCancelEdit) {
+        btnCancelEdit.style.display = 'none';
+        btnCancelEdit.classList.add('!hidden');
+      }
+      if (btnSubmit) {
+        btnSubmit.classList.remove('flex-1');
+        btnSubmit.classList.add('w-full');
+      }
+      if (btnSubmitText) btnSubmitText.textContent = 'Añadir al Programa';
+      if (btnSubmitIcon) {
+        btnSubmitIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>';
+      }
+      if (draftCheckboxLabel) draftCheckboxLabel.textContent = 'Guardar directamente como borrador (no publicado)';
+    }
+
+    function setEditMode(act) {
+      if (editIdInput) editIdInput.value = act.id;
+      if (timeInput) timeInput.value = act.time;
+      if (titleInput) titleInput.value = act.title;
+      if (descInput) descInput.value = act.description || '';
+      if (draftCheckbox) draftCheckbox.checked = act.status === 'draft';
+
+      if (formTitleText) formTitleText.textContent = 'Editar Actividad';
+      if (formBadgeDot) formBadgeDot.className = 'w-2.5 h-2.5 rounded-full bg-accent inline-block';
+      if (formModeBadge) formModeBadge.classList.remove('hidden');
+      if (formContainer) {
+        formContainer.classList.remove('border-base-300');
+        formContainer.classList.add('border-accent', 'ring-2', 'ring-accent/20');
+      }
+      if (btnCancelEdit) {
+        btnCancelEdit.style.display = 'inline-flex';
+        btnCancelEdit.classList.remove('!hidden');
+      }
+      if (btnSubmit) {
+        btnSubmit.classList.remove('w-full');
+        btnSubmit.classList.add('flex-1');
+      }
+      if (btnSubmitText) btnSubmitText.textContent = 'Publicar';
+      if (btnSubmitIcon) {
+        btnSubmitIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-upload-cloud"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>';
+      }
+      if (draftCheckboxLabel) draftCheckboxLabel.textContent = 'Mantener o guardar como borrador (no publicado)';
+
+      if (formContainer) {
+        formContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      setTimeout(() => {
+        if (timeInput) timeInput.focus();
+      }, 300);
+    }
+
+    if (btnCancelEdit) {
+      btnCancelEdit.addEventListener('click', () => {
+        setCreateMode();
+      });
+    }
+
+    // Attach Edit button click handlers to all activities (both published and drafts)
+    document.querySelectorAll('.btn-edit-activity').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id || btn.getAttribute('data-id');
+        const time = btn.dataset.time || btn.getAttribute('data-time') || '';
+        const title = btn.dataset.title || btn.getAttribute('data-title') || '';
+        const description = btn.dataset.description || btn.getAttribute('data-description') || '';
+        const status = btn.dataset.status || btn.getAttribute('data-status') || 'published';
+
+        setEditMode({ id, time, title, description, status });
+      });
+    });
 
     // Update delete button state and counter based on selected drafts
     function updateSelectedState() {
@@ -352,10 +496,11 @@ const drafts = allActivities.filter((a) => a.status === 'draft');
       });
     }
 
-    // 1. Submit Form: Añadir Actividad
+    // 1. Submit Form: Añadir o Editar Actividad
     if (form) {
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const editId = editIdInput ? editIdInput.value.trim() : '';
         const time = timeInput.value.trim();
         const title = titleInput.value.trim();
         const description = descInput.value.trim();
@@ -366,15 +511,17 @@ const drafts = allActivities.filter((a) => a.status === 'draft');
           return;
         }
 
+        const isEditing = Boolean(editId);
         btnSubmit.disabled = true;
-        btnSubmit.textContent = 'Añadiendo...';
+        btnSubmitText.textContent = isEditing ? 'Publicando...' : 'Añadiendo...';
 
         try {
           const res = await fetch('/api/admin/activities', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              action: 'add',
+              action: isEditing ? 'edit' : 'add',
+              id: isEditing ? editId : undefined,
               time,
               title,
               description,
@@ -383,17 +530,20 @@ const drafts = allActivities.filter((a) => a.status === 'draft');
           });
           const data = await res.json();
           if (res.ok && data.success) {
-            showToast(status === 'published' ? '¡Actividad publicada en el programa!' : 'Borrador guardado', 'success');
+            const successMsg = isEditing 
+              ? (status === 'published' ? '¡Actividad actualizada y publicada!' : '¡Borrador actualizado con éxito!')
+              : (status === 'published' ? '¡Actividad publicada en el programa!' : 'Borrador guardado');
+            showToast(successMsg, 'success');
             setTimeout(() => window.location.reload(), 600);
           } else {
-            alert(data.error || 'Error al añadir actividad');
+            alert(data.error || 'Error al procesar actividad');
             btnSubmit.disabled = false;
-            btnSubmit.textContent = '+ Añadir al Programa';
+            btnSubmitText.textContent = isEditing ? 'Publicar' : 'Añadir al Programa';
           }
         } catch {
           alert('Error de conexión con el servidor');
           btnSubmit.disabled = false;
-          btnSubmit.textContent = '+ Añadir al Programa';
+          btnSubmitText.textContent = isEditing ? 'Publicar' : 'Añadir al Programa';
         }
       });
     }
