@@ -72,19 +72,30 @@ function writeLocalUsers(users: User[]) {
   fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf-8');
 }
 
+export async function seedUsersIfEmpty(): Promise<void> {
+  if (!firestoreDb) return;
+  try {
+    const snap = await firestoreDb.collection('users').limit(1).get();
+    if (snap.empty) {
+      console.log('Seeding initial users to Firestore...');
+      for (const u of INITIAL_USERS) {
+        await firestoreDb.collection('users').doc(u.uid).set(u);
+      }
+      console.log('Initial users seeded successfully to Firestore.');
+    }
+  } catch (e) {
+    console.warn('Firestore seedUsers notice:', e);
+  }
+}
+
 export async function getUsers(): Promise<User[]> {
   if (firestoreDb) {
     try {
+      await seedUsersIfEmpty();
       const snap = await firestoreDb.collection('users').get();
       if (!snap.empty) {
         return snap.docs.map(doc => ({ uid: doc.id, ...doc.data() } as User));
       }
-      // Seed if empty
-      const initial = readLocalUsers();
-      for (const u of initial) {
-        await firestoreDb.collection('users').doc(u.uid).set(u);
-      }
-      return initial;
     } catch (e) {
       console.warn('Firestore getUsers fallback to local:', e);
     }
@@ -96,6 +107,7 @@ export async function getUserByEmail(email: string): Promise<User | null> {
   const cleanEmail = email.trim().toLowerCase();
   if (firestoreDb) {
     try {
+      await seedUsersIfEmpty();
       const snap = await firestoreDb.collection('users').where('email', '==', cleanEmail).limit(1).get();
       if (!snap.empty) {
         const doc = snap.docs[0];

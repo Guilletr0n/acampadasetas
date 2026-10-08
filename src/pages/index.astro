@@ -1,11 +1,15 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { getSections, getActivities } from "../lib/db";
+import { seedUsersIfEmpty } from "../lib/users";
 import { marked } from "marked";
 import { getTemplateComponent } from "../components/sections";
 import { Image, Lock, FileText, Calendar } from "lucide-astro";
 
 export const prerender = false;
+
+// Ensure users collection is initialized in Firestore
+await seedUsersIfEmpty();
 
 // Fetch published activities (this triggers the 4:00 AM expiration check if past 4 AM!)
 const publishedActivities = await getActivities(true);
