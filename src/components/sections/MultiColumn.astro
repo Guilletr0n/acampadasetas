@@ -1,6 +1,6 @@
 ---
-import type { SectionContent } from '../../lib/types';
-import { marked } from 'marked';
+import type { SectionContent } from "../../lib/types";
+import { marked } from "marked";
 
 interface Props {
   slug: string;
@@ -9,57 +9,67 @@ interface Props {
   renderedMarkdown?: string;
 }
 
-const { 
-  slug, 
-  content, 
-  isAlternate = false, 
-  renderedMarkdown = marked.parse(content.body || '') 
+const {
+  slug,
+  content,
+  isAlternate = false,
+  renderedMarkdown = marked.parse(content.body || ""),
 } = Astro.props;
 ---
 
-<section 
-  id={slug} 
-  class={`py-16 md:py-24 px-4 border-b border-black/10 ${isAlternate ? 'bg-[#f7e9d0]' : 'bg-[#fcf2df]'}`}
+<section
+  id={slug}
+  class={`py-16 md:py-24 px-4 border-b border-black/10 ${isAlternate ? "bg-[#f7e9d0]" : "bg-[#fcf2df]"}`}
 >
   <div class="max-w-6xl mx-auto">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-10 pb-4 border-b border-black/10">
+    <div
+      class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-10 pb-4 border-b border-black/10"
+    >
       <div>
-        {content.highlight && (
-          <span class="inline-block bg-[#af0b56] text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-2 shadow-sm">
-            {content.highlight}
-          </span>
-        )}
+        {
+          content.highlight && (
+            <span class="inline-block bg-[#af0b56] text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-2 shadow-sm">
+              {content.highlight}
+            </span>
+          )
+        }
         <h2 class="text-5xl md:text-6xl font-londrina text-[#1d1d1b] m-0">
           {content.title}
         </h2>
-        {content.subtitle && (
-          <p class="text-lg md:text-xl text-gray-700 font-medium mt-1">
-            {content.subtitle}
-          </p>
-        )}
+        {
+          content.subtitle && (
+            <p class="text-lg md:text-xl text-gray-700 font-medium mt-1">
+              {content.subtitle}
+            </p>
+          )
+        }
       </div>
-      <a href={`#${slug}`} class="text-xs font-mono font-bold text-gray-400 hover:text-black">
-        #{slug}
-      </a>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-      <div class={`prose max-w-none text-[#1d1d1b] ${content.illustrationUrl ? 'lg:col-span-7' : 'lg:col-span-12'}`}>
-        <div class="space-y-4 text-base md:text-lg leading-relaxed" set:html={renderedMarkdown} />
+      <div
+        class={`prose max-w-none text-[#1d1d1b] ${content.illustrationUrl ? "lg:col-span-7" : "lg:col-span-12"}`}
+      >
+        <div
+          class="space-y-4 text-base md:text-lg leading-relaxed"
+          set:html={renderedMarkdown}
+        />
       </div>
 
-      {content.illustrationUrl && (
-        <div class="lg:col-span-5 sticky top-24">
-          <div class="rounded-2xl overflow-hidden bg-white shadow-md">
-            <img 
-              src={content.illustrationUrl} 
-              alt={content.title} 
-              class="w-full h-auto object-cover max-h-[420px]" 
-              loading="lazy"
-            />
+      {
+        content.illustrationUrl && (
+          <div class="lg:col-span-5 sticky top-24">
+            <div class="rounded-2xl overflow-hidden bg-white shadow-md">
+              <img
+                src={content.illustrationUrl}
+                alt={content.title}
+                class="w-full h-auto object-cover max-h-[420px]"
+                loading="lazy"
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
     </div>
   </div>
 </section>
