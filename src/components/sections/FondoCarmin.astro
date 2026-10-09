@@ -1,0 +1,14 @@
+---
+import type { SectionTemplateProps } from "./index";
+interface Props extends SectionTemplateProps {}
+const { slug, content, isAlternate, renderedMarkdown } = Astro.props;
+---
+
+<section id={slug} class={`py-16 px-4 bg-[#B50655]`}>
+    <div class="max-w-6xl mx-auto">
+        <h2 class="text-4xl mb-6 font-londrina text-secondary">
+            {content.title}
+        </h2>
+        <div class="text-secondary" set:html={renderedMarkdown} />
+    </div>
+</section>

@@ -44,7 +44,7 @@ const hasAgenda = sections.some(
         <span
           class="text-3xl md:text-4xl font-londrina text-[#af0b56] tracking-wide group-hover:scale-105 transition-transform"
         >
-          ACAMPADA SETAS
+          ACAMPADA de las SETAS
         </span>
       </a>
 
@@ -131,13 +131,13 @@ const hasAgenda = sections.some(
   <section
     class="py-12 md:py-20 px-4 max-w-6xl mx-auto text-center border-b border-black/10"
   >
-    <div
-      class="inline-block bg-[#af0b56] text-white px-4 py-1 text-sm md:text-base font-bold uppercase tracking-widest rounded-full mb-4 shadow-sm"
-    >
-      Plaza de la Encarnación • Sevilla
-    </div>
+    <img
+      src="/assets/images/logo.svg"
+      class="w-64 mx-auto"
+      alt="Logo Acampada Setas"
+    />
     <h1
-      class="text-6xl md:text-8xl font-londrina text-[#1d1d1b] leading-none mb-6"
+      class="text-6xl md:text-8xl font-londrina text-[#B50655] leading-none mb-6"
     >
       POR EL DERECHO A LA CIUDAD Y A LA VIVIENDA
     </h1>
@@ -147,33 +147,6 @@ const hasAgenda = sections.some(
       Frente a la especulación rentista, los desahucios y la turistificación
       masiva: autoorganización popular y asamblea abierta permanente.
     </p>
-    <div class="flex flex-wrap justify-center gap-4 mt-8">
-      <a
-        href="#manifiesto"
-        class="btn btn-primary px-6 text-base inline-flex items-center gap-2"
-      >
-        <FileText class="w-5 h-5" />
-        <span>Leer Manifiesto</span>
-      </a>
-      {
-        hasAgenda && (
-          <a
-            href="#agenda"
-            class="btn btn-outline px-6 text-base inline-flex items-center gap-2"
-          >
-            <Calendar class="w-5 h-5" />
-            <span>Ver Programa de Actividades</span>
-          </a>
-        )
-      }
-      <a
-        href="/gallery"
-        class="btn btn-outline btn-primary px-6 text-base inline-flex items-center gap-2"
-      >
-        <Image class="w-5 h-5" />
-        <span>Galería de Fotos</span>
-      </a>
-    </div>
   </section>
 
   <!-- Dynamic Sections Rendered by Template -->

@@ -3,6 +3,8 @@ import MultiColumn from './MultiColumn.astro';
 import NuevaPlantilla from './nuevaPlantilla.astro';
 import ScheduleActivities from './ScheduleActivities.astro';
 import type { SectionContent } from '../../lib/types';
+import FondoTrigo from './FondoTrigo.astro';
+import FondoCarmin from './FondoCarmin.astro'
 
 export interface SectionTemplateProps {
   slug: string;
@@ -55,6 +57,18 @@ export const TEMPLATES: Record<string, SectionTemplateMeta> = {
     label: 'Nueva Plantilla',
     description: 'Una nueva plantilla para sections.',
     component: NuevaPlantilla,
+  },
+  'fondo-trigo': {
+    id: 'fondo-trigo',
+    label: 'Fondo Trigo',
+    description: 'Nueva plantilla con fondo de trigo.',
+    component: FondoTrigo,
+  },
+  'fondo-carmin': {
+    id: 'fondo-carmin',
+    label: 'Fondo carmin',
+    description: 'Nueva plantilla con fondo de carmin.',
+    component: FondoCarmin,
   }
 };
 

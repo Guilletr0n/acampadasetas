@@ -7,65 +7,100 @@
   --font-sans: 'Poppins', sans-serif;
   --font-title: "Londrina Solid", cursive, sans-serif;
   --font-londrina: "Londrina Solid", cursive, sans-serif;
-  --color-brand-primary: #af0b56;
   --color-brand-bg: #fcf2df;
   --color-brand-black: #1d1d1b;
+  --color-brand-trigo: #FFF0DD;
+  --color-brand-carmin: #B50655;
+  --color-brand-primary: var(--color-brand-carmin);
+  --color-brand-secondary: var(--color-brand-trigo);
 }
 
-:root, [data-theme], [data-theme="light"], [data-theme="dark"] {
-  --color-primary: #af0b56 !important;
-  --p: #af0b56 !important;
-  --color-brand-primary: #af0b56 !important;
+:root,
+[data-theme],
+[data-theme="light"],
+[data-theme="dark"] {
+  --color-primary: var(--color-brand-carmin) !important;
+  --p: var(--color-brand-carmin) !important;
+  --color-brand-primary: var(--color-brand-carmin) !important;
 }
 
 @layer base {
   body {
     font-family: 'Poppins', sans-serif;
-    background-color: #fcf2df;
-    color: #1d1d1b;
+    background-color: var(--color-brand-trigo);
+    color: var(--color-brand-black);
   }
 
   /* Font Londrina ONLY for titles */
-  h1, h2, h3, h4, h5, h6, .font-title, .font-londrina {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .font-title,
+  .font-londrina {
     font-family: "Londrina Solid", cursive, sans-serif;
     letter-spacing: 0.02em;
   }
 
-  p, span, a, button, input, textarea, select, label, table, th, td, ul, ol, li, blockquote {
+  p,
+  span,
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  label,
+  table,
+  th,
+  td,
+  ul,
+  ol,
+  li,
+  blockquote {
     font-family: 'Poppins', sans-serif;
   }
 }
 
-/* Enforce Brand Primary Color #af0b56 everywhere */
+/* Enforce Brand Primary Color var(--color-brand-carmin) everywhere */
 .text-primary {
-  color: #af0b56 !important;
+  color: var(--color-brand-carmin) !important;
 }
+
+.text-secondary {
+  color: var(--color-brand-secondary) !important;
+}
+
 .bg-primary {
-  background-color: #af0b56 !important;
+  background-color: var(--color-brand-carmin) !important;
 }
+
 .border-primary {
-  border-color: #af0b56 !important;
+  border-color: var(--color-brand-carmin) !important;
 }
 
 /* Unified DaisyUI Button Styles */
 .btn-primary {
-  background-color: #af0b56 !important;
-  border-color: #af0b56 !important;
+  background-color: var(--color-brand-carmin) !important;
+  border-color: var(--color-brand-carmin) !important;
   color: #ffffff !important;
 }
+
 .btn-primary:hover {
   background-color: #8f0946 !important;
   border-color: #8f0946 !important;
 }
 
 .btn-outline.btn-primary {
-  color: #af0b56 !important;
-  border-color: #af0b56 !important;
+  color: var(--color-brand-carmin) !important;
+  border-color: var(--color-brand-carmin) !important;
   background-color: transparent !important;
 }
+
 .btn-outline.btn-primary:hover {
-  background-color: #af0b56 !important;
-  border-color: #af0b56 !important;
+  background-color: var(--color-brand-carmin) !important;
+  border-color: var(--color-brand-carmin) !important;
   color: #ffffff !important;
 }
 
@@ -80,13 +115,6 @@
 }
 
 .badge {
-  display: inline-block;
-  text-align: center;
-  vertical-align: middle;
-  line-height: calc(var(--size, 1.5rem) - (var(--border, 1px) * 2));
-}
-
-.badge:has(> svg, > img, > .badge) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -106,8 +134,8 @@
   display: inline-flex;
 }
 
-.btn > span,
-.badge > span {
+.btn>span,
+.badge>span {
   display: inline-block;
   max-width: 100%;
   overflow: hidden;
@@ -120,6 +148,7 @@
 .tooltip {
   overflow: visible !important;
 }
+
 .tooltip:before,
 .tooltip:after {
   z-index: 50 !important;
