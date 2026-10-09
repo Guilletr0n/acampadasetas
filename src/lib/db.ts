@@ -555,60 +555,83 @@ const INITIAL_ACTIVITIES: ScheduleActivity[] = [
 ];
 
 /**
- * Calculates the most recent 04:00 AM cutoff timestamp in Spain (Europe/Madrid).
+ * Calculates the most recent 00:00 (midnight) cutoff timestamp in Spain (Europe/Madrid).
  * Any activity published before this timestamp belongs to a previous daily cycle.
  */
-export function getMadrid4amCutoff(now = new Date()): Date {
+export function getMadridMidnightCutoff(now = new Date()): Date {
   const dtf = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Europe/Madrid',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
   });
 
-  const formatted = dtf.format(now);
-  const [datePart, timePart] = formatted.split(', ');
-  const [year, month, day] = datePart.split('-').map(Number);
-  const [hour] = timePart.split(':').map(Number);
+  const dateStr = dtf.format(now);
+  const [year, month, day] = dateStr.split('-').map(Number);
 
-  // If current Madrid hour < 4, cutoff was yesterday at 04:00.
-  // If current Madrid hour >= 4, cutoff was today at 04:00.
-  const targetDate = new Date(Date.UTC(year, month - 1, hour < 4 ? day - 1 : day, 12));
-  const y = targetDate.getUTCFullYear();
-  const m = targetDate.getUTCMonth();
-  const d = targetDate.getUTCDate();
-
-  // Find exact UTC hour corresponding to 04:00 Madrid time
-  for (let h = 1; h <= 4; h++) {
-    const testUtc = new Date(Date.UTC(y, m, d, h, 0, 0));
-    const madridHour = parseInt(
-      new Intl.DateTimeFormat('en-US', {
-        timeZone: 'Europe/Madrid',
-        hour: 'numeric',
-        hour12: false,
-      }).format(testUtc),
-      10
-    );
-    if (madridHour === 4) {
-      return testUtc;
+  // Search exact UTC time corresponding to 00:00:00 Europe/Madrid for today
+  for (let h = 20; h <= 26; h++) {
+    const testDate = new Date(Date.UTC(year, month - 1, day - 1, h, 0, 0, 0));
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Europe/Madrid',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).formatToParts(testDate);
+    const mDay = Number(parts.find(p => p.type === 'day')?.value);
+    const mHour = Number(parts.find(p => p.type === 'hour')?.value);
+    const mMin = Number(parts.find(p => p.type === 'minute')?.value);
+    if (mDay === day && mHour === 0 && mMin === 0) {
+      return testDate;
     }
   }
-  return new Date(Date.UTC(y, m, d, 2, 0, 0));
+  return new Date(Date.UTC(year, month - 1, day - 1, 22, 0, 0, 0));
 }
 
+// Backward-compatible alias
+export const getMadrid4amCutoff = getMadridMidnightCutoff;
+
 /**
- * Checks all activities and transitions any activity published before 04:00 AM into 'draft' status.
+ * Checks all activities and transitions any activity published before 00:00 (midnight) into 'draft' status.
  */
 export async function checkAndResetExpiredActivities(): Promise<number> {
-  const cutoff = getMadrid4amCutoff();
-  const list = readLocal<ScheduleActivity[]>(ACTIVITIES_FILE, INITIAL_ACTIVITIES);
-
+  const cutoff = getMadridMidnightCutoff();
   let updatedCount = 0;
-  const expiredIds: string[] = [];
+  const expiredFirestoreIds: string[] = [];
+
+  if (firestoreDb) {
+    try {
+      const snap = await firestoreDb.collection('activities').get();
+      if (!snap.empty) {
+        const batch = firestoreDb.batch();
+        for (const doc of snap.docs) {
+          const act = doc.data() as ScheduleActivity;
+          if (act.status === 'published') {
+            const actTime = new Date(act.updatedAt || act.createdAt || 0).getTime();
+            if (actTime < cutoff.getTime()) {
+              batch.update(doc.ref, {
+                status: 'draft',
+                updatedAt: new Date().toISOString(),
+              });
+              expiredFirestoreIds.push(doc.id);
+              updatedCount++;
+            }
+          }
+        }
+        if (expiredFirestoreIds.length > 0) {
+          await batch.commit();
+        }
+      }
+    } catch (e) {
+      console.warn('Firestore checkAndResetExpiredActivities fallback:', e);
+    }
+  }
+
+  const list = readLocal<ScheduleActivity[]>(ACTIVITIES_FILE, INITIAL_ACTIVITIES);
+  let localUpdated = false;
 
   for (const act of list) {
     if (act.status === 'published') {
@@ -616,28 +639,16 @@ export async function checkAndResetExpiredActivities(): Promise<number> {
       if (actTime < cutoff.getTime()) {
         act.status = 'draft';
         act.updatedAt = new Date().toISOString();
-        expiredIds.push(act.id);
-        updatedCount++;
+        if (!expiredFirestoreIds.includes(act.id)) {
+          updatedCount++;
+        }
+        localUpdated = true;
       }
     }
   }
 
-  if (updatedCount > 0) {
+  if (localUpdated) {
     writeLocal(ACTIVITIES_FILE, list);
-    if (firestoreDb) {
-      try {
-        const batch = firestoreDb.batch();
-        for (const id of expiredIds) {
-          batch.update(firestoreDb.collection('activities').doc(id), {
-            status: 'draft',
-            updatedAt: new Date().toISOString(),
-          });
-        }
-        await batch.commit();
-      } catch (e) {
-        console.warn('Firestore checkAndResetExpiredActivities fallback:', e);
-      }
-    }
   }
 
   return updatedCount;
@@ -651,7 +662,7 @@ if (typeof setInterval !== 'undefined') {
 }
 
 export async function getActivities(publishedOnly = false): Promise<ScheduleActivity[]> {
-  // Automatically rollover any activities from before 4:00 AM
+  // Automatically rollover any activities from before midnight (00:00)
   await checkAndResetExpiredActivities();
 
   let list: ScheduleActivity[] = [];
@@ -749,9 +760,11 @@ export async function saveActivity(data: {
 
 export async function updateActivityStatus(id: string, status: 'published' | 'draft'): Promise<boolean> {
   const now = new Date().toISOString();
+  let firestoreSuccess = false;
   if (firestoreDb) {
     try {
       await firestoreDb.collection('activities').doc(id).update({ status, updatedAt: now });
+      firestoreSuccess = true;
     } catch (e) {
       console.warn('Firestore updateActivityStatus fallback:', e);
     }
@@ -759,37 +772,61 @@ export async function updateActivityStatus(id: string, status: 'published' | 'dr
 
   const list = readLocal<ScheduleActivity[]>(ACTIVITIES_FILE, INITIAL_ACTIVITIES);
   const index = list.findIndex(a => a.id === id);
-  if (index === -1) return false;
+  if (index >= 0) {
+    list[index].status = status;
+    list[index].updatedAt = now;
+    writeLocal(ACTIVITIES_FILE, list);
+    return true;
+  }
 
-  list[index].status = status;
-  list[index].updatedAt = now;
-  writeLocal(ACTIVITIES_FILE, list);
-  return true;
+  return firestoreSuccess;
 }
 
 export async function deleteDraftActivities(ids: string[]): Promise<{ deleted: number; notAllowed: number }> {
-  const list = readLocal<ScheduleActivity[]>(ACTIVITIES_FILE, INITIAL_ACTIVITIES);
   const targetIds = new Set(ids);
-
-  const draftsToDelete = list.filter(a => targetIds.has(a.id) && a.status === 'draft');
-  const publishedAttempted = list.filter(a => targetIds.has(a.id) && a.status === 'published');
-
-  const draftIdsSet = new Set(draftsToDelete.map(d => d.id));
-  const remaining = list.filter(a => !draftIdsSet.has(a.id));
+  let fsDeletedCount = 0;
+  let fsNotAllowedCount = 0;
 
   if (firestoreDb) {
     try {
-      const batch = firestoreDb.batch();
-      for (const d of draftsToDelete) {
-        batch.delete(firestoreDb.collection('activities').doc(d.id));
+      const snap = await firestoreDb.collection('activities').get();
+      if (!snap.empty) {
+        const batch = firestoreDb.batch();
+        for (const doc of snap.docs) {
+          if (targetIds.has(doc.id)) {
+            const data = doc.data() as ScheduleActivity;
+            if (data.status === 'draft') {
+              batch.delete(doc.ref);
+              fsDeletedCount++;
+            } else {
+              fsNotAllowedCount++;
+            }
+          }
+        }
+        if (fsDeletedCount > 0) {
+          await batch.commit();
+        }
       }
-      await batch.commit();
     } catch (e) {
       console.warn('Firestore deleteDraftActivities fallback:', e);
     }
   }
 
+  const list = readLocal<ScheduleActivity[]>(ACTIVITIES_FILE, INITIAL_ACTIVITIES);
+  const draftsToDelete = list.filter(a => targetIds.has(a.id) && a.status === 'draft');
+  const publishedAttempted = list.filter(a => targetIds.has(a.id) && a.status === 'published');
+
+  const draftIdsSet = new Set(draftsToDelete.map(d => d.id));
+  const remaining = list.filter(a => !draftIdsSet.has(a.id));
   writeLocal(ACTIVITIES_FILE, remaining);
+
+  if (firestoreDb) {
+    return {
+      deleted: fsDeletedCount,
+      notAllowed: fsNotAllowedCount,
+    };
+  }
+
   return {
     deleted: draftsToDelete.length,
     notAllowed: publishedAttempted.length,

@@ -27,7 +27,7 @@ const dayNum = parts.find(p => p.type === 'day')?.value || now.getDate();
 const monthNum = parts.find(p => p.type === 'month')?.value || (now.getMonth() + 1);
 const dateNumberLabel = `${dayNum} – ${monthNum}`;
 
-// Retrieve published activities from database (4:00 AM cutoff handled automatically)
+// Retrieve published activities from database (midnight 00:00 cutoff handled automatically)
 const activities = await getActivities(true);
 ---
 

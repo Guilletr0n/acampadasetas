@@ -11,7 +11,7 @@ export const prerender = false;
 // Ensure users collection is initialized in Firestore
 await seedUsersIfEmpty();
 
-// Fetch published activities (this triggers the 4:00 AM expiration check if past 4 AM!)
+// Fetch published activities (this triggers the midnight 00:00 expiration check if past 00:00!)
 const publishedActivities = await getActivities(true);
 const rawSections = await getSections(true); // true = live published sections only
 
