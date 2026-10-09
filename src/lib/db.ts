@@ -661,6 +661,35 @@ if (typeof setInterval !== 'undefined') {
   }, 5 * 60 * 1000);
 }
 
+/**
+ * Parses a time string (e.g. "17:30", "9:00", "09:15", "10h30", "18:00 - 20:00")
+ * into total minutes from midnight 00:00 (0 to 1439).
+ * Returns Infinity if unparseable so it sorts at the end.
+ */
+export function parseTimeToMinutes(timeStr?: string): number {
+  if (!timeStr) return Infinity;
+  const match = timeStr.trim().match(/^(\d{1,2})(?:[:.hH](\d{1,2}))?/);
+  if (!match) return Infinity;
+  const hours = parseInt(match[1], 10);
+  const minutes = match[2] ? parseInt(match[2], 10) : 0;
+  if (isNaN(hours) || isNaN(minutes)) return Infinity;
+  return hours * 60 + minutes;
+}
+
+export function compareActivitiesByTime(a: ScheduleActivity, b: ScheduleActivity): number {
+  const minA = parseTimeToMinutes(a.time);
+  const minB = parseTimeToMinutes(b.time);
+  if (minA !== minB) {
+    return minA - minB;
+  }
+  return (
+    a.time.localeCompare(b.time) ||
+    ((a.order ?? 0) - (b.order ?? 0)) ||
+    (a.createdAt || '').localeCompare(b.createdAt || '') ||
+    a.id.localeCompare(b.id)
+  );
+}
+
 export async function getActivities(publishedOnly = false): Promise<ScheduleActivity[]> {
   // Automatically rollover any activities from before midnight (00:00)
   await checkAndResetExpiredActivities();
@@ -690,7 +719,7 @@ export async function getActivities(publishedOnly = false): Promise<ScheduleActi
     list = list.filter(a => a.status === 'published');
   }
 
-  return list.sort((a, b) => (a.order - b.order) || a.time.localeCompare(b.time));
+  return list.sort(compareActivitiesByTime);
 }
 
 export async function saveActivity(data: {
@@ -745,6 +774,11 @@ export async function saveActivity(data: {
     };
     list.push(item);
   }
+
+  list.sort(compareActivitiesByTime);
+  list.forEach((act, idx) => {
+    act.order = idx + 1;
+  });
 
   if (firestoreDb) {
     try {
