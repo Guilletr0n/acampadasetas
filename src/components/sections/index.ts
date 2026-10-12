@@ -4,7 +4,8 @@ import NuevaPlantilla from './nuevaPlantilla.astro';
 import ScheduleActivities from './ScheduleActivities.astro';
 import type { SectionContent } from '../../lib/types';
 import FondoTrigo from './FondoTrigo.astro';
-import FondoCarmin from './FondoCarmin.astro'
+import FondoCarmin from './FondoCarmin.astro';
+import PastillaBlanca from './PastillaBlanca.astro';
 
 export interface SectionTemplateProps {
   slug: string;
@@ -69,12 +70,26 @@ export const TEMPLATES: Record<string, SectionTemplateMeta> = {
     label: 'Fondo carmin',
     description: 'Nueva plantilla con fondo de carmin.',
     component: FondoCarmin,
+  },
+  'pastilla-blanca': {
+    id: 'pastilla-blanca',
+    label: 'Pastilla blanca',
+    description: 'Tarjeta blanca redondeada sobre fondo trigo, con badge, tipografía en carmín y botón de acción.',
+    component: PastillaBlanca,
+  },
+  'pastilla blanca': {
+    id: 'pastilla blanca',
+    label: 'Pastilla blanca',
+    description: 'Tarjeta blanca redondeada sobre fondo trigo, con badge, tipografía en carmín y botón de acción.',
+    component: PastillaBlanca,
   }
 };
 
 export const DEFAULT_TEMPLATE_ID = 'single-column';
 
-export const AVAILABLE_TEMPLATES = Object.values(TEMPLATES).filter(t => t.id !== 'horario-actividades');
+export const AVAILABLE_TEMPLATES = Object.values(TEMPLATES).filter(
+  t => t.id !== 'horario-actividades' && t.id !== 'pastilla blanca'
+);
 
 export function getTemplateComponent(templateId: string) {
   return TEMPLATES[templateId]?.component || TEMPLATES[DEFAULT_TEMPLATE_ID].component;

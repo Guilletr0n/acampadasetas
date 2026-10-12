@@ -1,0 +1,118 @@
+---
+import type { SectionTemplateProps } from "./index";
+import { ScrollText, ArrowRight } from "lucide-astro";
+import { marked } from "marked";
+
+interface Props extends SectionTemplateProps {}
+
+const {
+  slug,
+  content,
+  isAlternate = false,
+  renderedMarkdown = marked.parse(content.body || ""),
+} = Astro.props;
+
+// Detectar si illustrationUrl es un enlace de destino o un archivo de imagen
+const isExplicitLink =
+  content.illustrationUrl &&
+  (content.illustrationUrl.startsWith("/") ||
+    content.illustrationUrl.startsWith("http")) &&
+  !content.illustrationUrl.match(/\.(png|jpg|jpeg|webp|gif|svg)(\?.*)?$/i);
+
+const isImage = content.illustrationUrl && !isExplicitLink;
+
+// URL de destino del botón CTA
+const targetUrl = isExplicitLink
+  ? content.illustrationUrl
+  : slug === "manifiesto"
+    ? "/manifiesto"
+    : slug === "gallery"
+      ? "/gallery"
+      : null;
+---
+
+<section
+  id={slug}
+  class={`py-16 md:py-24 px-4 border-b border-black/10 relative overflow-hidden ${
+    isAlternate ? "bg-[#f7e9d0]" : "bg-[#FFF0DD]"
+  }`}
+>
+  <div class="max-w-5xl mx-auto">
+    <div
+      class="bg-white/90 backdrop-blur-xs rounded-3xl border border-black/10 shadow-sm hover:shadow-md transition-shadow p-8 md:p-12 relative overflow-hidden space-y-6"
+    >
+      <!-- Elemento decorativo de fondo -->
+      <div
+        class="absolute -right-12 -bottom-12 w-72 h-72 bg-[#af0b56]/5 rounded-full blur-3xl pointer-events-none"
+      >
+      </div>
+
+      <!-- Badge oficial / Destacado -->
+      {
+        content.highlight && (
+          <div>
+            <div class="inline-flex items-center gap-2 bg-[#af0b56] text-[#FFF0DD] text-xs md:text-sm font-bold uppercase tracking-wider px-4 py-1.5 rounded-full shadow-xs">
+              <ScrollText class="w-4 h-4 shrink-0" />
+              <span>{content.highlight}</span>
+            </div>
+          </div>
+        )
+      }
+
+      <!-- Título de la sección -->
+      <h2
+        class="text-4xl sm:text-5xl md:text-6xl font-londrina text-[#af0b56] tracking-wide leading-[1.05]"
+      >
+        {content.title}
+      </h2>
+
+      <!-- Subtítulo opcional -->
+      {
+        content.subtitle && (
+          <p class="text-xl md:text-2xl text-gray-700 font-medium font-londrina tracking-wide">
+            {content.subtitle}
+          </p>
+        )
+      }
+
+      <!-- Párrafo explicativo / contenido markdown -->
+      {
+        renderedMarkdown && (
+          <div
+            class="text-base md:text-lg text-[#1d1d1b] leading-relaxed font-sans max-w-4xl space-y-4"
+            set:html={renderedMarkdown}
+          />
+        )
+      }
+
+      <!-- Ilustración si es imagen -->
+      {
+        isImage && (
+          <div class="rounded-2xl overflow-hidden max-w-2xl bg-white shadow-sm border border-black/10 my-4">
+            <img
+              src={content.illustrationUrl}
+              alt={content.title}
+              class="w-full h-auto object-cover max-h-[420px]"
+              loading="lazy"
+            />
+          </div>
+        )
+      }
+
+      <!-- Botón de acción -->
+      {
+        targetUrl && (
+          <div class="pt-2">
+            <a
+              href={targetUrl}
+              class="btn bg-[#af0b56] hover:bg-[#8f0946] text-[#FFF0DD] font-bold text-base md:text-lg px-8 py-3.5 rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all inline-flex items-center gap-2 group w-fit max-w-full"
+            >
+              <span>Leer completo</span>
+              <ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform shrink-0" />
+            </a>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</section>
