@@ -1,0 +1,1074 @@
+---
+import Layout from "../layouts/Layout.astro";
+import {
+    ArrowLeft,
+    Share2,
+    Image as ImageIcon,
+    Lock,
+    ArrowUp,
+    Megaphone,
+} from "lucide-astro";
+
+export const prerender = false;
+
+// Reivindicaciones 15. ¿Qué se está reclamando?
+const reivindicaciones = [
+    {
+        letter: "A",
+        text: "Prórroga automática indefinida de los alquileres y congelación de las hipotecas",
+    },
+    {
+        letter: "B",
+        text: "Ajustar los precios de las viviendas en alquiler vinculándolo al SMI, contemplando planes de ajuste para los contratos existentes.",
+    },
+    {
+        letter: "C",
+        text: "Prohibición automática de cualquier desahucio por motivos económicos comprobados, ya sea en régimen de alquiler o de hipoteca. Así como la ilegalización de empresas de desokupación y todas las empresas que ejercen y venden el uso de la violencia inmobiliaria contra civiles.",
+    },
+    {
+        letter: "D",
+        text: "Expropiación sin indemnización de los especuladores, específicamente a los fondos buitres, Sareb y bancos. Los bienes usados para especular deben pasar al parque social de viviendas para satisfacer las necesidades de las familias trabajadoras.",
+    },
+    {
+        letter: "E",
+        text: "Las viviendas en propiedad de persona física sin uso residencial quedan sujetas a expropiación inmediata (salvo necesidad comprobada), para su incorporación al parque social de vivienda.",
+    },
+    {
+        letter: "F",
+        text: "Prohibición a las sociedades empresariales de hacer negocio con la Vivienda",
+    },
+    {
+        letter: "G",
+        text: "Fin de contratos de alquiler precarios para proteger el alquiler de temporada.",
+    },
+    {
+        letter: "H",
+        text: "Prohibición de reconversión de vivienda en hotel o de uso turístico. Si hace falta hoteles, que construyan hoteles, pero que no puedan comprar bloques.",
+    },
+    {
+        letter: "I",
+        text: "Derogar la privatización de VPO. La vivienda construida con dinero público, debe permanecer pública para siempre.",
+    },
+    {
+        letter: "J",
+        text: "Demandamos un Plan de Construcción de Viviendas Sociales que vaya en relación a las necesidades de la Clase Trabajadora, a través de la Nacionalización del Suelo Urbano Edificable para ampliar el Parque Público de Viviendas respetando siempre el Medio Ambiente.",
+    },
+];
+---
+
+<Layout title="PROPUESTA PROGRAMACIÓN RRSS · HUELGA GENERAL 11N">
+    <!-- Barra de Lectura / Progreso Superior -->
+    <div
+        id="reading-progress"
+        aria-hidden="true"
+        class="fixed top-0 left-0 h-1 bg-[#af0b56] z-[60] w-0 transition-all duration-150"
+    >
+    </div>
+
+    <!-- Header de Navegación Sticky -->
+    <header
+        class="sticky top-0 z-50 bg-[#fcf2df]/95 backdrop-blur-md border-b border-black/10 px-4 md:px-8 py-3 transition-all shadow-sm"
+    >
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <a href="/" class="flex items-center gap-2 group">
+                <span
+                    class="text-2xl md:text-4xl font-londrina text-[#af0b56] tracking-wide group-hover:scale-105 transition-transform"
+                >
+                    ACAMPADA de las SETAS
+                </span>
+            </a>
+
+            <!-- Desktop Nav -->
+            <nav
+                class="hidden md:flex items-center gap-6 font-bold text-sm text-[#1d1d1b]"
+            >
+                <a
+                    href="/"
+                    class="hover:text-[#af0b56] uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 hover:-translate-x-0.5"
+                >
+                    <ArrowLeft class="w-4 h-4" />
+                    <span>Inicio</span>
+                </a>
+                <a
+                    href="/manifiesto"
+                    class="hover:text-[#af0b56] uppercase tracking-wider transition-colors"
+                >
+                    Manifiesto
+                </a>
+                <a
+                    href="/huelga"
+                    class="text-[#af0b56] uppercase tracking-wider transition-colors font-extrabold border-b-2 border-[#af0b56] pb-0.5"
+                >
+                    Huelga 11N
+                </a>
+                <a
+                    href="/gallery"
+                    class="hover:text-[#af0b56] uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 hover:text-[#af0b56]"
+                >
+                    <ImageIcon class="w-4 h-4" />
+                    <span>Galería</span>
+                </a>
+            </nav>
+
+            <!-- Mobile dropdown -->
+            <div class="dropdown dropdown-end md:hidden">
+                <label
+                    tabindex="0"
+                    class="btn btn-ghost btn-sm"
+                    aria-label="Menú"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </label>
+                <ul
+                    tabindex="0"
+                    class="dropdown-content menu p-2 shadow-lg bg-[#fcf2df] border border-black/10 rounded-box w-52 text-sm font-bold mt-2"
+                >
+                    <li>
+                        <a
+                            href="/"
+                            class="uppercase text-[#1d1d1b] hover:text-[#af0b56]"
+                        >
+                            ← Inicio
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="/manifiesto"
+                            class="uppercase text-[#1d1d1b] hover:text-[#af0b56]"
+                        >
+                            Manifiesto
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/huelga" class="uppercase text-[#af0b56]">
+                            Huelga 11N
+                        </a>
+                    </li>
+                    <li class="border-t border-black/10 mt-1 pt-1">
+                        <a
+                            href="/gallery"
+                            class="text-[#1d1d1b] hover:text-[#af0b56] inline-flex items-center gap-1.5"
+                        >
+                            <ImageIcon class="w-4 h-4" />
+                            <span>Galería</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="/login"
+                            class="text-gray-700 inline-flex items-center gap-1.5"
+                        >
+                            <Lock class="w-4 h-4" />
+                            <span>Administración</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <main class="min-h-screen py-8 md:py-16 px-4 md:px-6">
+        <div class="max-w-4xl mx-auto space-y-10 md:space-y-12">
+            <!-- Barra de acciones contextuales -->
+            <div
+                class="flex items-center justify-between text-xs md:text-sm font-semibold text-neutral-600"
+            >
+                <a
+                    href="/"
+                    class="inline-flex items-center gap-1.5 text-[#af0b56] hover:underline transition-all hover:-translate-x-0.5"
+                >
+                    <ArrowLeft class="w-4 h-4" />
+                    <span>Volver al inicio</span>
+                </a>
+                <button
+                    id="btn-share"
+                    type="button"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-black/15 bg-white/80 hover:bg-white text-[#1d1d1b] hover:text-[#af0b56] hover:border-[#af0b56]/40 transition-all cursor-pointer shadow-xs hover:shadow-sm"
+                >
+                    <Share2 class="w-3.5 h-3.5 text-[#af0b56]" />
+                    <span id="share-text">Compartir</span>
+                </button>
+            </div>
+
+            <!-- Título Principal Dinámico con Gráfico de Campaña -->
+            <header
+                class="text-center pt-2 pb-8 border-b-2 border-black/10 relative space-y-4"
+            >
+                <div class="flex justify-center">
+                    <img
+                        src="/assets/images/cartel-huelga-512.png"
+                        alt="11 N · Una huelga como una casa"
+                        width="220"
+                        height="220"
+                        class="w-36 sm:w-44 md:w-52 h-auto aspect-square object-contain drop-shadow-md hover:scale-105 transition-transform"
+                        loading="eager"
+                        decoding="async"
+                    />
+                </div>
+
+                <h1
+                    class="text-4xl sm:text-5xl md:text-7xl font-londrina text-[#af0b56] leading-[1.0] tracking-wide drop-shadow-xs"
+                >
+                    PROPUESTA PROGRAMACIÓN RRSS · HUELGA GENERAL 11N
+                </h1>
+
+                <div>
+                    <span
+                        class="inline-flex items-center gap-2 bg-[#FFF0DD] text-[#af0b56] border border-[#af0b56]/20 text-sm md:text-base font-bold uppercase tracking-wider px-4 py-1.5 rounded-full shadow-xs"
+                    >
+                        13/10/2026
+                    </span>
+                </div>
+
+                <div class="w-24 h-1.5 bg-[#af0b56] mx-auto mt-4 rounded-full">
+                </div>
+            </header>
+
+            <!-- Bloques de Contenido con Variaciones Estilísticas -->
+            <article
+                class="space-y-8 text-[#1d1d1b] text-base md:text-lg leading-relaxed font-sans"
+            >
+                <!-- 1. La vivienda se ha convertido en un lujo -->
+                <div
+                    class="bg-white/90 backdrop-blur-xs p-6 md:p-9 rounded-3xl border border-black/10 shadow-xs hover:shadow-md transition-shadow space-y-6"
+                >
+                    <div
+                        class="flex items-center justify-between gap-4 flex-wrap"
+                    >
+                        <h2
+                            class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
+                        >
+                            1. La vivienda se ha convertido en un lujo
+                        </h2>
+                    </div>
+
+                    <p
+                        class="first-letter:text-5xl first-letter:md:text-6xl first-letter:font-londrina first-letter:text-[#af0b56] first-letter:float-left first-letter:mr-3 first-letter:leading-none text-neutral-800"
+                    >
+                        En Sevilla, el precio anunciado del alquiler pasó de <strong
+                            class="text-neutral-900 font-semibold"
+                            >9,8 €/m² en 2020 a 12,8 €/m² en 2025</strong
+                        >, un aumento del 30,6 %. En el mismo periodo, el SMI
+                        mensual pasó de 950 € a 1.184 € en 14 pagas: subió un
+                        24,6 %. Los alquileres suben más rápido que el salario
+                        mínimo. ¿Cómo se supone que vamos a construir un
+                        proyecto de vida si cada vez cuesta más pagar un techo?
+                    </p>
+
+                    <div
+                        class="bg-[#FFF0DD] border-l-4 md:border-l-6 border-[#af0b56] p-4 md:p-6 rounded-r-2xl"
+                    >
+                        <p
+                            class="font-londrina text-xl sm:text-2xl md:text-3xl text-[#af0b56] tracking-wide leading-tight"
+                        >
+                            LA VIVIENDA ES UN DERECHO, NO UN PRIVILEGIO.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 2. Viviendas turísticas y barrios -->
+                <div
+                    class="bg-[#FFF0DD]/70 border-l-4 md:border-l-6 border-[#af0b56] p-6 md:p-9 rounded-r-3xl shadow-xs space-y-5"
+                >
+                    <div
+                        class="flex items-center justify-between gap-4 flex-wrap"
+                    >
+                        <h2
+                            class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
+                        >
+                            2. Viviendas turísticas y barrios
+                        </h2>
+                    </div>
+
+                    <p
+                        class="font-londrina text-2xl sm:text-3xl text-[#1d1d1b] tracking-wide"
+                    >
+                        ¿PARA QUIÉN SON NUESTROS BARRIOS?
+                    </p>
+
+                    <p class="text-neutral-800">
+                        En mayo de 2026, Sevilla capital registraba <strong
+                            class="text-neutral-900 font-semibold"
+                            >6.937 viviendas turísticas</strong
+                        >, con capacidad para casi 29.700 personas. Cuando una
+                        vivienda se destina al turismo, deja de estar disponible
+                        para el alquiler residencial mientras mantiene ese uso.
+                        En zonas con mucha presión turística, esto puede
+                        intensificar la competencia por la vivienda y
+                        transformar la vida cotidiana de los barrios.
+                    </p>
+
+                    <div
+                        class="p-4 md:p-5 rounded-2xl bg-white/90 border border-[#af0b56]/20"
+                    >
+                        <p
+                            class="font-londrina text-xl sm:text-2xl text-[#af0b56] tracking-wide"
+                        >
+                            LOS BARRIOS SON PARA VIVIR, NO SOLO PARA VISITAR.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 3. La emancipación juvenil -->
+                <div
+                    class="bg-white/90 backdrop-blur-xs p-6 md:p-9 rounded-3xl border border-black/10 shadow-xs hover:shadow-md transition-shadow space-y-5"
+                >
+                    <div
+                        class="flex items-center justify-between gap-4 flex-wrap"
+                    >
+                        <h2
+                            class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
+                        >
+                            3. La emancipación juvenil
+                        </h2>
+                    </div>
+
+                    <p
+                        class="font-londrina text-2xl sm:text-3xl text-[#1d1d1b] tracking-wide"
+                    >
+                        ¿INDEPENDIZARSE? CASI UNA MISIÓN IMPOSIBLE
+                    </p>
+
+                    <p class="text-neutral-800">
+                        En España, la tasa de emancipación juvenil cayó hasta el <strong
+                            class="text-neutral-900 font-semibold"
+                            >14,5 % en 2025</strong
+                        >, según el Consejo de la Juventud de España. En
+                        Andalucía, se situaba en el <strong
+                            class="text-neutral-900 font-semibold"
+                            >12,6 % durante el primer semestre de 2024.</strong
+                        > Alquileres inasumibles, salarios insuficientes e inestabilidad
+                        laboral hacen que muchas personas jóvenes tengan que retrasar
+                        su independencia, compartir vivienda o seguir viviendo con
+                        sus familias aunque quieran marcharse.
+                    </p>
+
+                    <div
+                        class="bg-[#FFF0DD] border-l-4 md:border-l-6 border-[#af0b56] p-4 md:p-6 rounded-r-2xl"
+                    >
+                        <p
+                            class="font-londrina text-xl sm:text-2xl md:text-3xl text-[#af0b56] tracking-wide leading-tight"
+                        >
+                            NO PEDIMOS LUJOS. PEDIMOS PODER EMPEZAR NUESTRA
+                            VIDA.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 4. Los precios suben ¿Y los salarios? -->
+                <div
+                    class="bg-[#FFF0DD]/70 border-l-4 md:border-l-6 border-[#af0b56] p-6 md:p-9 rounded-r-3xl shadow-xs space-y-5"
+                >
+                    <div
+                        class="flex items-center justify-between gap-4 flex-wrap"
+                    >
+                        <h2
+                            class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
+                        >
+                            4. Los precios suben ¿Y los salarios?
+                        </h2>
+                    </div>
+
+                    <p
+                        class="font-londrina text-2xl sm:text-3xl text-[#1d1d1b] tracking-wide"
+                    >
+                        LLEGAR A FIN DE MES NO DEBERÍA SER UN LUJO
+                    </p>
+
+                    <p class="text-neutral-800">
+                        Entre 2020 y 2025, los alimentos subieron un <strong
+                            class="text-neutral-900 font-semibold"
+                            >37,7 % en España</strong
+                        > y el <strong class="text-neutral-900 font-semibold"
+                            >IPC general, un 23,5 %.</strong
+                        > Según el Consejo de la Juventud de España, a finales de
+                        2024 una persona joven asalariada tenía que destinar el <strong
+                            class="text-neutral-900 font-semibold"
+                            >92,3 % de su sueldo al alquiler si vivía sola</strong
+                        >. Para <strong class="text-neutral-900 font-semibold"
+                            >comprar una vivienda</strong
+                        >, el esfuerzo estimado era del <strong
+                            class="text-neutral-900 font-semibold"
+                            >64,1 % del salario</strong
+                        >. Con estos costes, ahorrar para una entrada, afrontar
+                        imprevistos o independizarse resulta cada vez más
+                        difícil.
+                    </p>
+
+                    <div
+                        class="p-4 md:p-5 rounded-2xl bg-white/90 border border-[#af0b56]/20"
+                    >
+                        <p
+                            class="font-londrina text-xl sm:text-2xl text-[#af0b56] tracking-wide"
+                        >
+                            QUEREMOS SALARIOS DIGNOS Y UNA VIVIENDA DIGNA.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 5. ¿Por qué una huelga general por la vivienda? -->
+                <div
+                    class="bg-[#B50655] text-[#FFF0DD] p-8 md:p-12 rounded-3xl shadow-xl my-10 relative overflow-hidden space-y-6"
+                >
+                    <h2
+                        class="text-3xl sm:text-4xl md:text-5xl font-londrina text-white tracking-wide leading-tight"
+                    >
+                        5. ¿Por qué una huelga general por la vivienda?
+                    </h2>
+
+                    <p
+                        class="font-londrina text-2xl sm:text-3xl md:text-4xl text-[#FFF0DD] tracking-wide leading-tight"
+                    >
+                        ¿Qué pasa, qué pasa? ¡Que no tenemos casa!
+                    </p>
+
+                    <p
+                        class="text-[#FFF0DD]/95 text-base md:text-lg leading-relaxed font-sans"
+                    >
+                        La vivienda, los salarios y el coste de la vida no son
+                        problemas aislados, condicionan dónde vivimos, cuánto
+                        podemos ahorrar y qué futuro podemos construir. Por eso,
+                        las reivindicaciones por la vivienda se conectan con las
+                        condiciones de vida y de trabajo. La convocatoria de
+                        huelga general prevista para el 11 de noviembre busca
+                        convertir el malestar individual en una reivindicación
+                        colectiva. Porque que no puedas pagar el alquiler o
+                        acceder a la compra de una vivienda digna, no es un
+                        fracaso personal, también es un problema social y
+                        político.
+                    </p>
+
+                    <div
+                        class="bg-white/10 backdrop-blur-xs p-5 md:p-6 rounded-2xl border border-white/20 text-center"
+                    >
+                        <p
+                            class="font-londrina text-2xl sm:text-3xl md:text-4xl text-white tracking-wide"
+                        >
+                            EL 11 DE NOVIEMBRE, QUE SE ESCUCHE NUESTRA VOZ.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 6. La vivienda nos afecta a todas las personas -->
+                <div
+                    class="bg-white/90 backdrop-blur-xs p-6 md:p-9 rounded-3xl border border-black/10 shadow-xs hover:shadow-md transition-shadow space-y-5"
+                >
+                    <div
+                        class="flex items-center justify-between gap-4 flex-wrap"
+                    >
+                        <h2
+                            class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
+                        >
+                            6. La vivienda nos afecta a todas las personas
+                        </h2>
+                    </div>
+
+                    <p
+                        class="font-londrina text-2xl sm:text-3xl text-[#1d1d1b] tracking-wide"
+                    >
+                        LA CRISIS DE LA VIVIENDA NO ENTIENDE DE EDADES
+                    </p>
+
+                    <p class="text-neutral-800">
+                        Afecta a quien busca su primera habitación, a las
+                        familias que destinan gran parte de sus ingresos al
+                        alquiler, a quienes temen no poder renovar su contrato y
+                        a las personas mayores que quieren seguir viviendo en su
+                        barrio. Incluso quienes tienen una vivienda en propiedad
+                        pueden verse afectados por el encarecimiento de la vida,
+                        la dificultad para ayudar a sus hijos a emanciparse o la
+                        pérdida de comunidad en sus barrios. No hace falta vivir
+                        la misma situación para entender que todo el mundo
+                        necesita un lugar digno donde vivir.
+                    </p>
+
+                    <div
+                        class="bg-[#FFF0DD] border-l-4 md:border-l-6 border-[#af0b56] p-4 md:p-6 rounded-r-2xl"
+                    >
+                        <p
+                            class="font-londrina text-xl sm:text-2xl md:text-3xl text-[#af0b56] tracking-wide leading-tight"
+                        >
+                            LA VIVIENDA ES UN PROBLEMA COLECTIVO. LA RESPUESTA
+                            TAMBIÉN.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 7. Organizarse también es participar -->
+                <div
+                    class="bg-[#FFF0DD]/80 p-6 md:p-9 rounded-3xl border border-[#af0b56]/20 shadow-xs space-y-5"
+                >
+                    <div
+                        class="flex items-center justify-between gap-4 flex-wrap"
+                    >
+                        <h2
+                            class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
+                        >
+                            7. Organizarse también es participar
+                        </h2>
+                    </div>
+
+                    <p
+                        class="font-londrina text-2xl sm:text-3xl text-[#1d1d1b] tracking-wide"
+                    >
+                        NO TE QUEDES AL MARGEN, ORGANÍZATE CON TU BARRIO
+                    </p>
+
+                    <p class="text-neutral-800">
+                        La crisis de la vivienda no se soluciona en soledad.
+                        Compartir información, conocer a tus vecinas y vecinos y
+                        organizarse permite identificar problemas comunes y
+                        defender reivindicaciones colectivas. ¿Quieres
+                        implicarte? La Acampada de las Setas cuenta con grupos
+                        de WhatsApp de barrios y pueblos para conectar a las
+                        personas, compartir información y organizar iniciativas.
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <div
+                            class="bg-white/90 p-5 rounded-2xl border border-[#af0b56]/20 text-center flex items-center justify-center"
+                        >
+                            <p
+                                class="font-londrina text-xl sm:text-2xl text-[#af0b56] tracking-wide"
+                            >
+                                ¡Únete al grupo de tu barrio o pueblo y
+                                participa!
+                            </p>
+                        </div>
+                        <div
+                            class="bg-[#af0b56] text-[#FFF0DD] p-5 rounded-2xl text-center flex items-center justify-center"
+                        >
+                            <p
+                                class="font-londrina text-xl sm:text-2xl tracking-wide"
+                            >
+                                LA ORGANIZACIÓN EMPIEZA CERCA DE CASA.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. ¿Conoces tus derechos laborales? -->
+                <div
+                    class="bg-white/90 backdrop-blur-xs p-6 md:p-9 rounded-3xl border border-black/10 shadow-xs hover:shadow-md transition-shadow space-y-5"
+                >
+                    <div
+                        class="flex items-center justify-between gap-4 flex-wrap"
+                    >
+                        <h2
+                            class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
+                        >
+                            8. ¿Conoces tus derechos laborales?
+                        </h2>
+                    </div>
+
+                    <p
+                        class="font-londrina text-2xl sm:text-3xl text-[#1d1d1b] tracking-wide"
+                    >
+                        TUS DERECHOS, TAMBIÉN EN HUELGA
+                    </p>
+
+                    <p class="text-neutral-800">
+                        ¿Tienes dudas sobre cómo secundar la huelga general del
+                        11N o qué implica para ti? Infórmate a través de los
+                        canales oficiales de la convocatoria, consulta con tu
+                        sindicato o pregunta a la Acampada de las Setas. Es
+                        importante conocer las condiciones de la convocatoria y
+                        resolver tus dudas antes de la huelga.
+                    </p>
+
+                    <div
+                        class="bg-[#FFF0DD] border-l-4 md:border-l-6 border-[#af0b56] p-4 md:p-6 rounded-r-2xl"
+                    >
+                        <p
+                            class="font-londrina text-xl sm:text-2xl md:text-3xl text-[#af0b56] tracking-wide leading-tight"
+                        >
+                            Una huelga general se gana o se pierde en los
+                            puestos de trabajo.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 9. Las acampadas, del malestar a la organización -->
+                <div
+                    class="bg-[#FFF0DD]/70 border-l-4 md:border-l-6 border-[#af0b56] p-6 md:p-9 rounded-r-3xl shadow-xs space-y-5"
+                >
+                    <div
+                        class="flex items-center justify-between gap-4 flex-wrap"
+                    >
+                        <h2
+                            class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
+                        >
+                            9. Las acampadas, del malestar a la organización
+                        </h2>
+                    </div>
+
+                    <p
+                        class="font-londrina text-2xl sm:text-3xl text-[#1d1d1b] tracking-wide"
+                    >
+                        CUANDO LA GENTE SE ORGANIZA, EL PROBLEMA SE HACE VISIBLE
+                    </p>
+
+                    <p class="text-neutral-800">
+                        Las acampadas por el derecho a la vivienda han llevado a
+                        plazas y calles de todo el país una realidad que afecta
+                        a miles de personas, la dificultad para acceder a una
+                        vivienda digna. Madrid, Sevilla, Bilbao y Santander
+                        mantienen sus acampadas, con cientos de tiendas
+                        instaladas y personas organizándose para defender el
+                        derecho a la vivienda. En Sevilla, la Acampada de las
+                        Setas continúa reuniendo a personas de distintos barrios
+                        y pueblos, con unas 200 tiendas en total. <span
+                            class="text-xs md:text-sm text-neutral-500 italic"
+                            >*(Comprobar)*</span
+                        > Estos espacios sirven para compartir experiencias, visibilizar
+                        situaciones de vulnerabilidad y preparar nuevas movilizaciones,
+                        como la huelga general del 11N.
+                    </p>
+
+                    <div
+                        class="p-5 md:p-6 rounded-2xl bg-white/95 border border-[#af0b56]/20"
+                    >
+                        <p
+                            class="font-londrina text-xl sm:text-2xl md:text-3xl text-[#af0b56] tracking-wide leading-tight"
+                        >
+                            LA ACAMPADA NO ES EL FINAL DEL CAMINO. ACÉRCATE,
+                            INFÓRMATE, PARTICIPA Y ACAMPA CON NOSOTROS
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 10. Cuenta atrás para la huelga -->
+                <div
+                    class="bg-white/90 backdrop-blur-xs p-6 md:p-9 rounded-3xl border border-black/10 shadow-xs hover:shadow-md transition-shadow space-y-5"
+                >
+                    <div
+                        class="flex items-center justify-between gap-4 flex-wrap"
+                    >
+                        <h2
+                            class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
+                        >
+                            10. Cuenta atrás para la huelga
+                        </h2>
+                    </div>
+
+                    <p
+                        class="font-londrina text-2xl sm:text-3xl md:text-4xl text-[#af0b56] tracking-wide"
+                    >
+                        QUEDAN [X] DÍAS PARA LA HUELGA GENERAL POR LA VIVIENDA
+                    </p>
+
+                    <p class="text-neutral-800">
+                        Desde las plazas, los barrios, los pueblos hasta los
+                        centros de trabajo, cada vez más personas están poniendo
+                        sobre la mesa una realidad, vivir y trabajar no debería
+                        ser incompatible con llegar a fin de mes. Las
+                        reivindicaciones que se están organizando incluyen
+                        medidas para frenar los desahucios en situaciones de
+                        vulnerabilidad, limitar la especulación, ampliar la
+                        vivienda pública y garantizar condiciones de vida
+                        dignas. El 11 de noviembre, la movilización quiere
+                        convertir ese malestar en una demanda colectiva.
+                    </p>
+
+                    <div
+                        class="bg-[#FFF0DD] border-l-4 md:border-l-6 border-[#af0b56] p-4 md:p-6 rounded-r-2xl"
+                    >
+                        <p
+                            class="font-londrina text-xl sm:text-2xl md:text-3xl text-[#af0b56] tracking-wide leading-tight"
+                        >
+                            POR EL DERECHO A VIVIR DIGNAMENTE.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 11. Vivir donde hemos nacido - importancia de las redes de apoyo -->
+                <div
+                    class="bg-[#FFF0DD]/70 border-l-4 md:border-l-6 border-[#af0b56] p-6 md:p-9 rounded-r-3xl shadow-xs space-y-5"
+                >
+                    <div
+                        class="flex items-center justify-between gap-4 flex-wrap"
+                    >
+                        <h2
+                            class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
+                        >
+                            11. Vivir donde hemos nacido - importancia de las
+                            redes de apoyo
+                        </h2>
+                    </div>
+
+                    <p
+                        class="font-londrina text-2xl sm:text-3xl text-[#1d1d1b] tracking-wide"
+                    >
+                        QUEREMOS PODER VIVIR DONDE ESTÁ NUESTRA VIDA
+                    </p>
+
+                    <p class="text-neutral-800">
+                        Un hogar no son solo cuatro paredes. Es tener a alguien
+                        que llame a tu puerta para ver cómo estás, una vecina
+                        que note tu ausencia, una persona a la que pedir ayuda
+                        cuando las cosas se tuercen. Es saber que, si un día no
+                        puedes cuidar de ti, no estás a solas. En Sevilla hemos
+                        conocido historias que nos recuerdan lo importantes que
+                        son esos vínculos. En abril de 2022, dos hermanas de 82
+                        y 84 años fueron encontradas muertas en su vivienda de
+                        la Macarena, después de que pasaran aproximadamente dos
+                        semanas sin que sus vecinos supieran de ellas. En mayo
+                        de 2023, un hombre de 65 años fue hallado muerto en su
+                        casa de la calle Tarfia, después de varios días sin que
+                        nadie supiera de él. Y recientemente en agosto de 2026,
+                        una mujer de unos 70 años fue encontrada muerta en un
+                        pequeño trastero de Triana, sin baño ni ventanas de
+                        menos de 6 m². Detrás de cada noticia hay una vida, una
+                        historia y una persona que merecía vivir con dignidad y
+                        no sentirse invisible. Por eso importan tanto las redes
+                        de apoyo, porque acompañarnos, conocernos y cuidarnos
+                        puede marcar una diferencia. Y cuando la vivienda nos
+                        obliga a marcharnos, también podemos perder esos lazos
+                        que hemos construido durante años.
+                    </p>
+
+                    <div class="space-y-3 pt-2">
+                        <div
+                            class="bg-white/90 p-4 md:p-5 rounded-2xl border border-[#af0b56]/20"
+                        >
+                            <p
+                                class="font-londrina text-xl sm:text-2xl text-[#af0b56] tracking-wide"
+                            >
+                                QUE NADIE SE SIENTA INVISIBLE EN SU PROPIA
+                                COMUNIDAD.
+                            </p>
+                        </div>
+                        <div
+                            class="bg-[#af0b56] text-[#FFF0DD] p-4 md:p-5 rounded-2xl"
+                        >
+                            <p
+                                class="font-londrina text-xl sm:text-2xl tracking-wide"
+                            >
+                                NO QUEREMOS QUE QUEDARSE EN NUESTRO BARRIO SEA
+                                UN PRIVILEGIO.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 12. Sevilla y Andalucía - el precio de alquilar -->
+                <div
+                    class="bg-white/90 backdrop-blur-xs p-6 md:p-9 rounded-3xl border border-black/10 shadow-xs hover:shadow-md transition-shadow space-y-5"
+                >
+                    <div
+                        class="flex items-center justify-between gap-4 flex-wrap"
+                    >
+                        <h2
+                            class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
+                        >
+                            12. Sevilla y Andalucía - el precio de alquilar
+                        </h2>
+                    </div>
+
+                    <p class="text-neutral-800">
+                        En Sevilla capital, el precio anunciado del alquiler
+                        pasó de <strong class="text-neutral-900 font-semibold"
+                            >9,8 €/m² en 2020 a 12,8 €</strong
+                        >
+                    </p>
+
+                    <p class="text-neutral-800">
+                        Cuando la población disminuye y envejece, mantener
+                        servicios, comercios, transporte y atención cercana
+                        puede resultar más difícil. Por eso, hablar del futuro
+                        de nuestros pueblos también significa hablar de empleo
+                        digno, vivienda accesible, servicios públicos y
+                        oportunidades para las personas jóvenes. No se trata de
+                        rechazar el turismo, sino de garantizar que la actividad
+                        económica conviva con el derecho de la población a vivir
+                        en su municipio.
+                    </p>
+                </div>
+
+                <!-- 14. Privilegio - conciencia social -->
+                <div
+                    class="bg-[#FFF0DD]/70 border-l-4 md:border-l-6 border-[#af0b56] p-6 md:p-9 rounded-r-3xl shadow-xs space-y-5"
+                >
+                    <h2
+                        class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
+                    >
+                        14. Privilegio - conciencia social
+                    </h2>
+
+                    <p class="text-neutral-800">
+                        Quizá tú puedas pagar el alquiler hoy, pero alguien de
+                        tu familia no consigue emanciparse. Quizá no tengas
+                        problemas con tu vivienda, pero sí ves cómo cambian tu
+                        barrio o tu pueblo. La crisis de acceso a la vivienda
+                        tiene muchas caras y no todas las personas la viven de
+                        la misma manera. Precisamente por eso, compartir
+                        experiencias y organizarse permite encontrar soluciones
+                        que no dependan únicamente de la situación individual.
+                    </p>
+
+                    <div
+                        class="p-5 md:p-6 rounded-2xl bg-[#af0b56] text-[#FFF0DD]"
+                    >
+                        <p
+                            class="font-londrina text-2xl sm:text-3xl tracking-wide"
+                        >
+                            Únete a la lucha. 11 N · Una huelga como una casa
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 15. ¿Qué se está reclamando? -->
+                <div
+                    class="bg-white/90 backdrop-blur-xs p-6 md:p-9 rounded-3xl border border-black/10 shadow-xs hover:shadow-md transition-shadow space-y-6"
+                >
+                    <div
+                        class="flex items-center justify-between gap-4 flex-wrap"
+                    >
+                        <h2
+                            class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
+                        >
+                            15. ¿Qué se está reclamando?
+                        </h2>
+                    </div>
+
+                    <div
+                        class="p-5 md:p-6 rounded-2xl bg-[#FFF0DD] border border-[#af0b56]/20"
+                    >
+                        <p
+                            class="font-londrina text-xl sm:text-2xl text-[#1d1d1b] tracking-wide"
+                        >
+                            Estas son las reivindicaciones inmediatas de la
+                            Acampada de las Setas (Sevilla)
+                        </p>
+                    </div>
+
+                    <!-- Lista Interactiva de Reivindicaciones A a J -->
+                    <ol class="space-y-4 my-6 pl-0 list-none">
+                        {
+                            reivindicaciones.map((item) => (
+                                <li class="group bg-white/85 hover:bg-white p-5 md:p-6 rounded-2xl border border-black/10 hover:border-[#af0b56]/40 shadow-xs hover:shadow-md transition-all duration-200 flex items-start gap-4 sm:gap-5 hover:-translate-y-0.5">
+                                    <div class="shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-[#FFF0DD] border border-[#af0b56]/20 group-hover:bg-[#af0b56] transition-colors flex items-center justify-center">
+                                        <span class="font-londrina text-[#af0b56] group-hover:text-[#FFF0DD] text-2xl md:text-3xl leading-none transition-colors">
+                                            {item.letter}
+                                        </span>
+                                    </div>
+                                    <div class="text-neutral-900 leading-relaxed text-base md:text-lg self-center">
+                                        {item.text}
+                                    </div>
+                                </li>
+                            ))
+                        }
+                    </ol>
+                </div>
+
+                <!-- IDEAS -->
+                <div
+                    class="bg-[#FFF0DD]/90 border-2 border-dashed border-[#af0b56]/30 p-6 md:p-9 rounded-3xl shadow-xs space-y-4"
+                >
+                    <div
+                        class="inline-flex items-center gap-2 bg-[#af0b56] text-[#FFF0DD] text-xs md:text-sm font-bold uppercase tracking-wider px-3.5 py-1 rounded-full shadow-xs"
+                    >
+                        <span>IDEAS:</span>
+                    </div>
+
+                    <ul
+                        class="space-y-2.5 text-neutral-800 text-lg md:text-xl font-londrina tracking-wide list-none pl-0"
+                    >
+                        <li class="flex items-center gap-2">
+                            <span class="text-[#af0b56]">•</span>
+                            <span
+                                >¿Por qué es importante esta Huelga General?</span
+                            >
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-[#af0b56]">•</span>
+                            <span>¿Cuándo fue la última y porque se hizo?</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-[#af0b56]">•</span>
+                            <span>¿Cómo se organiza una huelga general?</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Cierre de Impacto -->
+                <div
+                    class="bg-[#B50655] text-[#FFF0DD] p-8 md:p-12 rounded-3xl shadow-xl my-10 relative overflow-hidden text-center"
+                >
+                    <div class="relative z-10 max-w-2xl mx-auto space-y-4">
+                        <p
+                            class="font-londrina text-3xl sm:text-4xl md:text-5xl leading-tight text-white tracking-wide"
+                        >
+                            LA VIVIENDA ES UN DERECHO, NO UN PRIVILEGIO.
+                        </p>
+                        <p
+                            class="font-londrina text-2xl sm:text-3xl md:text-4xl leading-tight text-[#FFF0DD] tracking-wide"
+                        >
+                            11 N · Una huelga como una casa
+                        </p>
+                        <p
+                            class="font-londrina text-2xl sm:text-3xl md:text-4xl leading-tight text-white tracking-wide"
+                        >
+                            EL 11 DE NOVIEMBRE, QUE SE ESCUCHE NUESTRA VOZ.
+                        </p>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Botón Flotante para Volver Arriba -->
+            <div class="flex justify-center pt-2">
+                <button
+                    id="btn-scroll-top"
+                    type="button"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-black/15 bg-white/80 hover:bg-white text-xs md:text-sm font-semibold text-[#1d1d1b] hover:text-[#af0b56] transition-all cursor-pointer shadow-xs hover:shadow-sm"
+                >
+                    <ArrowUp class="w-4 h-4 text-[#af0b56]" />
+                    <span>Volver arriba</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Coherente -->
+    <footer
+        class="bg-[#1d1d1b] text-[#fcf2df] py-12 px-4 border-t-4 border-[#af0b56] mt-16"
+    >
+        <div
+            class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left"
+        >
+            <div>
+                <h3 class="text-3xl font-londrina text-[#af0b56] tracking-wide">
+                    ACAMPADA SETAS SEVILLA
+                </h3>
+                <p class="text-xs text-gray-400 mt-1">
+                    Contacto: <a
+                        href="mailto:acampadasetas@gmail.com"
+                        class="hover:underline hover:text-white transition-colors"
+                        >acampadasetas@gmail.com</a
+                    > • Instagram: <a
+                        href="https://www.instagram.com/acampadasetas/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="hover:underline hover:text-white transition-colors"
+                        >@acampadasetas</a
+                    >
+                </p>
+            </div>
+
+            <div class="flex items-center gap-4 text-sm font-bold">
+                <a href="/" class="hover:text-[#af0b56] transition-colors"
+                    >Inicio</a
+                >
+                <span>•</span>
+                <a
+                    href="/manifiesto"
+                    class="hover:text-[#af0b56] transition-colors">Manifiesto</a
+                >
+                <span>•</span>
+                <a
+                    href="/gallery"
+                    class="hover:text-[#af0b56] transition-colors"
+                    >Galería Fotográfica</a
+                >
+                <span>•</span>
+                <a href="/login" class="hover:text-[#af0b56] transition-colors"
+                    >Admin</a
+                >
+            </div>
+        </div>
+    </footer>
+
+    <!-- Estilos para animación de scroll nativa (Scroll-driven animations) según mejores prácticas -->
+    <style>
+        @media (prefers-reduced-motion: no-preference) {
+            @supports (animation-timeline: scroll()) {
+                @keyframes grow-reading-progress {
+                    from {
+                        transform: scaleX(0);
+                    }
+                    to {
+                        transform: scaleX(1);
+                    }
+                }
+
+                #reading-progress {
+                    width: 100% !important;
+                    transform-origin: 0 50%;
+                    animation: grow-reading-progress auto linear;
+                    animation-timeline: scroll();
+                }
+            }
+        }
+    </style>
+
+    <!-- Scripts interactivos: Barra de progreso fallback, compartir y scroll arriba -->
+    <script>
+        // Barra de progreso de lectura (fallback reactivo para navegadores sin scroll-driven animations nativo)
+        if (!CSS.supports("animation-timeline", "scroll()")) {
+            const progressBar = document.getElementById("reading-progress");
+            window.addEventListener("scroll", () => {
+                if (!progressBar) return;
+                const totalHeight =
+                    document.documentElement.scrollHeight - window.innerHeight;
+                const progress =
+                    totalHeight > 0 ? (window.scrollY / totalHeight) * 100 : 0;
+                progressBar.style.width = `${progress}%`;
+            });
+        }
+
+        // Compartir documento
+        const shareBtn = document.getElementById("btn-share");
+        const shareText = document.getElementById("share-text");
+
+        if (shareBtn && shareText) {
+            shareBtn.addEventListener("click", async () => {
+                const title =
+                    "PROPUESTA PROGRAMACIÓN RRSS · HUELGA GENERAL 11N";
+                const url = window.location.href;
+
+                if (navigator.share) {
+                    try {
+                        await navigator.share({
+                            title,
+                            url,
+                        });
+                        return;
+                    } catch (err) {
+                        // Usuario canceló o no soportado
+                    }
+                }
+
+                try {
+                    await navigator.clipboard.writeText(url);
+                    const original = shareText.textContent;
+                    shareText.textContent = "¡Copiado!";
+                    setTimeout(() => {
+                        shareText.textContent = original;
+                    }, 2000);
+                } catch {
+                    window.prompt("Copia el enlace:", url);
+                }
+            });
+        }
+
+        // Volver arriba
+        const scrollTopBtn = document.getElementById("btn-scroll-top");
+        if (scrollTopBtn) {
+            scrollTopBtn.addEventListener("click", () => {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            });
+        }
+    </script>
+</Layout>

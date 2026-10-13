@@ -4,6 +4,7 @@ import { getSections, getActivities } from "../lib/db";
 import { seedUsersIfEmpty } from "../lib/users";
 import { marked } from "marked";
 import { getTemplateComponent } from "../components/sections";
+import SeccionHuelga from "../components/seccion-huelga.astro";
 import {
   Image,
   Lock,
@@ -12,6 +13,7 @@ import {
   ScrollText,
   ArrowRight,
   CheckCircle2,
+  Megaphone,
 } from "lucide-astro";
 
 export const prerender = false;
@@ -24,9 +26,12 @@ const publishedActivities = await getActivities(true);
 const rawSections = await getSections(true); // true = live published sections only
 
 // If there are no published activities for today, do not render the schedule section.
-// Also filter out sec-manifiesto as it now has a dedicated, prominently styled section and page.
+// Also filter out sec-manifiesto and sec-huelga as they have dedicated, prominently styled sections.
 const sections = rawSections.filter((sec) => {
   if (sec.slug === "manifiesto" || sec.id === "sec-manifiesto") {
+    return false;
+  }
+  if (sec.slug === "huelga" || sec.id === "sec-huelga") {
     return false;
   }
   const isSchedule =
@@ -69,6 +74,12 @@ const hasAgenda = sections.some(
           class="hover:text-[#af0b56] uppercase tracking-wider transition-colors scroll-link"
         >
           Manifiesto
+        </a>
+        <a
+          href="#huelga"
+          class="hover:text-[#af0b56] uppercase tracking-wider transition-colors scroll-link"
+        >
+          Huelga 11N
         </a>
         {
           sections.map((sec) => (
@@ -116,6 +127,14 @@ const hasAgenda = sections.some(
               class="uppercase text-[#1d1d1b] hover:text-[#af0b56]"
             >
               Manifiesto
+            </a>
+          </li>
+          <li>
+            <a
+              href="#huelga"
+              class="uppercase text-[#1d1d1b] hover:text-[#af0b56]"
+            >
+              Huelga 11N
             </a>
           </li>
           {
@@ -235,6 +254,9 @@ const hasAgenda = sections.some(
     </div>
   </section>
 
+  <!-- Sección Destacada: 11 de Noviembre (Huelga General) -->
+  <SeccionHuelga invert={false} />
+
   <!-- Dynamic Sections Rendered by Template -->
   <main class="space-y-0">
     {
@@ -302,6 +324,10 @@ const hasAgenda = sections.some(
       <div class="flex items-center gap-4 text-sm font-bold">
         <a href="/manifiesto" class="hover:text-[#af0b56] transition-colors"
           >Manifiesto</a
+        >
+        <span>•</span>
+        <a href="/huelga" class="hover:text-[#af0b56] transition-colors"
+          >Propuesta de Huelga</a
         >
         <span>•</span>
         <a href="/gallery" class="hover:text-[#af0b56] transition-colors"
