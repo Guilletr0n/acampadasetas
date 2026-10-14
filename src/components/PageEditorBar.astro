@@ -1,0 +1,222 @@
+---
+import { getCurrentUser, canEditContent } from '../lib/auth';
+import { Pencil, Eye, Check, Loader2, Sparkles, ChevronDown, ChevronUp, ExternalLink } from 'lucide-astro';
+
+interface Props {
+  pageId: string;
+}
+
+const { pageId } = Astro.props;
+const currentUser = await getCurrentUser(Astro.cookies);
+const isEditor = canEditContent(currentUser);
+
+if (!isEditor) {
+  return;
+}
+---
+
+<!-- Ventana Flotante de Edición de Página (Solo para Editores/Admins) -->
+<aside
+  id="page-editor-bar"
+  class="fixed bottom-5 right-5 z-[9999] select-none font-sans text-xs"
+  aria-label="Barra de edición en vivo"
+  data-page-id={pageId}
+>
+  <div
+    id="page-editor-card"
+    class="bg-white/95 backdrop-blur-md border border-black/15 shadow-2xl rounded-2xl p-3.5 transition-all duration-200 text-[#1d1d1b] min-w-[280px] max-w-xs space-y-3"
+  >
+    <!-- Cabecera de la ventana -->
+    <div class="flex items-center justify-between gap-2 border-b border-black/10 pb-2">
+      <div class="flex items-center gap-1.5">
+        <span class="bg-[#af0b56] text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full inline-flex items-center gap-1 shadow-xs">
+          <Sparkles class="w-3 h-3" />
+          <span>Editor en Vivo</span>
+        </span>
+        <span class="font-mono text-[11px] font-bold text-gray-500 uppercase tracking-tight">
+          /{pageId}
+        </span>
+      </div>
+
+      <div class="flex items-center gap-1">
+        <button
+          type="button"
+          id="btn-collapse-editor-bar"
+          class="btn btn-ghost btn-xs btn-square text-gray-400 hover:text-gray-700"
+          title="Minimizar barra"
+          aria-label="Minimizar barra"
+        >
+          <ChevronDown class="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+
+    <!-- Switch Modo Lectura / Modo Edición -->
+    <div class="flex items-center justify-between gap-3 bg-[#fcf2df]/60 border border-black/5 rounded-xl px-3 py-2">
+      <div class="flex items-center gap-1.5 text-gray-600 font-medium">
+        <Eye class="w-3.5 h-3.5 text-gray-400" id="icon-reading-mode" />
+        <span id="label-reading-mode">Lectura</span>
+      </div>
+
+      <label class="relative inline-flex items-center cursor-pointer">
+        <input
+          type="checkbox"
+          id="page-editor-mode-toggle"
+          class="toggle toggle-sm bg-[#af0b56] checked:bg-[#af0b56] border-[#af0b56] checked:border-[#af0b56]"
+        />
+      </label>
+
+      <div class="flex items-center gap-1.5 font-bold text-[#af0b56]">
+        <Pencil class="w-3.5 h-3.5" id="icon-editing-mode" />
+        <span id="label-editing-mode">Edición</span>
+      </div>
+    </div>
+
+    <!-- Indicador de estado dinámico -->
+    <div
+      id="page-editor-status-container"
+      class="hidden py-1 px-2.5 rounded-lg text-[11px] font-medium items-center justify-between gap-2 transition-all duration-200"
+    >
+      <div class="flex items-center gap-1.5" id="page-editor-status-content">
+        <span id="page-editor-status-icon"></span>
+        <span id="page-editor-status-text">Listo</span>
+      </div>
+    </div>
+
+    <!-- Pie de la ventana flotante -->
+    <div class="flex items-center justify-between text-[10px] text-gray-400 pt-1">
+      <span id="page-editor-mode-hint">Modo lectura activo</span>
+      <a
+        href="/admin/home"
+        target="_blank"
+        class="text-gray-500 hover:text-[#af0b56] underline inline-flex items-center gap-1 font-medium"
+      >
+        <span>CMS Admin</span>
+        <ExternalLink class="w-2.5 h-2.5" />
+      </a>
+    </div>
+  </div>
+
+  <!-- Botón minimizado cuando está colapsado -->
+  <button
+    type="button"
+    id="page-editor-collapsed-pill"
+    class="hidden bg-white/95 backdrop-blur-md border border-black/15 shadow-xl rounded-full px-3 py-1.5 font-bold text-xs text-[#af0b56] items-center gap-2 hover:bg-white hover:scale-105 transition-all"
+    title="Expandir barra de edición"
+  >
+    <Sparkles class="w-3.5 h-3.5" />
+    <span id="collapsed-pill-label">Editor /{pageId}</span>
+    <ChevronUp class="w-3.5 h-3.5 text-gray-500" />
+  </button>
+</aside>
+
+<script is:inline>
+  (function initPageEditorBar() {
+    const bar = document.getElementById('page-editor-bar');
+    if (!bar) return;
+
+    const pageId = bar.dataset.pageId;
+    const toggle = document.getElementById('page-editor-mode-toggle');
+    const card = document.getElementById('page-editor-card');
+    const collapsedPill = document.getElementById('page-editor-collapsed-pill');
+    const btnCollapse = document.getElementById('btn-collapse-editor-bar');
+    const modeHint = document.getElementById('page-editor-mode-hint');
+    const statusContainer = document.getElementById('page-editor-status-container');
+    const statusContent = document.getElementById('page-editor-status-content');
+    const statusIcon = document.getElementById('page-editor-status-icon');
+    const statusText = document.getElementById('page-editor-status-text');
+
+    const STORAGE_KEY_MODE = 'as_page_editor_mode';
+    const STORAGE_KEY_COLLAPSED = 'as_page_editor_collapsed';
+
+    // 1. Estado inicial de modo
+    const savedMode = localStorage.getItem(STORAGE_KEY_MODE) || 'reading';
+    const isEditing = savedMode === 'editing';
+
+    if (toggle) {
+      toggle.checked = isEditing;
+      applyMode(isEditing, false);
+    }
+
+    // 2. Estado inicial de colapso
+    const isCollapsed = localStorage.getItem(STORAGE_KEY_COLLAPSED) === 'true';
+    if (isCollapsed) {
+      setCollapsed(true);
+    }
+
+    function applyMode(active, notify = true) {
+      if (active) {
+        document.body.classList.add('inline-editor-active');
+        if (modeHint) modeHint.textContent = 'Modo edición activado';
+        localStorage.setItem(STORAGE_KEY_MODE, 'editing');
+      } else {
+        document.body.classList.remove('inline-editor-active');
+        if (modeHint) modeHint.textContent = 'Modo lectura activo';
+        localStorage.setItem(STORAGE_KEY_MODE, 'reading');
+      }
+
+      if (notify) {
+        window.dispatchEvent(
+          new CustomEvent('page-editor-mode-change', {
+            detail: { mode: active ? 'editing' : 'reading', pageId },
+          })
+        );
+      }
+    }
+
+    function setCollapsed(collapsed) {
+      if (collapsed) {
+        card?.classList.add('hidden');
+        collapsedPill?.classList.remove('hidden');
+        collapsedPill?.classList.add('inline-flex');
+        localStorage.setItem(STORAGE_KEY_COLLAPSED, 'true');
+      } else {
+        card?.classList.remove('hidden');
+        collapsedPill?.classList.add('hidden');
+        collapsedPill?.classList.remove('inline-flex');
+        localStorage.setItem(STORAGE_KEY_COLLAPSED, 'false');
+      }
+    }
+
+    toggle?.addEventListener('change', (e) => {
+      applyMode(e.target.checked, true);
+    });
+
+    btnCollapse?.addEventListener('click', () => setCollapsed(true));
+    collapsedPill?.addEventListener('click', () => setCollapsed(false));
+
+    // 3. Manejador de notificaciones de estado (Guardando, Guardado, Error)
+    let statusTimeout;
+    window.addEventListener('page-editor-status', (e) => {
+      const { state, message } = e.detail || {};
+      if (!statusContainer || !statusIcon || !statusText) return;
+
+      clearTimeout(statusTimeout);
+      statusContainer.classList.remove('hidden', 'bg-blue-50', 'text-blue-800', 'bg-emerald-50', 'text-emerald-800', 'bg-rose-50', 'text-rose-800');
+
+      if (state === 'saving') {
+        statusContainer.classList.add('flex', 'bg-blue-50', 'text-blue-800');
+        statusIcon.innerHTML = `<svg class="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
+        statusText.textContent = message || 'Guardando cambios...';
+      } else if (state === 'saved') {
+        statusContainer.classList.add('flex', 'bg-emerald-50', 'text-emerald-800');
+        statusIcon.innerHTML = `<svg class="w-3.5 h-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`;
+        statusText.textContent = message || 'Cambios publicados en vivo';
+        statusTimeout = setTimeout(() => {
+          statusContainer.classList.add('hidden');
+        }, 3000);
+      } else if (state === 'error') {
+        statusContainer.classList.add('flex', 'bg-rose-50', 'text-rose-800');
+        statusIcon.innerHTML = `<svg class="w-3.5 h-3.5 text-rose-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+        statusText.textContent = message || 'Error al guardar';
+        statusTimeout = setTimeout(() => {
+          statusContainer.classList.add('hidden');
+        }, 4000);
+      }
+    });
+  })();
+</script>
+
+<script>
+  import '../scripts/inline-page-editor';
+</script>

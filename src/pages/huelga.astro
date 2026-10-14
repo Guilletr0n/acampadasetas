@@ -1,5 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import EditableBlock from "../components/EditableBlock.astro";
+import { getPageData, getResolvedPageList } from "../lib/db";
+import { marked } from "marked";
 import {
     ArrowLeft,
     Share2,
@@ -12,51 +15,64 @@ import {
 export const prerender = false;
 
 // Reivindicaciones 15. ¿Qué se está reclamando?
-const reivindicaciones = [
+const defaultReivindicaciones = [
     {
+        id: "reiv-A",
         letter: "A",
         text: "Prórroga automática indefinida de los alquileres y congelación de las hipotecas",
     },
     {
+        id: "reiv-B",
         letter: "B",
         text: "Ajustar los precios de las viviendas en alquiler vinculándolo al SMI, contemplando planes de ajuste para los contratos existentes.",
     },
     {
+        id: "reiv-C",
         letter: "C",
         text: "Prohibición automática de cualquier desahucio por motivos económicos comprobados, ya sea en régimen de alquiler o de hipoteca. Así como la ilegalización de empresas de desokupación y todas las empresas que ejercen y venden el uso de la violencia inmobiliaria contra civiles.",
     },
     {
+        id: "reiv-D",
         letter: "D",
         text: "Expropiación sin indemnización de los especuladores, específicamente a los fondos buitres, Sareb y bancos. Los bienes usados para especular deben pasar al parque social de viviendas para satisfacer las necesidades de las familias trabajadoras.",
     },
     {
+        id: "reiv-E",
         letter: "E",
         text: "Las viviendas en propiedad de persona física sin uso residencial quedan sujetas a expropiación inmediata (salvo necesidad comprobada), para su incorporación al parque social de vivienda.",
     },
     {
+        id: "reiv-F",
         letter: "F",
         text: "Prohibición a las sociedades empresariales de hacer negocio con la Vivienda",
     },
     {
+        id: "reiv-G",
         letter: "G",
         text: "Fin de contratos de alquiler precarios para proteger el alquiler de temporada.",
     },
     {
+        id: "reiv-H",
         letter: "H",
         text: "Prohibición de reconversión de vivienda en hotel o de uso turístico. Si hace falta hoteles, que construyan hoteles, pero que no puedan comprar bloques.",
     },
     {
+        id: "reiv-I",
         letter: "I",
         text: "Derogar la privatización de VPO. La vivienda construida con dinero público, debe permanecer pública para siempre.",
     },
     {
+        id: "reiv-J",
         letter: "J",
         text: "Demandamos un Plan de Construcción de Viviendas Sociales que vaya en relación a las necesidades de la Clase Trabajadora, a través de la Nacionalización del Suelo Urbano Edificable para ampliar el Parque Público de Viviendas respetando siempre el Medio Ambiente.",
     },
 ];
+
+const pageData = await getPageData("huelga");
+const reivindicacionesList = getResolvedPageList(pageData, "reivindicaciones", defaultReivindicaciones);
 ---
 
-<Layout title="PROPUESTA PROGRAMACIÓN RRSS · HUELGA GENERAL 11N">
+<Layout title="PROPUESTA PROGRAMACIÓN RRSS · HUELGA GENERAL 11N" pageId="huelga">
     <!-- Barra de Lectura / Progreso Superior -->
     <div
         id="reading-progress"
@@ -218,18 +234,24 @@ const reivindicaciones = [
                     />
                 </div>
 
-                <h1
+                <EditableBlock
+                    pageData={pageData}
+                    pageId="huelga"
+                    blockKey="header_title"
+                    tag="h1"
                     class="text-4xl sm:text-5xl md:text-7xl font-londrina text-[#af0b56] leading-[1.0] tracking-wide drop-shadow-xs"
-                >
-                    HUELGA GENERAL 11N
-                </h1>
+                    defaultText="HUELGA GENERAL 11N"
+                />
 
                 <div>
-                    <span
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="header_date"
+                        tag="span"
                         class="inline-flex items-center gap-2 bg-[#FFF0DD] text-[#af0b56] border border-[#af0b56]/20 text-sm md:text-base font-bold uppercase tracking-wider px-4 py-1.5 rounded-full shadow-xs"
-                    >
-                        13/10/2026
-                    </span>
+                        defaultText="13/10/2026"
+                    />
                 </div>
 
                 <div class="w-24 h-1.5 bg-[#af0b56] mx-auto mt-4 rounded-full">
@@ -247,34 +269,37 @@ const reivindicaciones = [
                     <div
                         class="flex items-center justify-between gap-4 flex-wrap"
                     >
-                        <h2
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec1_title"
+                            tag="h2"
                             class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
-                        >
-                            1. La vivienda se ha convertido en un lujo
-                        </h2>
+                            defaultText="1. La vivienda se ha convertido en un lujo"
+                        />
                     </div>
 
-                    <p
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec1_p"
+                        tag="p"
+                        multiline={true}
                         class="first-letter:text-5xl first-letter:md:text-6xl first-letter:font-londrina first-letter:text-[#af0b56] first-letter:float-left first-letter:mr-3 first-letter:leading-none text-neutral-800"
-                    >
-                        En Sevilla, el precio anunciado del alquiler pasó de <strong
-                            class="text-neutral-900 font-semibold"
-                            >9,8 €/m² en 2020 a 12,8 €/m² en 2025</strong
-                        >, un aumento del 30,6 %. En el mismo periodo, el SMI
-                        mensual pasó de 950 € a 1.184 € en 14 pagas: subió un
-                        24,6 %. Los alquileres suben más rápido que el salario
-                        mínimo. ¿Cómo se supone que vamos a construir un
-                        proyecto de vida si cada vez cuesta más pagar un techo?
-                    </p>
+                        defaultText="En Sevilla, el precio anunciado del alquiler pasó de **9,8 €/m² en 2020 a 12,8 €/m² en 2025**, un aumento del 30,6 %. En el mismo periodo, el SMI mensual pasó de 950 € a 1.184 € en 14 pagas: subió un 24,6 %. Los alquileres suben más rápido que el salario mínimo. ¿Cómo se supone que vamos a construir un proyecto de vida si cada vez cuesta más pagar un techo?"
+                    />
 
                     <div
                         class="bg-[#FFF0DD] border-l-4 md:border-l-6 border-[#af0b56] p-4 md:p-6 rounded-r-2xl"
                     >
-                        <p
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec1_quote"
+                            tag="p"
                             class="font-londrina text-xl sm:text-2xl md:text-3xl text-[#af0b56] tracking-wide leading-tight"
-                        >
-                            LA VIVIENDA ES UN DERECHO, NO UN PRIVILEGIO.
-                        </p>
+                            defaultText="LA VIVIENDA ES UN DERECHO, NO UN PRIVILEGIO."
+                        />
                     </div>
                 </div>
 
@@ -285,39 +310,46 @@ const reivindicaciones = [
                     <div
                         class="flex items-center justify-between gap-4 flex-wrap"
                     >
-                        <h2
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec2_title"
+                            tag="h2"
                             class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
-                        >
-                            2. Viviendas turísticas y barrios
-                        </h2>
+                            defaultText="2. Viviendas turísticas y barrios"
+                        />
                     </div>
 
-                    <p
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec2_sub"
+                        tag="p"
                         class="font-londrina text-2xl sm:text-3xl text-[#1d1d1b] tracking-wide"
-                    >
-                        ¿PARA QUIÉN SON NUESTROS BARRIOS?
-                    </p>
+                        defaultText="¿PARA QUIÉN SON NUESTROS BARRIOS?"
+                    />
 
-                    <p class="text-neutral-800">
-                        En mayo de 2026, Sevilla capital registraba <strong
-                            class="text-neutral-900 font-semibold"
-                            >6.937 viviendas turísticas</strong
-                        >, con capacidad para casi 29.700 personas. Cuando una
-                        vivienda se destina al turismo, deja de estar disponible
-                        para el alquiler residencial mientras mantiene ese uso.
-                        En zonas con mucha presión turística, esto puede
-                        intensificar la competencia por la vivienda y
-                        transformar la vida cotidiana de los barrios.
-                    </p>
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec2_p"
+                        tag="p"
+                        multiline={true}
+                        class="text-neutral-800"
+                        defaultText="En mayo de 2026, Sevilla capital registraba **6.937 viviendas turísticas**, con capacidad para casi 29.700 personas. Cuando una vivienda se destina al turismo, deja de estar disponible para el alquiler residencial mientras mantiene ese uso. En zonas con mucha presión turística, esto puede intensificar la competencia por la vivienda y transformar la vida cotidiana de los barrios."
+                    />
 
                     <div
                         class="p-4 md:p-5 rounded-2xl bg-white/90 border border-[#af0b56]/20"
                     >
-                        <p
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec2_quote"
+                            tag="p"
                             class="font-londrina text-xl sm:text-2xl text-[#af0b56] tracking-wide"
-                        >
-                            LOS BARRIOS SON PARA VIVIR, NO SOLO PARA VISITAR.
-                        </p>
+                            defaultText="LOS BARRIOS SON PARA VIVIR, NO SOLO PARA VISITAR."
+                        />
                     </div>
                 </div>
 
@@ -328,42 +360,46 @@ const reivindicaciones = [
                     <div
                         class="flex items-center justify-between gap-4 flex-wrap"
                     >
-                        <h2
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec3_title"
+                            tag="h2"
                             class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
-                        >
-                            3. La emancipación juvenil
-                        </h2>
+                            defaultText="3. La emancipación juvenil"
+                        />
                     </div>
 
-                    <p
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec3_sub"
+                        tag="p"
                         class="font-londrina text-2xl sm:text-3xl text-[#1d1d1b] tracking-wide"
-                    >
-                        ¿INDEPENDIZARSE? CASI UNA MISIÓN IMPOSIBLE
-                    </p>
+                        defaultText="¿INDEPENDIZARSE? CASI UNA MISIÓN IMPOSIBLE"
+                    />
 
-                    <p class="text-neutral-800">
-                        En España, la tasa de emancipación juvenil cayó hasta el <strong
-                            class="text-neutral-900 font-semibold"
-                            >14,5 % en 2025</strong
-                        >, según el Consejo de la Juventud de España. En
-                        Andalucía, se situaba en el <strong
-                            class="text-neutral-900 font-semibold"
-                            >12,6 % durante el primer semestre de 2024.</strong
-                        > Alquileres inasumibles, salarios insuficientes e inestabilidad
-                        laboral hacen que muchas personas jóvenes tengan que retrasar
-                        su independencia, compartir vivienda o seguir viviendo con
-                        sus familias aunque quieran marcharse.
-                    </p>
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec3_p"
+                        tag="p"
+                        multiline={true}
+                        class="text-neutral-800"
+                        defaultText="En España, la tasa de emancipación juvenil cayó hasta el **14,5 % en 2025**, según el Consejo de la Juventud de España. En Andalucía, se situaba en el **12,6 % durante el primer semestre de 2024.** Alquileres inasumibles, salarios insuficientes e inestabilidad laboral hacen que muchas personas jóvenes tengan que retrasar su independencia, compartir vivienda o seguir viviendo con sus familias aunque quieran marcharse."
+                    />
 
                     <div
                         class="bg-[#FFF0DD] border-l-4 md:border-l-6 border-[#af0b56] p-4 md:p-6 rounded-r-2xl"
                     >
-                        <p
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec3_quote"
+                            tag="p"
                             class="font-londrina text-xl sm:text-2xl md:text-3xl text-[#af0b56] tracking-wide leading-tight"
-                        >
-                            NO PEDIMOS LUJOS. PEDIMOS PODER EMPEZAR NUESTRA
-                            VIDA.
-                        </p>
+                            defaultText="NO PEDIMOS LUJOS. PEDIMOS PODER EMPEZAR NUESTRA VIDA."
+                        />
                     </div>
                 </div>
 
@@ -374,47 +410,46 @@ const reivindicaciones = [
                     <div
                         class="flex items-center justify-between gap-4 flex-wrap"
                     >
-                        <h2
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec4_title"
+                            tag="h2"
                             class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
-                        >
-                            4. Los precios suben ¿Y los salarios?
-                        </h2>
+                            defaultText="4. Los precios suben ¿Y los salarios?"
+                        />
                     </div>
 
-                    <p
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec4_sub"
+                        tag="p"
                         class="font-londrina text-2xl sm:text-3xl text-[#1d1d1b] tracking-wide"
-                    >
-                        LLEGAR A FIN DE MES NO DEBERÍA SER UN LUJO
-                    </p>
+                        defaultText="LLEGAR A FIN DE MES NO DEBERÍA SER UN LUJO"
+                    />
 
-                    <p class="text-neutral-800">
-                        Entre 2020 y 2025, los alimentos subieron un <strong
-                            class="text-neutral-900 font-semibold"
-                            >37,7 % en España</strong
-                        > y el <strong class="text-neutral-900 font-semibold"
-                            >IPC general, un 23,5 %.</strong
-                        > Según el Consejo de la Juventud de España, a finales de
-                        2024 una persona joven asalariada tenía que destinar el <strong
-                            class="text-neutral-900 font-semibold"
-                            >92,3 % de su sueldo al alquiler si vivía sola</strong
-                        >. Para <strong class="text-neutral-900 font-semibold"
-                            >comprar una vivienda</strong
-                        >, el esfuerzo estimado era del <strong
-                            class="text-neutral-900 font-semibold"
-                            >64,1 % del salario</strong
-                        >. Con estos costes, ahorrar para una entrada, afrontar
-                        imprevistos o independizarse resulta cada vez más
-                        difícil.
-                    </p>
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec4_p"
+                        tag="p"
+                        multiline={true}
+                        class="text-neutral-800"
+                        defaultText="Entre 2020 y 2025, los alimentos subieron un **37,7 % en España** y el **IPC general, un 23,5 %**. Según el Consejo de la Juventud de España, a finales de 2024 una persona joven asalariada tenía que destinar el **92,3 % de su sueldo al alquiler si vivía sola**. Para **comprar una vivienda**, el esfuerzo estimado era del **64,1 % del salario**. Con estos costes, ahorrar para una entrada, afrontar imprevistos o independizarse resulta cada vez más difícil."
+                    />
 
                     <div
                         class="p-4 md:p-5 rounded-2xl bg-white/90 border border-[#af0b56]/20"
                     >
-                        <p
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec4_quote"
+                            tag="p"
                             class="font-londrina text-xl sm:text-2xl text-[#af0b56] tracking-wide"
-                        >
-                            QUEREMOS SALARIOS DIGNOS Y UNA VIVIENDA DIGNA.
-                        </p>
+                            defaultText="QUEREMOS SALARIOS DIGNOS Y UNA VIVIENDA DIGNA."
+                        />
                     </div>
                 </div>
 
@@ -422,42 +457,45 @@ const reivindicaciones = [
                 <div
                     class="bg-[#B50655] text-[#FFF0DD] p-8 md:p-12 rounded-3xl shadow-xl my-10 relative overflow-hidden space-y-6"
                 >
-                    <h2
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec5_title"
+                        tag="h2"
                         class="text-3xl sm:text-4xl md:text-5xl font-londrina text-white tracking-wide leading-tight"
-                    >
-                        5. ¿Por qué una huelga general por la vivienda?
-                    </h2>
+                        defaultText="5. ¿Por qué una huelga general por la vivienda?"
+                    />
 
-                    <p
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec5_sub"
+                        tag="p"
                         class="font-londrina text-2xl sm:text-3xl md:text-4xl text-[#FFF0DD] tracking-wide leading-tight"
-                    >
-                        ¿Qué pasa, qué pasa? ¡Que no tenemos casa!
-                    </p>
+                        defaultText="¿Qué pasa, qué pasa? ¡Que no tenemos casa!"
+                    />
 
-                    <p
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec5_p"
+                        tag="p"
+                        multiline={true}
                         class="text-[#FFF0DD]/95 text-base md:text-lg leading-relaxed font-sans"
-                    >
-                        La vivienda, los salarios y el coste de la vida no son
-                        problemas aislados, condicionan dónde vivimos, cuánto
-                        podemos ahorrar y qué futuro podemos construir. Por eso,
-                        las reivindicaciones por la vivienda se conectan con las
-                        condiciones de vida y de trabajo. La convocatoria de
-                        huelga general prevista para el 11 de noviembre busca
-                        convertir el malestar individual en una reivindicación
-                        colectiva. Porque que no puedas pagar el alquiler o
-                        acceder a la compra de una vivienda digna, no es un
-                        fracaso personal, también es un problema social y
-                        político.
-                    </p>
+                        defaultText="La vivienda, los salarios y el coste de la vida no son problemas aislados, condicionan dónde vivimos, cuánto podemos ahorrar y qué futuro podemos construir. Por eso, las reivindicaciones por la vivienda se conectan con las condiciones de vida y de trabajo. La convocatoria de huelga general prevista para el 11 de noviembre busca convertir el malestar individual en una reivindicación colectiva. Porque que no puedas pagar el alquiler o acceder a la compra de una vivienda digna, no es un fracaso personal, también es un problema social y político."
+                    />
 
                     <div
                         class="bg-white/10 backdrop-blur-xs p-5 md:p-6 rounded-2xl border border-white/20 text-center"
                     >
-                        <p
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec5_quote"
+                            tag="p"
                             class="font-londrina text-2xl sm:text-3xl md:text-4xl text-white tracking-wide"
-                        >
-                            EL 11 DE NOVIEMBRE, QUE SE ESCUCHE NUESTRA VOZ.
-                        </p>
+                            defaultText="EL 11 DE NOVIEMBRE, QUE SE ESCUCHE NUESTRA VOZ."
+                        />
                     </div>
                 </div>
 
@@ -468,41 +506,46 @@ const reivindicaciones = [
                     <div
                         class="flex items-center justify-between gap-4 flex-wrap"
                     >
-                        <h2
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec6_title"
+                            tag="h2"
                             class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
-                        >
-                            6. La vivienda nos afecta a todas las personas
-                        </h2>
+                            defaultText="6. La vivienda nos afecta a todas las personas"
+                        />
                     </div>
 
-                    <p
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec6_sub"
+                        tag="p"
                         class="font-londrina text-2xl sm:text-3xl text-[#1d1d1b] tracking-wide"
-                    >
-                        LA CRISIS DE LA VIVIENDA NO ENTIENDE DE EDADES
-                    </p>
+                        defaultText="LA CRISIS DE LA VIVIENDA NO ENTIENDE DE EDADES"
+                    />
 
-                    <p class="text-neutral-800">
-                        Afecta a quien busca su primera habitación, a las
-                        familias que destinan gran parte de sus ingresos al
-                        alquiler, a quienes temen no poder renovar su contrato y
-                        a las personas mayores que quieren seguir viviendo en su
-                        barrio. Incluso quienes tienen una vivienda en propiedad
-                        pueden verse afectados por el encarecimiento de la vida,
-                        la dificultad para ayudar a sus hijos a emanciparse o la
-                        pérdida de comunidad en sus barrios. No hace falta vivir
-                        la misma situación para entender que todo el mundo
-                        necesita un lugar digno donde vivir.
-                    </p>
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec6_p"
+                        tag="p"
+                        multiline={true}
+                        class="text-neutral-800"
+                        defaultText="Afecta a quien busca su primera habitación, a las familias que destinan gran parte de sus ingresos al alquiler, a quienes temen no poder renovar su contrato y a las personas mayores que quieren seguir viviendo en su barrio. Incluso quienes tienen una vivienda en propiedad pueden verse afectados por el encarecimiento de la vida, la dificultad para ayudar a sus hijos a emanciparse o la pérdida de comunidad en sus barrios. No hace falta vivir la misma situación para entender que todo el mundo necesita un lugar digno donde vivir."
+                    />
 
                     <div
                         class="bg-[#FFF0DD] border-l-4 md:border-l-6 border-[#af0b56] p-4 md:p-6 rounded-r-2xl"
                     >
-                        <p
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec6_quote"
+                            tag="p"
                             class="font-londrina text-xl sm:text-2xl md:text-3xl text-[#af0b56] tracking-wide leading-tight"
-                        >
-                            LA VIVIENDA ES UN PROBLEMA COLECTIVO. LA RESPUESTA
-                            TAMBIÉN.
-                        </p>
+                            defaultText="LA VIVIENDA ES UN PROBLEMA COLECTIVO. LA RESPUESTA TAMBIÉN."
+                        />
                     </div>
                 </div>
 
@@ -513,48 +556,59 @@ const reivindicaciones = [
                     <div
                         class="flex items-center justify-between gap-4 flex-wrap"
                     >
-                        <h2
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec7_title"
+                            tag="h2"
                             class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
-                        >
-                            7. Organizarse también es participar
-                        </h2>
+                            defaultText="7. Organizarse también es participar"
+                        />
                     </div>
 
-                    <p
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec7_sub"
+                        tag="p"
                         class="font-londrina text-2xl sm:text-3xl text-[#1d1d1b] tracking-wide"
-                    >
-                        NO TE QUEDES AL MARGEN, ORGANÍZATE CON TU BARRIO
-                    </p>
+                        defaultText="NO TE QUEDES AL MARGEN, ORGANÍZATE CON TU BARRIO"
+                    />
 
-                    <p class="text-neutral-800">
-                        La crisis de la vivienda no se soluciona en soledad.
-                        Compartir información, conocer a tus vecinas y vecinos y
-                        organizarse permite identificar problemas comunes y
-                        defender reivindicaciones colectivas. ¿Quieres
-                        implicarte? La Acampada de las Setas cuenta con grupos
-                        de WhatsApp de barrios y pueblos para conectar a las
-                        personas, compartir información y organizar iniciativas.
-                    </p>
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec7_p"
+                        tag="p"
+                        multiline={true}
+                        class="text-neutral-800"
+                        defaultText="La crisis de la vivienda no se soluciona en soledad. Compartir información, conocer a tus vecinas y vecinos y organizarse permite identificar problemas comunes y defender reivindicaciones colectivas. ¿Quieres implicarte? La Acampada de las Setas cuenta con grupos de WhatsApp de barrios y pueblos para conectar a las personas, compartir información y organizar iniciativas."
+                    />
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                         <div
                             class="bg-white/90 p-5 rounded-2xl border border-[#af0b56]/20 text-center flex items-center justify-center"
                         >
-                            <p
+                            <EditableBlock
+                                pageData={pageData}
+                                pageId="huelga"
+                                blockKey="sec7_cta1"
+                                tag="p"
                                 class="font-londrina text-xl sm:text-2xl text-[#af0b56] tracking-wide"
-                            >
-                                ¡Únete al grupo de tu barrio o pueblo y
-                                participa!
-                            </p>
+                                defaultText="¡Únete al grupo de tu barrio o pueblo y participa!"
+                            />
                         </div>
                         <div
                             class="bg-[#af0b56] text-[#FFF0DD] p-5 rounded-2xl text-center flex items-center justify-center"
                         >
-                            <p
+                            <EditableBlock
+                                pageData={pageData}
+                                pageId="huelga"
+                                blockKey="sec7_cta2"
+                                tag="p"
                                 class="font-londrina text-xl sm:text-2xl tracking-wide"
-                            >
-                                LA ORGANIZACIÓN EMPIEZA CERCA DE CASA.
-                            </p>
+                                defaultText="LA ORGANIZACIÓN EMPIEZA CERCA DE CASA."
+                            />
                         </div>
                     </div>
                 </div>
@@ -566,37 +620,46 @@ const reivindicaciones = [
                     <div
                         class="flex items-center justify-between gap-4 flex-wrap"
                     >
-                        <h2
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec8_title"
+                            tag="h2"
                             class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
-                        >
-                            8. ¿Conoces tus derechos laborales?
-                        </h2>
+                            defaultText="8. ¿Conoces tus derechos laborales?"
+                        />
                     </div>
 
-                    <p
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec8_sub"
+                        tag="p"
                         class="font-londrina text-2xl sm:text-3xl text-[#1d1d1b] tracking-wide"
-                    >
-                        TUS DERECHOS, TAMBIÉN EN HUELGA
-                    </p>
+                        defaultText="TUS DERECHOS, TAMBIÉN EN HUELGA"
+                    />
 
-                    <p class="text-neutral-800">
-                        ¿Tienes dudas sobre cómo secundar la huelga general del
-                        11N o qué implica para ti? Infórmate a través de los
-                        canales oficiales de la convocatoria, consulta con tu
-                        sindicato o pregunta a la Acampada de las Setas. Es
-                        importante conocer las condiciones de la convocatoria y
-                        resolver tus dudas antes de la huelga.
-                    </p>
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec8_p"
+                        tag="p"
+                        multiline={true}
+                        class="text-neutral-800"
+                        defaultText="¿Tienes dudas sobre cómo secundar la huelga general del 11N o qué implica para ti? Infórmate a través de los canales oficiales de la convocatoria, consulta con tu sindicato o pregunta a la Acampada de las Setas. Es importante conocer las condiciones de la convocatoria y resolver tus dudas antes de la huelga."
+                    />
 
                     <div
                         class="bg-[#FFF0DD] border-l-4 md:border-l-6 border-[#af0b56] p-4 md:p-6 rounded-r-2xl"
                     >
-                        <p
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec8_quote"
+                            tag="p"
                             class="font-londrina text-xl sm:text-2xl md:text-3xl text-[#af0b56] tracking-wide leading-tight"
-                        >
-                            Una huelga general se gana o se pierde en los
-                            puestos de trabajo.
-                        </p>
+                            defaultText="Una huelga general se gana o se pierde en los puestos de trabajo."
+                        />
                     </div>
                 </div>
 
@@ -607,45 +670,46 @@ const reivindicaciones = [
                     <div
                         class="flex items-center justify-between gap-4 flex-wrap"
                     >
-                        <h2
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec9_title"
+                            tag="h2"
                             class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
-                        >
-                            9. Las acampadas, del malestar a la organización
-                        </h2>
+                            defaultText="9. Las acampadas, del malestar a la organización"
+                        />
                     </div>
 
-                    <p
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec9_sub"
+                        tag="p"
                         class="font-londrina text-2xl sm:text-3xl text-[#1d1d1b] tracking-wide"
-                    >
-                        CUANDO LA GENTE SE ORGANIZA, EL PROBLEMA SE HACE VISIBLE
-                    </p>
+                        defaultText="CUANDO LA GENTE SE ORGANIZA, EL PROBLEMA SE HACE VISIBLE"
+                    />
 
-                    <p class="text-neutral-800">
-                        Las acampadas por el derecho a la vivienda han llevado a
-                        plazas y calles de todo el país una realidad que afecta
-                        a miles de personas, la dificultad para acceder a una
-                        vivienda digna. Madrid, Sevilla, Bilbao y Santander
-                        mantienen sus acampadas, con cientos de tiendas
-                        instaladas y personas organizándose para defender el
-                        derecho a la vivienda. En Sevilla, la Acampada de las
-                        Setas continúa reuniendo a personas de distintos barrios
-                        y pueblos, con unas 200 tiendas en total. <span
-                            class="text-xs md:text-sm text-neutral-500 italic"
-                            >*(Comprobar)*</span
-                        > Estos espacios sirven para compartir experiencias, visibilizar
-                        situaciones de vulnerabilidad y preparar nuevas movilizaciones,
-                        como la huelga general del 11N.
-                    </p>
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec9_p"
+                        tag="p"
+                        multiline={true}
+                        class="text-neutral-800"
+                        defaultText="Las acampadas por el derecho a la vivienda han llevado a plazas y calles de todo el país una realidad que afecta a miles de personas, la dificultad para acceder a una vivienda digna. Madrid, Sevilla, Bilbao y Santander mantienen sus acampadas, con cientos de tiendas instaladas y personas organizándose para defender el derecho a la vivienda. En Sevilla, la Acampada de las Setas continúa reuniendo a personas de distintos barrios y pueblos, con unas 200 tiendas en total. *(Comprobar)* Estos espacios sirven para compartir experiencias, visibilizar situaciones de vulnerabilidad y preparar nuevas movilizaciones, como la huelga general del 11N."
+                    />
 
                     <div
                         class="p-5 md:p-6 rounded-2xl bg-white/95 border border-[#af0b56]/20"
                     >
-                        <p
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec9_quote"
+                            tag="p"
                             class="font-londrina text-xl sm:text-2xl md:text-3xl text-[#af0b56] tracking-wide leading-tight"
-                        >
-                            LA ACAMPADA NO ES EL FINAL DEL CAMINO. ACÉRCATE,
-                            INFÓRMATE, PARTICIPA Y ACAMPA CON NOSOTROS
-                        </p>
+                            defaultText="LA ACAMPADA NO ES EL FINAL DEL CAMINO. ACÉRCATE, INFÓRMATE, PARTICIPA Y ACAMPA CON NOSOTROS"
+                        />
                     </div>
                 </div>
 
@@ -656,40 +720,46 @@ const reivindicaciones = [
                     <div
                         class="flex items-center justify-between gap-4 flex-wrap"
                     >
-                        <h2
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec10_title"
+                            tag="h2"
                             class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
-                        >
-                            10. Cuenta atrás para la huelga
-                        </h2>
+                            defaultText="10. Cuenta atrás para la huelga"
+                        />
                     </div>
 
-                    <p
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec10_sub"
+                        tag="p"
                         class="font-londrina text-2xl sm:text-3xl md:text-4xl text-[#af0b56] tracking-wide"
-                    >
-                        QUEDAN [X] DÍAS PARA LA HUELGA GENERAL POR LA VIVIENDA
-                    </p>
+                        defaultText="QUEDAN [X] DÍAS PARA LA HUELGA GENERAL POR LA VIVIENDA"
+                    />
 
-                    <p class="text-neutral-800">
-                        Desde las plazas, los barrios, los pueblos hasta los
-                        centros de trabajo, cada vez más personas están poniendo
-                        sobre la mesa una realidad, vivir y trabajar no debería
-                        ser incompatible con llegar a fin de mes. Las
-                        reivindicaciones que se están organizando incluyen
-                        medidas para frenar los desahucios en situaciones de
-                        vulnerabilidad, limitar la especulación, ampliar la
-                        vivienda pública y garantizar condiciones de vida
-                        dignas. El 11 de noviembre, la movilización quiere
-                        convertir ese malestar en una demanda colectiva.
-                    </p>
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec10_p"
+                        tag="p"
+                        multiline={true}
+                        class="text-neutral-800"
+                        defaultText="Desde las plazas, los barrios, los pueblos hasta los centros de trabajo, cada vez más personas están poniendo sobre la mesa una realidad, vivir y trabajar no debería ser incompatible con llegar a fin de mes. Las reivindicaciones que se están organizando incluyen medidas para frenar los desahucios en situaciones de vulnerabilidad, limitar la especulación, ampliar la vivienda pública y garantizar condiciones de vida dignas. El 11 de noviembre, la movilización quiere convertir ese malestar en una demanda colectiva."
+                    />
 
                     <div
                         class="bg-[#FFF0DD] border-l-4 md:border-l-6 border-[#af0b56] p-4 md:p-6 rounded-r-2xl"
                     >
-                        <p
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec10_quote"
+                            tag="p"
                             class="font-londrina text-xl sm:text-2xl md:text-3xl text-[#af0b56] tracking-wide leading-tight"
-                        >
-                            POR EL DERECHO A VIVIR DIGNAMENTE.
-                        </p>
+                            defaultText="POR EL DERECHO A VIVIR DIGNAMENTE."
+                        />
                     </div>
                 </div>
 
@@ -700,56 +770,47 @@ const reivindicaciones = [
                     <div
                         class="flex items-center justify-between gap-4 flex-wrap"
                     >
-                        <h2
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec11_title"
+                            tag="h2"
                             class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
-                        >
-                            11. Vivir donde hemos nacido - importancia de las
-                            redes de apoyo
-                        </h2>
+                            defaultText="11. Vivir donde hemos nacido - importancia de las redes de apoyo"
+                        />
                     </div>
 
-                    <p
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec11_sub"
+                        tag="p"
                         class="font-londrina text-2xl sm:text-3xl text-[#1d1d1b] tracking-wide"
-                    >
-                        QUEREMOS PODER VIVIR DONDE ESTÁ NUESTRA VIDA
-                    </p>
+                        defaultText="QUEREMOS PODER VIVIR DONDE ESTÁ NUESTRA VIDA"
+                    />
 
-                    <p class="text-neutral-800">
-                        Un hogar no son solo cuatro paredes. Es tener a alguien
-                        que llame a tu puerta para ver cómo estás, una vecina
-                        que note tu ausencia, una persona a la que pedir ayuda
-                        cuando las cosas se tuercen. Es saber que, si un día no
-                        puedes cuidar de ti, no estás a solas. En Sevilla hemos
-                        conocido historias que nos recuerdan lo importantes que
-                        son esos vínculos. En abril de 2022, dos hermanas de 82
-                        y 84 años fueron encontradas muertas en su vivienda de
-                        la Macarena, después de que pasaran aproximadamente dos
-                        semanas sin que sus vecinos supieran de ellas. En mayo
-                        de 2023, un hombre de 65 años fue hallado muerto en su
-                        casa de la calle Tarfia, después de varios días sin que
-                        nadie supiera de él. Y recientemente en agosto de 2026,
-                        una mujer de unos 70 años fue encontrada muerta en un
-                        pequeño trastero de Triana, sin baño ni ventanas de
-                        menos de 6 m². Detrás de cada noticia hay una vida, una
-                        historia y una persona que merecía vivir con dignidad y
-                        no sentirse invisible. Por eso importan tanto las redes
-                        de apoyo, porque acompañarnos, conocernos y cuidarnos
-                        puede marcar una diferencia. Y cuando la vivienda nos
-                        obliga a marcharnos, también podemos perder esos lazos
-                        que hemos construido durante años.
-                    </p>
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec11_p"
+                        tag="p"
+                        multiline={true}
+                        class="text-neutral-800"
+                        defaultText="Un hogar no son solo cuatro paredes. Es tener a alguien que llame a tu puerta para ver cómo estás, una vecina que note tu ausencia, una persona a la que pedir ayuda cuando las cosas se tuercen. Es saber que, si un día no puedes cuidar de ti, no estás a solas. En Sevilla hemos conocido historias que nos recuerdan lo importantes que son esos vínculos. En abril de 2022, dos hermanas de 82 y 84 años fueron encontradas muertas en su vivienda de la Macarena, después de que pasaran aproximadamente dos semanas sin que sus vecinos supieran de ellas. En mayo de 2023, un hombre de 65 años fue hallado muerto en su casa de la calle Tarfia, después de varios días sin que nadie supiera de él. Y recientemente en agosto de 2026, una mujer de unos 70 años fue encontrada muerta en un pequeño trastero de Triana, sin baño ni ventanas de menos de 6 m². Detrás de cada noticia hay una vida, una historia y una persona que merecía vivir con dignidad y no sentirse invisible. Por eso importan tanto las redes de apoyo, porque acompañarnos, conocernos y cuidarnos puede marcar una diferencia. Y cuando la vivienda nos obliga a marcharnos, también podemos perder esos lazos que hemos construido durante años."
+                    />
 
                     <div class="space-y-3 pt-2">
                         <div
                             class="bg-[#af0b56] text-[#FFF0DD] p-4 md:p-5 rounded-2xl"
                         >
-                            <p
+                            <EditableBlock
+                                pageData={pageData}
+                                pageId="huelga"
+                                blockKey="sec11_quote"
+                                tag="p"
                                 class="font-londrina text-xl sm:text-2xl tracking-wide"
-                            >
-                                QUE NADIE SE SIENTA INVISIBLE EN SU PROPIA
-                                COMUNIDAD. NO QUEREMOS QUE QUEDARSE EN NUESTRO
-                                BARRIO SEA UN PRIVILEGIO.
-                            </p>
+                                defaultText="QUE NADIE SE SIENTA INVISIBLE EN SU PROPIA COMUNIDAD. NO QUEREMOS QUE QUEDARSE EN NUESTRO BARRIO SEA UN PRIVILEGIO."
+                            />
                         </div>
                     </div>
                 </div>
@@ -761,62 +822,71 @@ const reivindicaciones = [
                     <div
                         class="flex items-center justify-between gap-4 flex-wrap"
                     >
-                        <h2
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec12_title"
+                            tag="h2"
                             class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
-                        >
-                            12. Sevilla y Andalucía - el precio de alquilar
-                        </h2>
+                            defaultText="12. Sevilla y Andalucía - el precio de alquilar"
+                        />
                     </div>
 
-                    <p class="text-neutral-800">
-                        En Sevilla capital, el precio anunciado del alquiler
-                        pasó de <strong class="text-neutral-900 font-semibold"
-                            >9,8 €/m² en 2020 a 12,8 €</strong
-                        >
-                    </p>
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec12_p1"
+                        tag="p"
+                        multiline={true}
+                        class="text-neutral-800"
+                        defaultText="En Sevilla capital, el precio anunciado del alquiler pasó de **9,8 €/m² en 2020 a 12,8 €**"
+                    />
 
-                    <p class="text-neutral-800">
-                        Cuando la población disminuye y envejece, mantener
-                        servicios, comercios, transporte y atención cercana
-                        puede resultar más difícil. Por eso, hablar del futuro
-                        de nuestros pueblos también significa hablar de empleo
-                        digno, vivienda accesible, servicios públicos y
-                        oportunidades para las personas jóvenes. No se trata de
-                        rechazar el turismo, sino de garantizar que la actividad
-                        económica conviva con el derecho de la población a vivir
-                        en su municipio.
-                    </p>
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec12_p2"
+                        tag="p"
+                        multiline={true}
+                        class="text-neutral-800"
+                        defaultText="Cuando la población disminuye y envejece, mantener servicios, comercios, transporte y atención cercana puede resultar más difícil. Por eso, hablar del futuro de nuestros pueblos también significa hablar de empleo digno, vivienda accesible, servicios públicos y oportunidades para las personas jóvenes. No se trata de rechazar el turismo, sino de garantizar que la actividad económica conviva con el derecho de la población a vivir en su municipio."
+                    />
                 </div>
 
                 <!-- 14. Privilegio - conciencia social -->
                 <div
                     class="bg-[#FFF0DD]/70 border-l-4 md:border-l-6 border-[#af0b56] p-6 md:p-9 rounded-r-3xl shadow-xs space-y-5"
                 >
-                    <h2
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec14_title"
+                        tag="h2"
                         class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
-                    >
-                        14. Privilegio - conciencia social
-                    </h2>
+                        defaultText="14. Privilegio - conciencia social"
+                    />
 
-                    <p class="text-neutral-800">
-                        Quizá tú puedas pagar el alquiler hoy, pero alguien de
-                        tu familia no consigue emanciparse. Quizá no tengas
-                        problemas con tu vivienda, pero sí ves cómo cambian tu
-                        barrio o tu pueblo. La crisis de acceso a la vivienda
-                        tiene muchas caras y no todas las personas la viven de
-                        la misma manera. Precisamente por eso, compartir
-                        experiencias y organizarse permite encontrar soluciones
-                        que no dependan únicamente de la situación individual.
-                    </p>
+                    <EditableBlock
+                        pageData={pageData}
+                        pageId="huelga"
+                        blockKey="sec14_p"
+                        tag="p"
+                        multiline={true}
+                        class="text-neutral-800"
+                        defaultText="Quizá tú puedas pagar el alquiler hoy, pero alguien de tu familia no consigue emanciparse. Quizá no tengas problemas con tu vivienda, pero sí ves cómo cambian tu barrio o tu pueblo. La crisis de acceso a la vivienda tiene muchas caras y no todas las personas la viven de la misma manera. Precisamente por eso, compartir experiencias y organizarse permite encontrar soluciones que no dependan únicamente de la situación individual."
+                    />
 
                     <div
                         class="p-5 md:p-6 rounded-2xl bg-[#af0b56] text-[#FFF0DD]"
                     >
-                        <p
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec14_quote"
+                            tag="p"
                             class="font-londrina text-2xl sm:text-3xl tracking-wide"
-                        >
-                            Únete a la lucha. 11 N · Una huelga como una casa
-                        </p>
+                            defaultText="Únete a la lucha. 11 N · Una huelga como una casa"
+                        />
                     </div>
                 </div>
 
@@ -827,63 +897,93 @@ const reivindicaciones = [
                     <div
                         class="flex items-center justify-between gap-4 flex-wrap"
                     >
-                        <h2
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec15_title"
+                            tag="h2"
                             class="text-3xl sm:text-4xl md:text-5xl font-londrina text-[#af0b56] tracking-wide leading-tight"
-                        >
-                            15. ¿Qué se está reclamando?
-                        </h2>
+                            defaultText="15. ¿Qué se está reclamando?"
+                        />
                     </div>
 
                     <div
                         class="p-5 md:p-6 rounded-2xl bg-[#FFF0DD] border border-[#af0b56]/20"
                     >
-                        <p
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="sec15_sub"
+                            tag="p"
                             class="font-londrina text-xl sm:text-2xl text-[#1d1d1b] tracking-wide"
-                        >
-                            Estas son las reivindicaciones inmediatas de la
-                            Acampada de las Setas (Sevilla)
-                        </p>
+                            defaultText="Estas son las reivindicaciones inmediatas de la Acampada de las Setas (Sevilla)"
+                        />
                     </div>
 
                     <!-- Lista Interactiva de Reivindicaciones A a J -->
-                    <ol class="space-y-4 my-6 pl-0 list-none">
+                    <ol
+                        class="space-y-4 my-6 pl-0 list-none"
+                        data-editable-list="reivindicaciones"
+                        data-editable-page="huelga"
+                    >
                         {
-                            reivindicaciones.map((item) => (
-                                <li class="group bg-white/85 hover:bg-white p-5 md:p-6 rounded-2xl border border-black/10 hover:border-[#af0b56]/40 shadow-xs hover:shadow-md transition-all duration-200 flex items-start gap-4 sm:gap-5 hover:-translate-y-0.5">
-                                    <div class="shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-[#FFF0DD] border border-[#af0b56]/20 group-hover:bg-[#af0b56] transition-colors flex items-center justify-center">
-                                        <span class="font-londrina text-[#af0b56] group-hover:text-[#FFF0DD] text-2xl md:text-3xl leading-none transition-colors">
-                                            {item.letter}
-                                        </span>
-                                    </div>
-                                    <div class="text-neutral-900 leading-relaxed text-base md:text-lg self-center">
-                                        {item.text}
-                                    </div>
-                                </li>
-                            ))
+                            reivindicacionesList.items.map((item, index) => {
+                                const letter = item.letter || String.fromCharCode(65 + index);
+                                return (
+                                    <li
+                                        class="group bg-white/85 hover:bg-white p-5 md:p-6 rounded-2xl border border-black/10 hover:border-[#af0b56]/40 shadow-xs hover:shadow-md transition-all duration-200 flex items-start gap-4 sm:gap-5 hover:-translate-y-0.5"
+                                        data-editable-item-id={item.id}
+                                        data-editable-page="huelga"
+                                        data-editable-raw={item.text}
+                                        data-editable-hidden={item.hidden ? "true" : "false"}
+                                    >
+                                        <div class="shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-[#FFF0DD] border border-[#af0b56]/20 group-hover:bg-[#af0b56] transition-colors flex items-center justify-center">
+                                            <span class="font-londrina text-[#af0b56] group-hover:text-[#FFF0DD] text-2xl md:text-3xl leading-none transition-colors">
+                                                {letter}
+                                            </span>
+                                        </div>
+                                        <div
+                                            class="text-neutral-900 leading-relaxed text-base md:text-lg self-center"
+                                            data-editable-item-text
+                                            set:html={marked.parseInline(item.text)}
+                                        />
+                                    </li>
+                                );
+                            })
                         }
                     </ol>
                 </div>
 
                 <!-- Cierre de Impacto -->
                 <div
+                    id="huelga-general"
                     class="bg-[#B50655] text-[#FFF0DD] p-8 md:p-12 rounded-3xl shadow-xl my-10 relative overflow-hidden text-center"
                 >
                     <div class="relative z-10 max-w-2xl mx-auto space-y-4">
-                        <p
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="cierre_1"
+                            tag="p"
                             class="font-londrina text-3xl sm:text-4xl md:text-5xl leading-tight text-white tracking-wide"
-                        >
-                            LA VIVIENDA ES UN DERECHO, NO UN PRIVILEGIO.
-                        </p>
-                        <p
+                            defaultText="LA VIVIENDA ES UN DERECHO, NO UN PRIVILEGIO."
+                        />
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="cierre_2"
+                            tag="p"
                             class="font-londrina text-2xl sm:text-3xl md:text-4xl leading-tight text-[#FFF0DD] tracking-wide"
-                        >
-                            11 N · Una huelga como una casa
-                        </p>
-                        <p
+                            defaultText="11 N · Una huelga como una casa"
+                        />
+                        <EditableBlock
+                            pageData={pageData}
+                            pageId="huelga"
+                            blockKey="cierre_3"
+                            tag="p"
                             class="font-londrina text-2xl sm:text-3xl md:text-4xl leading-tight text-white tracking-wide"
-                        >
-                            EL 11 DE NOVIEMBRE, QUE SE ESCUCHE NUESTRA VOZ.
-                        </p>
+                            defaultText="EL 11 DE NOVIEMBRE, QUE SE ESCUCHE NUESTRA VOZ."
+                        />
                     </div>
                 </div>
             </article>

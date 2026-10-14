@@ -5,6 +5,7 @@ import { seedUsersIfEmpty } from "../lib/users";
 import { marked } from "marked";
 import { getTemplateComponent } from "../components/sections";
 import SeccionHuelga from "../components/seccion-huelga.astro";
+import ScheduleActivities from "../components/sections/ScheduleActivities.astro";
 import {
   Image,
   Lock,
@@ -25,30 +26,53 @@ await seedUsersIfEmpty();
 const publishedActivities = await getActivities(true);
 const rawSections = await getSections(true); // true = live published sections only
 
-// If there are no published activities for today, do not render the schedule section.
-// Also filter out sec-manifiesto and sec-huelga as they have dedicated, prominently styled sections.
-const sections = rawSections.filter((sec) => {
+// 2. Identify if an explicit schedule/agenda section is configured in the CMS
+const scheduleSection = rawSections.find(
+  (s) =>
+    s.slug === "agenda" ||
+    s.slug === "programa" ||
+    s.id === "sec-agenda" ||
+    s.live?.template === "schedule" ||
+    s.live?.template === "horario-actividades",
+);
+
+const scheduleSlug = scheduleSection?.slug || "agenda";
+const scheduleContent = scheduleSection?.live ||
+  scheduleSection?.draft || {
+    title: "Actividades",
+    navLabel: "Programa",
+    subtitle: "Asambleas, talleres y formación colectiva",
+    highlight: "Horario del día",
+    template: "schedule",
+    body: "",
+  };
+if (
+  scheduleContent.title === "HORARIO DE ACTIVIDADES" ||
+  scheduleContent.title === "Programa y Actividades"
+) {
+  scheduleContent.title = "Actividades";
+}
+const scheduleNavLabel = scheduleContent.navLabel || "Programa";
+
+// 3. Filter other dynamic sections for <main>, excluding schedule, manifiesto, and huelga
+const dynamicSections = rawSections.filter((sec) => {
   if (sec.slug === "manifiesto" || sec.id === "sec-manifiesto") {
     return false;
   }
   if (sec.slug === "huelga" || sec.id === "sec-huelga") {
     return false;
   }
-  const isSchedule =
+  if (
+    sec.slug === "agenda" ||
+    sec.slug === "programa" ||
+    sec.id === "sec-agenda" ||
     sec.live?.template === "schedule" ||
-    sec.live?.template === "horario-actividades";
-  if (isSchedule && publishedActivities.length === 0) {
+    sec.live?.template === "horario-actividades"
+  ) {
     return false;
   }
   return true;
 });
-
-const hasAgenda = sections.some(
-  (s) =>
-    s.slug === "agenda" ||
-    s.live?.template === "schedule" ||
-    s.live?.template === "horario-actividades",
-);
 ---
 
 <Layout title="Acampada Setas Sevilla | Movilización por la Vivienda">
@@ -69,6 +93,16 @@ const hasAgenda = sections.some(
       <nav
         class="hidden md:flex items-center gap-6 font-bold text-sm text-[#1d1d1b]"
       >
+        {
+          publishedActivities.length > 0 && (
+            <a
+              href={`#${scheduleSlug}`}
+              class="hover:text-[#af0b56] uppercase tracking-wider transition-colors scroll-link"
+            >
+              {scheduleNavLabel}
+            </a>
+          )
+        }
         <a
           href="#manifiesto"
           class="hover:text-[#af0b56] uppercase tracking-wider transition-colors scroll-link"
@@ -82,7 +116,7 @@ const hasAgenda = sections.some(
           Huelga 11N
         </a>
         {
-          sections.map((sec) => (
+          dynamicSections.map((sec) => (
             <a
               href={`#${sec.slug}`}
               class="hover:text-[#af0b56] uppercase tracking-wider transition-colors scroll-link"
@@ -121,6 +155,18 @@ const hasAgenda = sections.some(
           tabindex="0"
           class="dropdown-content menu p-2 shadow-lg bg-[#fcf2df] border border-black/10 rounded-box w-52 text-sm font-bold mt-2"
         >
+          {
+            publishedActivities.length > 0 && (
+              <li>
+                <a
+                  href={`#${scheduleSlug}`}
+                  class="uppercase text-[#1d1d1b] hover:text-[#af0b56]"
+                >
+                  {scheduleNavLabel}
+                </a>
+              </li>
+            )
+          }
           <li>
             <a
               href="#manifiesto"
@@ -138,7 +184,7 @@ const hasAgenda = sections.some(
             </a>
           </li>
           {
-            sections.map((sec) => (
+            dynamicSections.map((sec) => (
               <li>
                 <a
                   href={`#${sec.slug}`}
@@ -193,6 +239,17 @@ const hasAgenda = sections.some(
       masiva: autoorganización popular y asamblea abierta permanente.
     </p>
   </section>
+
+  <!-- Horario de Actividades: primera sección entre el header y las secciones que vienen después -->
+  {
+    publishedActivities.length > 0 && (
+      <ScheduleActivities
+        slug={scheduleSlug}
+        content={scheduleContent}
+        isAlternate={false}
+      />
+    )
+  }
 
   <!-- Sección Destacada del Manifiesto -->
   <section
@@ -255,43 +312,28 @@ const hasAgenda = sections.some(
   </section>
 
   <!-- Sección Destacada: 11 de Noviembre (Huelga General) -->
-  <SeccionHuelga invert={false} />
+  <!-- <SeccionHuelga invert={false} /> -->
 
   <!-- Dynamic Sections Rendered by Template -->
   <main class="space-y-0">
     {
-      sections.length === 0 ? (
-        <div class="py-20 text-center text-gray-500">
-          <p class="text-xl font-bold">
-            No hay secciones publicadas actualmente.
-          </p>
-          <p class="text-sm mt-1">
-            Inicia sesión en el{" "}
-            <a href="/login" class="underline text-[#af0b56]">
-              CMS
-            </a>{" "}
-            para redactar y publicar contenidos.
-          </p>
-        </div>
-      ) : (
-        sections.map((sec, index) => {
-          const content = sec.live;
-          if (!content) return null;
+      dynamicSections.map((sec, index) => {
+        const content = sec.live;
+        if (!content) return null;
 
-          const TemplateComponent = getTemplateComponent(content.template);
-          const renderedMarkdown = marked.parse(content.body || "");
-          const isAlternate = index % 2 === 1;
+        const TemplateComponent = getTemplateComponent(content.template);
+        const renderedMarkdown = marked.parse(content.body || "");
+        const isAlternate = index % 2 === 1;
 
-          return (
-            <TemplateComponent
-              slug={sec.slug}
-              content={content}
-              isAlternate={isAlternate}
-              renderedMarkdown={renderedMarkdown}
-            />
-          );
-        })
-      )
+        return (
+          <TemplateComponent
+            slug={sec.slug}
+            content={content}
+            isAlternate={isAlternate}
+            renderedMarkdown={renderedMarkdown}
+          />
+        );
+      })
     }
   </main>
 

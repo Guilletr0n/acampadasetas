@@ -6,6 +6,8 @@ import type { SectionContent } from '../../lib/types';
 import FondoTrigo from './FondoTrigo.astro';
 import FondoCarmin from './FondoCarmin.astro';
 import PastillaBlanca from './PastillaBlanca.astro';
+import PastillaCarmin from './PastillaCarmin.astro';
+import ImgIzdaTextDcha from './ImgIzdaTextDcha.astro';
 
 export interface SectionTemplateProps {
   slug: string;
@@ -43,7 +45,7 @@ export const TEMPLATES: Record<string, SectionTemplateMeta> = {
   },
   'schedule': {
     id: 'schedule',
-    label: 'Horario de Actividades',
+    label: 'Actividades',
     description: 'Diseño cartel con fecha automática del día y listado horario de actividades.',
     component: ScheduleActivities,
   },
@@ -82,6 +84,18 @@ export const TEMPLATES: Record<string, SectionTemplateMeta> = {
     label: 'Pastilla blanca',
     description: 'Tarjeta blanca redondeada sobre fondo trigo, con badge, tipografía en carmín y botón de acción.',
     component: PastillaBlanca,
+  },
+  'pastilla-carmin': {
+    id: 'pastilla-carmin',
+    label: 'Pastilla carmín',
+    description: 'Tarjeta carmín con imagen a la izquierda y texto a la derecha, estilo "huelga general".',
+    component: PastillaCarmin,
+  },
+  'img-izda-text-dcha': {
+    id: 'img-izda-text-dcha',
+    label: 'Imagen izquierda · Texto derecha',
+    description: 'Imagen a la izquierda con título, subtítulo y botón CTA a la derecha, fondo transparente.',
+    component: ImgIzdaTextDcha,
   }
 };
 
