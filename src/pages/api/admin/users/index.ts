@@ -46,7 +46,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
       approved: approved ?? true,
     });
 
-    return new Response(JSON.stringify({ success: true, user: newUser }), {
+    const { password: _pwd, ...safeUser } = newUser;
+
+    return new Response(JSON.stringify({ success: true, user: safeUser }), {
       status: 201,
       headers: { 'Content-Type': 'application/json' },
     });
