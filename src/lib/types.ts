@@ -71,3 +71,27 @@ export interface GalleryItem {
   order: number;
   createdAt: string;
 }
+
+export interface PageBlock {
+  text: string;
+  hidden?: boolean;
+}
+
+export interface PageListItem {
+  id: string;
+  text: string;
+  hidden?: boolean;
+}
+
+export interface PageList {
+  items: PageListItem[];
+  hidden?: boolean;
+}
+
+export interface PageData {
+  id: string;
+  blocks: Record<string, PageBlock>;
+  lists: Record<string, PageList>;
+  updatedAt: string;
+}
+

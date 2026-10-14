@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { Section, SectionContent, SectionHistoryEntry, GalleryItem, ScheduleActivity } from './types';
+import type { Section, SectionContent, SectionHistoryEntry, GalleryItem, ScheduleActivity, PageData, PageBlock, PageList, PageListItem } from './types';
 import { Firestore } from '@google-cloud/firestore';
 
 let firestoreDb: Firestore | null = null;
@@ -29,6 +29,7 @@ const SECTIONS_FILE = path.join(DATA_DIR, 'sections.json');
 const HISTORY_FILE = path.join(DATA_DIR, 'history.json');
 const GALLERY_FILE = path.join(DATA_DIR, 'gallery.json');
 const ACTIVITIES_FILE = path.join(DATA_DIR, 'activities.json');
+const PAGES_FILE = path.join(DATA_DIR, 'pages.json');
 
 const INITIAL_SECTIONS: Section[] = [
   {
@@ -159,6 +160,9 @@ function ensureDataFiles() {
   }
   if (!fs.existsSync(GALLERY_FILE)) {
     fs.writeFileSync(GALLERY_FILE, JSON.stringify(INITIAL_GALLERY, null, 2), 'utf-8');
+  }
+  if (!fs.existsSync(PAGES_FILE)) {
+    fs.writeFileSync(PAGES_FILE, JSON.stringify([], null, 2), 'utf-8');
   }
 }
 
@@ -895,4 +899,246 @@ export async function deleteDraftActivities(ids: string[]): Promise<{ deleted: n
     notAllowed: publishedAttempted.length,
   };
 }
+
+// ==========================================
+// PAGE CONTENT (INLINE EDITING FOR STATIC PAGES)
+// ==========================================
+
+export async function getPageData(pageId: string): Promise<PageData> {
+  const cleanId = (pageId || '').trim().toLowerCase();
+
+  if (firestoreDb) {
+    try {
+      const doc = await firestoreDb.collection('pages').doc(cleanId).get();
+      if (doc.exists) {
+        const data = doc.data() as PageData;
+        return {
+          id: cleanId,
+          blocks: data.blocks || {},
+          lists: data.lists || {},
+          updatedAt: data.updatedAt || new Date().toISOString(),
+        };
+      }
+    } catch (e) {
+      console.warn('Firestore getPageData fallback:', e);
+    }
+  }
+
+  const list = readLocal<PageData[]>(PAGES_FILE, []);
+  const found = list.find((p) => p.id === cleanId);
+  if (found) {
+    return {
+      id: cleanId,
+      blocks: found.blocks || {},
+      lists: found.lists || {},
+      updatedAt: found.updatedAt || new Date().toISOString(),
+    };
+  }
+
+  return {
+    id: cleanId,
+    blocks: {},
+    lists: {},
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+export async function savePageData(pageData: PageData): Promise<PageData> {
+  pageData.updatedAt = new Date().toISOString();
+
+  if (firestoreDb) {
+    try {
+      await firestoreDb.collection('pages').doc(pageData.id).set(pageData, { merge: true });
+    } catch (e) {
+      console.warn('Firestore savePageData fallback:', e);
+    }
+  }
+
+  const list = readLocal<PageData[]>(PAGES_FILE, []);
+  const idx = list.findIndex((p) => p.id === pageData.id);
+  if (idx >= 0) {
+    list[idx] = pageData;
+  } else {
+    list.push(pageData);
+  }
+  writeLocal(PAGES_FILE, list);
+
+  return pageData;
+}
+
+export async function savePageBlock(
+  pageId: string,
+  blockKey: string,
+  text: string
+): Promise<PageBlock> {
+  const page = await getPageData(pageId);
+  if (!page.blocks) page.blocks = {};
+  const existing = page.blocks[blockKey];
+  const updatedBlock: PageBlock = {
+    text,
+    hidden: existing?.hidden ?? false,
+  };
+  page.blocks[blockKey] = updatedBlock;
+  await savePageData(page);
+  return updatedBlock;
+}
+
+export async function togglePageBlockVisibility(
+  pageId: string,
+  blockKey: string,
+  defaultText = ''
+): Promise<PageBlock> {
+  const page = await getPageData(pageId);
+  if (!page.blocks) page.blocks = {};
+  const existing = page.blocks[blockKey];
+  const updatedBlock: PageBlock = {
+    text: existing?.text !== undefined ? existing.text : defaultText,
+    hidden: existing ? !existing.hidden : true,
+  };
+  page.blocks[blockKey] = updatedBlock;
+  await savePageData(page);
+  return updatedBlock;
+}
+
+export async function savePageListItem(
+  pageId: string,
+  listKey: string,
+  itemId: string,
+  text: string,
+  fallbackItems?: Array<{ id: string; text: string; hidden?: boolean }>
+): Promise<PageListItem> {
+  const page = await getPageData(pageId);
+  if (!page.lists) page.lists = {};
+  if (!page.lists[listKey] || !page.lists[listKey].items || page.lists[listKey].items.length === 0) {
+    page.lists[listKey] = {
+      items: fallbackItems ? fallbackItems.map((fi) => ({ id: fi.id, text: fi.text, hidden: fi.hidden ?? false })) : [],
+      hidden: false,
+    };
+  }
+
+  const item = page.lists[listKey].items.find((i) => i.id === itemId);
+  if (item) {
+    item.text = text;
+    await savePageData(page);
+    return item;
+  }
+
+  const newItem: PageListItem = { id: itemId, text, hidden: false };
+  page.lists[listKey].items.push(newItem);
+  await savePageData(page);
+  return newItem;
+}
+
+export async function togglePageListItemVisibility(
+  pageId: string,
+  listKey: string,
+  itemId: string,
+  fallbackItems?: Array<{ id: string; text: string; hidden?: boolean }>
+): Promise<PageListItem> {
+  const page = await getPageData(pageId);
+  if (!page.lists) page.lists = {};
+  if (!page.lists[listKey] || !page.lists[listKey].items || page.lists[listKey].items.length === 0) {
+    page.lists[listKey] = {
+      items: fallbackItems ? fallbackItems.map((fi) => ({ id: fi.id, text: fi.text, hidden: fi.hidden ?? false })) : [],
+      hidden: false,
+    };
+  }
+
+  const item = page.lists[listKey].items.find((i) => i.id === itemId);
+  if (item) {
+    item.hidden = !item.hidden;
+    await savePageData(page);
+    return item;
+  }
+
+  const newItem: PageListItem = { id: itemId, text: '', hidden: true };
+  page.lists[listKey].items.push(newItem);
+  await savePageData(page);
+  return newItem;
+}
+
+export async function addPageListItem(
+  pageId: string,
+  listKey: string,
+  text: string,
+  fallbackItems?: Array<{ id: string; text: string; hidden?: boolean }>
+): Promise<PageListItem> {
+  const page = await getPageData(pageId);
+  if (!page.lists) page.lists = {};
+  if (!page.lists[listKey] || !page.lists[listKey].items || page.lists[listKey].items.length === 0) {
+    page.lists[listKey] = {
+      items: fallbackItems ? fallbackItems.map((fi) => ({ id: fi.id, text: fi.text, hidden: fi.hidden ?? false })) : [],
+      hidden: false,
+    };
+  }
+
+  const uniqueId = `item-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+  const newItem: PageListItem = {
+    id: uniqueId,
+    text,
+    hidden: false,
+  };
+  page.lists[listKey].items.push(newItem);
+  await savePageData(page);
+  return newItem;
+}
+
+export async function togglePageListVisibility(
+  pageId: string,
+  listKey: string
+): Promise<PageList> {
+  const page = await getPageData(pageId);
+  if (!page.lists) page.lists = {};
+  if (!page.lists[listKey]) {
+    page.lists[listKey] = { items: [], hidden: false };
+  }
+  page.lists[listKey].hidden = !page.lists[listKey].hidden;
+  await savePageData(page);
+  return page.lists[listKey];
+}
+
+export function getResolvedPageBlock(
+  pageData: PageData,
+  blockKey: string,
+  defaultText: string
+): { text: string; hidden: boolean } {
+  const block = pageData.blocks?.[blockKey];
+  if (block) {
+    return {
+      text: block.text !== undefined ? block.text : defaultText,
+      hidden: block.hidden ?? false,
+    };
+  }
+  return {
+    text: defaultText,
+    hidden: false,
+  };
+}
+
+export function getResolvedPageList(
+  pageData: PageData,
+  listKey: string,
+  defaultItems: Array<{ id?: string; text: string } | string>
+): { items: PageListItem[]; hidden: boolean } {
+  const list = pageData.lists?.[listKey];
+  if (list && list.items && list.items.length > 0) {
+    return {
+      items: list.items,
+      hidden: list.hidden ?? false,
+    };
+  }
+
+  const items: PageListItem[] = defaultItems.map((item, idx) => {
+    if (typeof item === 'string') {
+      return { id: `item-${idx + 1}`, text: item, hidden: false };
+    }
+    return { id: item.id || `item-${idx + 1}`, text: item.text, hidden: false };
+  });
+
+  return {
+    items,
+    hidden: list?.hidden ?? false,
+  };
+}
+
 
