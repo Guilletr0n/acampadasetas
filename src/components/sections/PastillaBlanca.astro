@@ -21,14 +21,18 @@ const isExplicitLink =
 
 const isImage = content.illustrationUrl && !isExplicitLink;
 
-// URL de destino del botón CTA
-const targetUrl = isExplicitLink
-  ? content.illustrationUrl
-  : slug === "manifiesto"
-    ? "/manifiesto"
-    : slug === "gallery"
-      ? "/gallery"
-      : null;
+// URL y etiqueta de destino del botón CTA
+const targetUrl = content.buttonUrl
+  ? content.buttonUrl
+  : isExplicitLink
+    ? content.illustrationUrl
+    : slug === "manifiesto"
+      ? "/manifiesto"
+      : slug === "gallery"
+        ? "/gallery"
+        : null;
+
+const buttonText = content.buttonLabel || "Leer completo";
 ---
 
 <section
@@ -107,7 +111,7 @@ const targetUrl = isExplicitLink
               href={targetUrl}
               class="btn bg-[#af0b56] hover:bg-[#8f0946] text-[#FFF0DD] font-bold text-base md:text-lg px-8 py-3.5 rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all inline-flex items-center gap-2 group w-fit max-w-full"
             >
-              <span>Leer completo</span>
+              <span>{buttonText}</span>
               <ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform shrink-0" />
             </a>
           </div>

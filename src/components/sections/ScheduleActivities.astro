@@ -3,13 +3,13 @@ import type { SectionContent } from '../../lib/types';
 import { getActivities } from '../../lib/db';
 
 interface Props {
-  slug: string;
-  content: SectionContent;
+  slug?: string;
+  content?: SectionContent;
   isAlternate?: boolean;
   renderedMarkdown?: string;
 }
 
-const { slug, content, isAlternate = false } = Astro.props;
+const { slug = 'agenda', content = {} as SectionContent, isAlternate = false } = Astro.props;
 
 // Date calculations using Europe/Madrid timezone
 const now = new Date();
@@ -51,15 +51,15 @@ const activities = await getActivities(true);
 
         <!-- Centered Title -->
         <div class="text-center px-4">
-          {content.highlight && (
+          {content?.highlight && (
             <span class="inline-block bg-[#af0b56] text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-3 shadow-sm">
               {content.highlight}
             </span>
           )}
           <h2 class="text-5xl md:text-7xl font-londrina text-[#af0b56] m-0 tracking-wide leading-tight">
-            {content.title || 'HORARIO DE ACTIVIDADES'}
+            {content?.title || 'Actividades'}
           </h2>
-          {content.subtitle && (
+          {content?.subtitle && (
             <p class="text-lg md:text-xl text-gray-700 font-medium mt-1">
               {content.subtitle}
             </p>

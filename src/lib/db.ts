@@ -77,31 +77,21 @@ Nos concentramos en la Plaza de la Encarnación (Las Setas) para denunciar la em
     order: 2,
     updatedAt: new Date().toISOString(),
     live: {
-      title: 'Programa y Actividades',
+      title: 'Actividades',
       navLabel: 'Programa',
       subtitle: 'Asambleas, talleres y formación colectiva',
       highlight: 'Asamblea diaria a las 20:00h',
-      template: 'multi-column',
-      body: `### Horario de Movilización
-
-- **10:00h** — Desayuno popular y apertura de puntos informativos.
-- **12:00h** — Taller jurídico sobre contratos de alquiler y paralización de desahucios.
-- **17:00h** — Charla-debate: *Turistificación y expolio del espacio público*.
-- **20:00h** — **Gran Asamblea Abierta**: Toma de decisiones colectivas.`,
+      template: 'schedule',
+      body: '',
       illustrationUrl: ''
     },
     draft: {
-      title: 'Programa y Actividades',
+      title: 'Actividades',
       navLabel: 'Programa',
       subtitle: 'Asambleas, talleres y formación colectiva',
       highlight: 'Asamblea diaria a las 20:00h',
-      template: 'multi-column',
-      body: `### Horario de Movilización
-
-- **10:00h** — Desayuno popular y apertura de puntos informativos.
-- **12:00h** — Taller jurídico sobre contratos de alquiler y paralización de desahucios.
-- **17:00h** — Charla-debate: *Turistificación y expolio del espacio público*.
-- **20:00h** — **Gran Asamblea Abierta**: Toma de decisiones colectivas.`,
+      template: 'schedule',
+      body: '',
       illustrationUrl: ''
     }
   }
@@ -126,11 +116,11 @@ const INITIAL_HISTORY: SectionHistoryEntry[] = [
     sectionId: 'sec-agenda',
     timestamp: '2026-10-01T11:00:00.000Z',
     authorName: 'Administración Acampada',
-    template: 'multi-column',
-    title: 'Programa y Actividades',
+    template: 'schedule',
+    title: 'Actividades',
     subtitle: 'Asambleas, talleres y formación colectiva',
     highlight: 'Asamblea diaria a las 20:00h',
-    body: INITIAL_SECTIONS[1].live!.body,
+    body: '',
     illustrationUrl: '',
     status: 'published',
   }
@@ -192,22 +182,57 @@ export async function getSections(liveOnly = false): Promise<Section[]> {
   if (firestoreDb) {
     try {
       const snap = await firestoreDb.collection('sections').orderBy('order', 'asc').get();
+      let list: Section[];
       if (!snap.empty) {
-        const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Section));
-        return liveOnly ? list.filter(s => s.live !== null) : list;
+        list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Section));
       } else {
         const initial = readLocal<Section[]>(SECTIONS_FILE, INITIAL_SECTIONS);
         for (const s of initial) {
           await firestoreDb.collection('sections').doc(s.id).set(s);
         }
-        return liveOnly ? initial.filter(s => s.live !== null) : initial;
+        list = initial;
       }
+
+      for (const s of list) {
+        if (s.id === 'sec-agenda' || s.slug === 'agenda' || s.slug === 'programa') {
+          if (s.live && (s.live.template === 'multi-column' || !s.live.template)) {
+            s.live.template = 'schedule';
+          }
+          if (s.draft && (s.draft.template === 'multi-column' || !s.draft.template)) {
+            s.draft.template = 'schedule';
+          }
+          if (s.live && (s.live.title === 'HORARIO DE ACTIVIDADES' || s.live.title === 'Programa y Actividades')) {
+            s.live.title = 'Actividades';
+          }
+          if (s.draft && (s.draft.title === 'HORARIO DE ACTIVIDADES' || s.draft.title === 'Programa y Actividades')) {
+            s.draft.title = 'Actividades';
+          }
+        }
+      }
+
+      return liveOnly ? list.filter(s => s.live !== null) : list;
     } catch (e) {
       console.warn('Firestore getSections fallback:', e);
     }
   }
 
   const list = readLocal<Section[]>(SECTIONS_FILE, INITIAL_SECTIONS);
+  for (const s of list) {
+    if (s.id === 'sec-agenda' || s.slug === 'agenda' || s.slug === 'programa') {
+      if (s.live && (s.live.template === 'multi-column' || !s.live.template)) {
+        s.live.template = 'schedule';
+      }
+      if (s.draft && (s.draft.template === 'multi-column' || !s.draft.template)) {
+        s.draft.template = 'schedule';
+      }
+      if (s.live && (s.live.title === 'HORARIO DE ACTIVIDADES' || s.live.title === 'Programa y Actividades')) {
+        s.live.title = 'Actividades';
+      }
+      if (s.draft && (s.draft.title === 'HORARIO DE ACTIVIDADES' || s.draft.title === 'Programa y Actividades')) {
+        s.draft.title = 'Actividades';
+      }
+    }
+  }
   const sorted = [...list].sort((a, b) => a.order - b.order);
   return liveOnly ? sorted.filter(s => s.live !== null) : sorted;
 }
@@ -261,6 +286,8 @@ export async function saveSectionDraft(
     highlight: draftData.highlight,
     body: draftData.body,
     illustrationUrl: draftData.illustrationUrl,
+    buttonUrl: draftData.buttonUrl,
+    buttonLabel: draftData.buttonLabel,
     status: 'draft',
   };
 
@@ -394,6 +421,8 @@ export async function restoreSectionDraft(sectionId: string, historyId: string):
     template: entry.template,
     body: entry.body,
     illustrationUrl: entry.illustrationUrl,
+    buttonUrl: entry.buttonUrl,
+    buttonLabel: entry.buttonLabel,
   };
 
   return await saveSectionDraft(sectionId, restoredContent);

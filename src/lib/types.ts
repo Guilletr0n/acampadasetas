@@ -32,6 +32,8 @@ export interface SectionContent {
   template: SectionTemplate;
   body: string;
   illustrationUrl?: string;
+  buttonUrl?: string;
+  buttonLabel?: string;
 }
 
 export interface Section {
@@ -55,6 +57,8 @@ export interface SectionHistoryEntry {
   highlight?: string;
   body: string;
   illustrationUrl?: string;
+  buttonUrl?: string;
+  buttonLabel?: string;
   status: 'published' | 'draft';
 }
 

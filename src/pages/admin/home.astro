@@ -320,6 +320,32 @@ const templateLabels = Object.fromEntries(
             </div>
           </div>
 
+          <!-- Botón de Acción (CTA) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="form-control">
+              <label class="label" for="button-label">
+                <span class="label-text font-bold text-xs">ETIQUETA DEL BOTÓN</span>
+              </label>
+              <input
+                type="text"
+                id="button-label"
+                class="input input-bordered w-full"
+                placeholder="Ej: Propuesta de huelga"
+              />
+            </div>
+            <div class="form-control">
+              <label class="label" for="button-url">
+                <span class="label-text font-bold text-xs">LINK DEL BOTÓN</span>
+              </label>
+              <input
+                type="text"
+                id="button-url"
+                class="input input-bordered w-full font-mono text-xs"
+                placeholder="Ej: /huelga o https://..."
+              />
+            </div>
+          </div>
+
           <!-- Markdown Body -->
           <div class="form-control">
             <label class="label" for="body-editor">
@@ -552,6 +578,10 @@ const templateLabels = Object.fromEntries(
           document.getElementById("subtitle").value = content.subtitle || "";
           document.getElementById("illustration-url").value =
             content.illustrationUrl || "";
+          document.getElementById("button-label").value =
+            content.buttonLabel || "";
+          document.getElementById("button-url").value =
+            content.buttonUrl || "";
 
           document.getElementById("editor-title-heading").innerText =
             `EDITANDO: ${content.title || s.slug}`;
@@ -598,6 +628,8 @@ const templateLabels = Object.fromEntries(
       document.getElementById("highlight").value = "";
       document.getElementById("subtitle").value = "";
       document.getElementById("illustration-url").value = "";
+      document.getElementById("button-label").value = "";
+      document.getElementById("button-url").value = "";
       document
         .getElementById("illustration-preview-container")
         .classList.add("hidden");
@@ -681,6 +713,12 @@ const templateLabels = Object.fromEntries(
       const illustrationUrl = document
         .getElementById("illustration-url")
         .value.trim();
+      const buttonLabel = document
+        .getElementById("button-label")
+        .value.trim();
+      const buttonUrl = document
+        .getElementById("button-url")
+        .value.trim();
       const body = easyMDE ? easyMDE.value() : "";
 
       return {
@@ -693,6 +731,8 @@ const templateLabels = Object.fromEntries(
         highlight,
         subtitle,
         illustrationUrl,
+        buttonLabel,
+        buttonUrl,
         body,
       };
     }

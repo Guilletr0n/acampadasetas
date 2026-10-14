@@ -35,7 +35,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   try {
     const data = await request.json();
-    const { action, id, title, navLabel, subtitle, highlight, template, body, illustrationUrl, slug, order, historyId } = data;
+    const { action, id, title, navLabel, subtitle, highlight, template, body, illustrationUrl, buttonUrl, buttonLabel, slug, order, historyId } = data;
     const authorName = locals.user.displayName || locals.user.email || 'Editor';
 
     const cleanSlug = (slug || (title ? title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') : '') || 'seccion').toLowerCase();
@@ -58,6 +58,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
         template: template || 'single-column',
         body: body || '',
         illustrationUrl: illustrationUrl || '',
+        buttonUrl: buttonUrl || '',
+        buttonLabel: buttonLabel || '',
       }, cleanSlug, order, authorName);
 
       const history = await getSectionHistory(sectionId);
@@ -82,6 +84,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
           template: template || 'single-column',
           body: body || '',
           illustrationUrl: illustrationUrl || '',
+          buttonUrl: buttonUrl || '',
+          buttonLabel: buttonLabel || '',
         }, cleanSlug, order, authorName);
       }
 
