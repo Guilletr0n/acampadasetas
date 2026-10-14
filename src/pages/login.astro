@@ -47,7 +47,7 @@ if (user && user.approved) {
               id="email"
               name="email"
               class="input input-bordered w-full"
-              placeholder="arrendataria@zohomail.com"
+              placeholder="ejemplo@correo.com"
               required
             />
           </div>
@@ -94,11 +94,6 @@ if (user && user.approved) {
   </main>
 
   <script is:inline>
-    function fillCreds(email, pass) {
-      document.getElementById("email").value = email;
-      document.getElementById("password").value = pass;
-    }
-
     const form = document.getElementById("login-form");
     const submitBtn = document.getElementById("submit-btn");
     const submitText = document.getElementById("submit-text");
