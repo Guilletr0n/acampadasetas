@@ -1,0 +1,465 @@
+---
+import Layout from "../layouts/Layout.astro";
+import EditableBlock from "../components/EditableBlock.astro";
+import { getPageData, getResolvedPageList } from "../lib/db";
+import { marked } from "marked";
+import {
+  ArrowLeft,
+  Share2,
+  Image as ImageIcon,
+  Lock,
+  ArrowUp,
+} from "lucide-astro";
+
+export const prerender = false;
+
+const defaultItems = [
+  "Prórroga automática indefinida de los alquileres y congelación de las hipotecas",
+  "Ajustar los precios de las viviendas en alquiler vinculándolo al SMI, contemplando planes de ajuste para los contratos existentes.",
+  "Prohibición automática de cualquier desahucio por motivos económicos o vulnerabilidad comprobados, ya sea en régimen de alquiler o de hipoteca. Así como la ilegalización de empresas de desokupación y todas las empresas que ejercen y venden el uso de la violencia inmobiliaria contra la clase trabajadora.",
+  "Expropiación de los especuladores, específicamente a los fondos buitre, Sareb y bancos. Los bienes usados para especular deben pasar al parque social de viviendas para satisfacer las necesidades de las familias trabajadoras.",
+  "Las viviendas vacías en propiedad, excluyendo las de uso de vacacional, quedan sujetas a expropiación inmediata (salvo necesidad comprobada), para su incorporación al parque social de vivienda.",
+  "Prohibición de hacer negocio y especular con la vivienda.",
+  "Fin de contratos de alquiler precarios para proteger el alquiler de temporada.",
+  "Prohibición de reconversión de vivienda en hotel o de uso turístico. Si hacen falta hoteles, que construyan hoteles, pero que no puedan comprar bloques.",
+  "Derogar la privatización de VPO. La vivienda construida con recursos públicos, debe permanecer pública para siempre.",
+  "Demandamos un Plan de Construcción de Viviendas Sociales que vaya en relación con las necesidades de la Clase Trabajadora, a través de la Nacionalización del Suelo Urbano Edificable para ampliar el Parque Público de Viviendas, respetando siempre el Medio Ambiente.",
+  "Derogación inmediata de la ley mordaza y exculpación de todos los damnificados por esta ley.",
+];
+
+const pageData = await getPageData("manifiesto");
+const reivindicacionesList = getResolvedPageList(pageData, "reivindicaciones", defaultItems);
+---
+
+<Layout title="Manifiesto de la Acampada Setas (Sevilla)" pageId="manifiesto">
+  <!-- Barra de Lectura / Progreso Superior -->
+  <div
+    id="reading-progress"
+    class="fixed top-0 left-0 h-1 bg-[#af0b56] z-[60] w-0 transition-all duration-150"
+  >
+  </div>
+
+  <!-- Header de Navegación Sticky -->
+  <header
+    class="sticky top-0 z-50 bg-[#fcf2df]/95 backdrop-blur-md border-b border-black/10 px-4 md:px-8 py-3 transition-all shadow-sm"
+  >
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2 group">
+        <span
+          class="text-2xl md:text-4xl font-londrina text-[#af0b56] tracking-wide group-hover:scale-105 transition-transform"
+        >
+          ACAMPADA de las SETAS
+        </span>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav
+        class="hidden md:flex items-center gap-6 font-bold text-sm text-[#1d1d1b]"
+      >
+        <a
+          href="/"
+          class="hover:text-[#af0b56] uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 hover:-translate-x-0.5"
+        >
+          <ArrowLeft class="w-4 h-4" />
+          <span>Inicio</span>
+        </a>
+        <a
+          href="/manifiesto"
+          class="text-[#af0b56] uppercase tracking-wider transition-colors font-extrabold border-b-2 border-[#af0b56] pb-0.5"
+        >
+          Manifiesto
+        </a>
+        <a
+          href="/gallery"
+          class="hover:text-[#af0b56] uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 hover:text-[#af0b56]"
+        >
+          <ImageIcon class="w-4 h-4" />
+          <span>Galería</span>
+        </a>
+      </nav>
+
+      <!-- Mobile dropdown -->
+      <div class="dropdown dropdown-end md:hidden">
+        <label tabindex="0" class="btn btn-ghost btn-sm" aria-label="Menú">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </label>
+        <ul
+          tabindex="0"
+          class="dropdown-content menu p-2 shadow-lg bg-[#fcf2df] border border-black/10 rounded-box w-52 text-sm font-bold mt-2"
+        >
+          <li>
+            <a href="/" class="uppercase text-[#1d1d1b] hover:text-[#af0b56]">
+              ← Inicio
+            </a>
+          </li>
+          <li>
+            <a href="/manifiesto" class="uppercase text-[#af0b56]">
+              Manifiesto
+            </a>
+          </li>
+          <li class="border-t border-black/10 mt-1 pt-1">
+            <a
+              href="/gallery"
+              class="text-[#1d1d1b] hover:text-[#af0b56] inline-flex items-center gap-1.5"
+            >
+              <ImageIcon class="w-4 h-4" />
+              <span>Galería</span>
+            </a>
+          </li>
+          <li>
+            <a
+              href="/login"
+              class="text-gray-700 inline-flex items-center gap-1.5"
+            >
+              <Lock class="w-4 h-4" />
+              <span>Administración</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <main class="min-h-screen py-8 md:py-16 px-4 md:px-6">
+    <div class="max-w-4xl mx-auto space-y-10 md:space-y-12">
+      <!-- Barra de acciones contextuales -->
+      <div
+        class="flex items-center justify-between text-xs md:text-sm font-semibold text-neutral-600"
+      >
+        <a
+          href="/"
+          class="inline-flex items-center gap-1.5 text-[#af0b56] hover:underline transition-all hover:-translate-x-0.5"
+        >
+          <ArrowLeft class="w-4 h-4" />
+          <span>Volver al inicio</span>
+        </a>
+        <button
+          id="btn-share"
+          type="button"
+          class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-black/15 bg-white/80 hover:bg-white text-[#1d1d1b] hover:text-[#af0b56] hover:border-[#af0b56]/40 transition-all cursor-pointer shadow-xs hover:shadow-sm"
+        >
+          <Share2 class="w-3.5 h-3.5 text-[#af0b56]" />
+          <span id="share-text">Compartir</span>
+        </button>
+      </div>
+
+      <!-- Título Principal Dinámico -->
+      <header class="text-center pt-2 pb-8 border-b-2 border-black/10 relative">
+        <EditableBlock
+          pageData={pageData}
+          pageId="manifiesto"
+          blockKey="hero_title"
+          tag="h1"
+          class="text-5xl sm:text-6xl md:text-8xl font-londrina text-[#af0b56] leading-[0.98] tracking-wide drop-shadow-xs"
+          defaultText='MANIFIESTO DE LA “ACAMPADA SETAS” (SEVILLA)'
+        />
+        <div class="w-24 h-1.5 bg-[#af0b56] mx-auto mt-6 rounded-full"></div>
+      </header>
+
+      <!-- Artículo Completo con Estilos Dinámicos -->
+      <article
+        class="space-y-8 text-[#1d1d1b] text-base md:text-lg leading-relaxed font-sans"
+      >
+        <!-- Párrafo 1: Bloque de Apertura -->
+        <div
+          class="bg-white/90 backdrop-blur-xs p-6 md:p-9 rounded-3xl border border-black/10 shadow-xs hover:shadow-md transition-shadow"
+        >
+          <EditableBlock
+            pageData={pageData}
+            pageId="manifiesto"
+            blockKey="p1"
+            tag="div"
+            multiline={true}
+            class="first-letter:text-5xl first-letter:md:text-6xl first-letter:font-londrina first-letter:text-[#af0b56] first-letter:float-left first-letter:mr-3 first-letter:leading-none"
+            defaultText="Entre el 26 y el 28 de septiembre se ponían las primeras tiendas de campaña en las plazas de varias ciudades del país para protestar por el desahucio perpetrado contra Maricarmen, quien ha sido asesinada por los fondos buitre. Tan solo unos días antes todos los fondos buitre, nacionales y extranjeros, públicos y privados, los mismos rentistas y explotadores, consideraban que tenían vía libre para seguir expoliando a la clase trabajadora haciendo de la vivienda un negocio. El contexto les parece propicio. Rescate de la banca privada con millones de euros públicos, estancamiento de salarios, saqueo turístico de nuestra tierra, infiltración y represión de los movimientos sociales, las guerras imperialistas, ascenso del fascismo, y corrientes reaccionarias que dividen a la clase trabajadora. Sobre ello galopa una inflación disparada. Los precios de la vivienda devoran los salarios, llenando sus bolsillos y vaciando los nuestros. Las acampadas y las manifestaciones por la vivienda, sin embargo, obstaculizan el afán de los poderosos de continuar robando impunemente el salario a la clase trabajadora."
+          />
+        </div>
+
+        <!-- Párrafo 2: Llamada con Borde Carmín Acentuado -->
+        <div
+          class="bg-[#FFF0DD]/70 border-l-4 md:border-l-6 border-[#af0b56] p-6 md:p-8 rounded-r-3xl shadow-xs"
+        >
+          <EditableBlock
+            pageData={pageData}
+            pageId="manifiesto"
+            blockKey="p2"
+            tag="div"
+            multiline={true}
+            defaultText="Una semana más tarde, un congreso de los diputados desconectado del interés público de la sociedad que clama regular la vivienda, tumbó el modesto Decreto Maricarmen. Frente a esto, la Huelga General del 11 de Noviembre se vuelve inevitable para restaurar el interés general. Parlamentos hay muchos, clase obrera sólo una."
+          />
+        </div>
+
+        <!-- Párrafo 3: Bloque Declarativo Central -->
+        <div
+          class="bg-white/80 p-6 md:p-8 rounded-3xl border border-black/10 shadow-xs"
+        >
+          <EditableBlock
+            pageData={pageData}
+            pageId="manifiesto"
+            blockKey="p3"
+            tag="div"
+            multiline={true}
+            defaultText="En las plazas se reconstruye una conciencia política de la clase trabajadora que busca barrer toda duda. No es viable un sistema económico que ha convertido la vivienda en un negocio para escapar de su fracaso en proporcionar una vida justa, libre y digna. Dicen que comprar vivienda en España es la única inversión segura y que proporciona una rentabilidad alta (menuda confesión). Si la única forma para revalorizar inversiones y ahorros de unos pocos es extrayendo rentas de la vivienda pagada por la inmensa mayoría, demuestra que vivimos en un sistema condenado."
+          />
+        </div>
+
+        <!-- Párrafo 4: Llamamiento Previo a las Reivindicaciones -->
+        <div
+          class="p-6 md:p-7 rounded-2xl bg-[#FFF0DD] border border-[#af0b56]/20 font-medium"
+        >
+          <EditableBlock
+            pageData={pageData}
+            pageId="manifiesto"
+            blockKey="p4"
+            tag="div"
+            multiline={true}
+            class="text-lg md:text-xl text-[#1d1d1b]"
+            defaultText="En este contexto, nos dirigimos a los sindicatos y al conjunto de la clase trabajadora, nativa y migrante, de la ciudad y del campo, desde el puerto hasta la oficina. Esta son nuestras reivindicaciones inmediatas:"
+          />
+        </div>
+
+        <!-- Lista de las 11 Reivindicaciones en Tarjetas Interactivas -->
+        <ol
+          class="space-y-4 my-8 pl-0 list-none"
+          data-editable-list="reivindicaciones"
+          data-editable-page="manifiesto"
+        >
+          {
+            reivindicacionesList.items.map((item, index) => {
+              const formattedNumber =
+                index + 1 < 10 ? `0${index + 1}` : `${index + 1}`;
+              return (
+                <li
+                  class="group bg-white/85 hover:bg-white p-5 md:p-6 rounded-2xl border border-black/10 hover:border-[#af0b56]/40 shadow-xs hover:shadow-md transition-all duration-200 flex items-start gap-4 sm:gap-5 hover:-translate-y-0.5"
+                  data-editable-item-id={item.id}
+                  data-editable-page="manifiesto"
+                  data-editable-raw={item.text}
+                  data-editable-hidden={item.hidden ? "true" : "false"}
+                >
+                  <div class="shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-[#FFF0DD] border border-[#af0b56]/20 group-hover:bg-[#af0b56] transition-colors flex items-center justify-center">
+                    <span class="font-londrina text-[#af0b56] group-hover:text-[#FFF0DD] text-2xl md:text-3xl leading-none transition-colors">
+                      {formattedNumber}
+                    </span>
+                  </div>
+                  <div
+                    class="text-neutral-900 leading-relaxed text-base md:text-lg self-center"
+                    data-editable-item-text
+                    set:html={marked.parseInline(item.text)}
+                  />
+                </li>
+              );
+            })
+          }
+        </ol>
+
+        <!-- Párrafo 5: Tarjeta con Acento Carmín -->
+        <div
+          class="bg-white/85 border-l-4 md:border-l-6 border-[#af0b56] p-6 md:p-8 rounded-r-3xl shadow-xs"
+        >
+          <EditableBlock
+            pageData={pageData}
+            pageId="manifiesto"
+            blockKey="p5"
+            tag="div"
+            multiline={true}
+            defaultText="Denunciamos especialmente el racismo inmobiliario estructural que empuja a las personas migrantes y racializadas a las peores condiciones de habitabilidad. A la violencia de los precios se suma la discriminación sistemática y la negativa constante de propietarios y agencias a alquilar viviendas por motivos de origen, etnia o color de piel. No habrá justicia habitacional sin combatir la discriminación racista en el acceso a un hogar."
+          />
+        </div>
+
+        <!-- Párrafo 6: Bloque sobre el Rescate Bancario -->
+        <div
+          class="bg-white/80 p-6 md:p-8 rounded-3xl border border-black/10 shadow-xs"
+        >
+          <EditableBlock
+            pageData={pageData}
+            pageId="manifiesto"
+            blockKey="p6"
+            tag="div"
+            multiline={true}
+            defaultText="No olvidamos tampoco que a la banca se le regaló, hace poco menos de 15 años, más de 65.000 millones de euros inyectados directamente. Todas las medidas expropiatorias que planteamos, incluida la nacionalización de la banca sin indemnización, en buena medida es la recuperación de esos fondos públicos."
+          />
+        </div>
+
+        <!-- Párrafo 7: Bloque sobre la Huelga General -->
+        <div
+          class="bg-white/80 p-6 md:p-8 rounded-3xl border border-black/10 shadow-xs"
+        >
+          <EditableBlock
+            pageData={pageData}
+            pageId="manifiesto"
+            blockKey="p7"
+            tag="div"
+            multiline={true}
+            defaultText="La huelga general es una herramienta de nuestra clase, incluidos los trabajadores migrantes, que movemos el aparato productivo sobre el que se levanta el funcionamiento del conjunto de la sociedad. Nuestra acampada es sólo un medio para exponer nuestras aspiraciones inmediatas al conjunto de la población como una vía para lograr que la convocatoria de la huelga general se extienda y se secunde masivamente."
+          />
+        </div>
+
+        <!-- Párrafo 8: Antesala del Cierre -->
+        <div
+          class="bg-[#FFF0DD]/90 p-6 md:p-8 rounded-3xl border border-[#af0b56]/20 shadow-xs"
+        >
+          <EditableBlock
+            pageData={pageData}
+            pageId="manifiesto"
+            blockKey="p8"
+            tag="div"
+            multiline={true}
+            class="text-base md:text-lg"
+            defaultText="Estas medidas son las mínimas necesarias para satisfacer parte del deseo de libertad de la mayoría obrera para poder vivir una vida que merezca la pena ser vivida. Libres de explotadores y rentistas que nos condenan a entregar la gran parte de unos pequeños salarios a cambio de vivir entre cuatro paredes. Por ello, llamamos a la clase obrera a organizar la Huelga General del 11 de noviembre en la que conseguir que el salario crezca y se indexe a la subida de precios, y que la vivienda se libere del capital."
+          />
+        </div>
+
+        <!-- Cierre del Documento en Carmín y Trigo con Gran Dinamismo -->
+        <div
+          class="bg-[#B50655] text-[#FFF0DD] p-8 md:p-12 rounded-3xl shadow-xl my-10 relative overflow-hidden text-center"
+        >
+          <div class="relative z-10 max-w-2xl mx-auto space-y-4">
+            <EditableBlock
+              pageData={pageData}
+              pageId="manifiesto"
+              blockKey="cierre_1"
+              tag="p"
+              class="font-londrina text-3xl sm:text-4xl md:text-5xl leading-tight text-white tracking-wide"
+              defaultText="Llamamos a todo el pueblo a que se levante."
+            />
+            <EditableBlock
+              pageData={pageData}
+              pageId="manifiesto"
+              blockKey="cierre_2"
+              tag="p"
+              class="font-londrina text-2xl sm:text-3xl md:text-4xl leading-tight text-[#FFF0DD] tracking-wide"
+              defaultText="Sin nuestro permiso no se mueve una grúa."
+            />
+            <EditableBlock
+              pageData={pageData}
+              pageId="manifiesto"
+              blockKey="cierre_3"
+              tag="p"
+              class="font-londrina text-2xl sm:text-3xl md:text-4xl leading-tight text-white tracking-wide"
+              defaultText="Con nuestro esfuerzo se ganará un país entero."
+            />
+          </div>
+        </div>
+      </article>
+
+      <!-- Botón Flotante para Volver Arriba -->
+      <div class="flex justify-center pt-2">
+        <button
+          id="btn-scroll-top"
+          type="button"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-black/15 bg-white/80 hover:bg-white text-xs md:text-sm font-semibold text-[#1d1d1b] hover:text-[#af0b56] transition-all cursor-pointer shadow-xs hover:shadow-sm"
+        >
+          <ArrowUp class="w-4 h-4 text-[#af0b56]" />
+          <span>Volver arriba</span>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer Coherente -->
+  <footer
+    class="bg-[#1d1d1b] text-[#fcf2df] py-12 px-4 border-t-4 border-[#af0b56] mt-16"
+  >
+    <div
+      class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left"
+    >
+      <div>
+        <h3 class="text-3xl font-londrina text-[#af0b56] tracking-wide">
+          ACAMPADA SETAS SEVILLA
+        </h3>
+        <p class="text-xs text-gray-400 mt-1">
+          Contacto: <a
+            href="mailto:acampadasetas@gmail.com"
+            class="hover:underline hover:text-white transition-colors"
+            >acampadasetas@gmail.com</a
+          > • Instagram: <a
+            href="https://www.instagram.com/acampadasetas/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline hover:text-white transition-colors"
+            >@acampadasetas</a
+          >
+        </p>
+      </div>
+
+      <div class="flex items-center gap-4 text-sm font-bold">
+        <a href="/" class="hover:text-[#af0b56] transition-colors">Inicio</a>
+        <span>•</span>
+        <a href="/gallery" class="hover:text-[#af0b56] transition-colors"
+          >Galería Fotográfica</a
+        >
+        <span>•</span>
+        <a href="/login" class="hover:text-[#af0b56] transition-colors">Admin</a
+        >
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts interactivos: Barra de progreso, compartir y scroll arriba -->
+  <script>
+    // Barra de progreso de lectura
+    const progressBar = document.getElementById("reading-progress");
+    window.addEventListener("scroll", () => {
+      if (!progressBar) return;
+      const totalHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
+      const progress =
+        totalHeight > 0 ? (window.scrollY / totalHeight) * 100 : 0;
+      progressBar.style.width = `${progress}%`;
+    });
+
+    // Compartir documento
+    const shareBtn = document.getElementById("btn-share");
+    const shareText = document.getElementById("share-text");
+
+    if (shareBtn && shareText) {
+      shareBtn.addEventListener("click", async () => {
+        const title = "Manifiesto de la Acampada Setas (Sevilla)";
+        const url = window.location.href;
+
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title,
+              url,
+            });
+            return;
+          } catch (err) {
+            // Usuario canceló o no soportado
+          }
+        }
+
+        try {
+          await navigator.clipboard.writeText(url);
+          const original = shareText.textContent;
+          shareText.textContent = "¡Copiado!";
+          setTimeout(() => {
+            shareText.textContent = original;
+          }, 2000);
+        } catch {
+          window.prompt("Copia el enlace:", url);
+        }
+      });
+    }
+
+    // Volver arriba
+    const scrollTopBtn = document.getElementById("btn-scroll-top");
+    if (scrollTopBtn) {
+      scrollTopBtn.addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    }
+  </script>
+</Layout>

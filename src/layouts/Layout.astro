@@ -1,13 +1,15 @@
 ---
 import "../styles/global.css";
+import PageEditorBar from "../components/PageEditorBar.astro";
 
 interface Props {
     title: string;
     theme?: string;
     isDashboard?: boolean;
+    pageId?: string;
 }
 
-const { title, theme = "light", isDashboard = false } = Astro.props;
+const { title, theme = "light", isDashboard = false, pageId } = Astro.props;
 ---
 
 <!doctype html>
@@ -66,6 +68,7 @@ const { title, theme = "light", isDashboard = false } = Astro.props;
         }
     >
         <slot />
+        {pageId && <PageEditorBar pageId={pageId} />}
     </body>
 </html>
 
@@ -88,5 +91,41 @@ const { title, theme = "light", isDashboard = false } = Astro.props;
     h6,
     .font-londrina {
         font-family: "Londrina Solid", cursive, sans-serif;
+    }
+
+    /* Estilos cuando el Modo Edición está activo */
+    body.inline-editor-active [data-editable-key],
+    body.inline-editor-active [data-editable-item-id] {
+        position: relative;
+        transition: outline 0.15s ease-in-out;
+    }
+
+    body.inline-editor-active [data-editable-key]:hover,
+    body.inline-editor-active [data-editable-item-id]:hover {
+        outline: 2px dashed rgba(175, 11, 86, 0.4);
+        outline-offset: 4px;
+        border-radius: 4px;
+    }
+
+    body.inline-editor-active [data-editable-hidden="true"] {
+        opacity: 0.45;
+        filter: grayscale(40%);
+        position: relative;
+    }
+
+    body.inline-editor-active .inline-editor-toolbar {
+        display: inline-flex !important;
+    }
+
+    body.inline-editor-active .inline-editor-add-item-wrap {
+        display: block !important;
+    }
+
+    /* En modo lectura o para visitantes no registrados, los elementos ocultos y herramientas desaparecen por completo */
+    body:not(.inline-editor-active) [data-editable-hidden="true"],
+    body:not(.inline-editor-active) .inline-editor-toolbar,
+    body:not(.inline-editor-active) .inline-editor-add-item-wrap,
+    body:not(.inline-editor-active) .inline-editor-box {
+        display: none !important;
     }
 </style>

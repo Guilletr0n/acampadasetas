@@ -32,6 +32,8 @@ export interface SectionContent {
   template: SectionTemplate;
   body: string;
   illustrationUrl?: string;
+  buttonUrl?: string;
+  buttonLabel?: string;
 }
 
 export interface Section {
@@ -55,6 +57,8 @@ export interface SectionHistoryEntry {
   highlight?: string;
   body: string;
   illustrationUrl?: string;
+  buttonUrl?: string;
+  buttonLabel?: string;
   status: 'published' | 'draft';
 }
 
@@ -67,3 +71,27 @@ export interface GalleryItem {
   order: number;
   createdAt: string;
 }
+
+export interface PageBlock {
+  text: string;
+  hidden?: boolean;
+}
+
+export interface PageListItem {
+  id: string;
+  text: string;
+  hidden?: boolean;
+}
+
+export interface PageList {
+  items: PageListItem[];
+  hidden?: boolean;
+}
+
+export interface PageData {
+  id: string;
+  blocks: Record<string, PageBlock>;
+  lists: Record<string, PageList>;
+  updatedAt: string;
+}
+

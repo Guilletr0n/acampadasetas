@@ -1,0 +1,85 @@
+---
+import type { SectionTemplateProps } from "./index";
+import { marked } from "marked";
+import { ArrowRight } from "lucide-astro";
+
+interface Props extends SectionTemplateProps {}
+
+const {
+  slug,
+  content,
+  isAlternate = false,
+  renderedMarkdown = marked.parse(content.body || ""),
+} = Astro.props;
+---
+
+<section
+  id={slug}
+  class="py-16 md:py-24 px-4 border-b border-black/10 bg-[#FFF0DD]"
+>
+  <div class="max-w-5xl mx-auto">
+    <div
+      class="bg-[#B50655] text-[#FFF0DD] rounded-3xl shadow-xl relative overflow-hidden"
+    >
+      <div
+        class="grid grid-cols-1 md:grid-cols-2 gap-0 items-stretch"
+      >
+        <!-- Imagen a la izquierda -->
+        {content.illustrationUrl && (
+          <div class="relative min-h-[280px] md:min-h-[360px]">
+            <img
+              src={content.illustrationUrl}
+              alt={content.title}
+              class="absolute inset-0 w-full h-full object-cover md:rounded-l-3xl"
+              loading="lazy"
+            />
+          </div>
+        )}
+
+        <!-- Texto a la derecha -->
+        <div
+          class={`p-8 md:p-12 flex flex-col justify-center space-y-6 ${
+            !content.illustrationUrl ? "md:col-span-2" : ""
+          }`}
+        >
+          {content.highlight && (
+            <div>
+              <span class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-xs text-[#FFF0DD] text-xs md:text-sm font-bold uppercase tracking-wider px-4 py-1.5 rounded-full border border-white/20">
+                {content.highlight}
+              </span>
+            </div>
+          )}
+
+          <h2 class="text-3xl sm:text-4xl md:text-5xl font-londrina text-white tracking-wide leading-tight">
+            {content.title}
+          </h2>
+
+          {content.subtitle && (
+            <p class="font-londrina text-2xl sm:text-3xl text-[#FFF0DD] tracking-wide leading-tight">
+              {content.subtitle}
+            </p>
+          )}
+
+          {renderedMarkdown && (
+            <div
+              class="text-[#FFF0DD]/95 text-base md:text-lg leading-relaxed font-sans space-y-4 [&_a]:text-white [&_a]:underline [&_a:hover]:text-[#FFF0DD] [&_strong]:text-white [&_strong]:font-semibold"
+              set:html={renderedMarkdown}
+            />
+          )}
+
+          {content.buttonUrl && (
+            <div class="pt-2">
+              <a
+                href={content.buttonUrl}
+                class="btn bg-[#FFF0DD] hover:bg-white text-[#B50655] font-bold text-base md:text-lg px-8 py-3.5 rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all inline-flex items-center gap-2 group w-fit max-w-full"
+              >
+                <span>{content.buttonLabel || "Saber más"}</span>
+                <ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform shrink-0" />
+              </a>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

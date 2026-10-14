@@ -1,0 +1,43 @@
+---
+import { getResolvedPageBlock, type PageData } from '../lib/db';
+import { marked } from 'marked';
+
+interface Props {
+  pageData?: PageData;
+  pageId: string;
+  blockKey: string;
+  defaultText: string;
+  tag?: string;
+  class?: string;
+  multiline?: boolean;
+}
+
+const {
+  pageData,
+  pageId,
+  blockKey,
+  defaultText,
+  tag = 'div',
+  class: className = '',
+  multiline = false,
+} = Astro.props;
+
+const resolved = pageData
+  ? getResolvedPageBlock(pageData, blockKey, defaultText)
+  : { text: defaultText, hidden: false };
+
+const Tag = tag as any;
+const htmlContent = multiline
+  ? marked.parse(resolved.text)
+  : marked.parseInline(resolved.text);
+---
+
+<Tag
+  class={className}
+  data-editable-page={pageId}
+  data-editable-key={blockKey}
+  data-editable-raw={resolved.text}
+  data-editable-multiline={multiline ? 'true' : 'false'}
+  data-editable-hidden={resolved.hidden ? 'true' : 'false'}
+  set:html={htmlContent}
+/>

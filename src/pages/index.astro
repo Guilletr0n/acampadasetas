@@ -4,7 +4,18 @@ import { getSections, getActivities } from "../lib/db";
 import { seedUsersIfEmpty } from "../lib/users";
 import { marked } from "marked";
 import { getTemplateComponent } from "../components/sections";
-import { Image, Lock, FileText, Calendar } from "lucide-astro";
+import SeccionHuelga from "../components/seccion-huelga.astro";
+import ScheduleActivities from "../components/sections/ScheduleActivities.astro";
+import {
+    Image,
+    Lock,
+    FileText,
+    Calendar,
+    ScrollText,
+    ArrowRight,
+    CheckCircle2,
+    Megaphone,
+} from "lucide-astro";
 
 export const prerender = false;
 
@@ -15,30 +26,345 @@ await seedUsersIfEmpty();
 const publishedActivities = await getActivities(true);
 const rawSections = await getSections(true); // true = live published sections only
 
-// If there are no published activities for today, do not render the schedule section
-const sections = rawSections.filter((sec) => {
-    const isSchedule =
+// 2. Identify if an explicit schedule/agenda section is configured in the CMS
+const scheduleSection = rawSections.find(
+    (s) =>
+        s.slug === "agenda" ||
+        s.slug === "programa" ||
+        s.id === "sec-agenda" ||
+        s.live?.template === "schedule" ||
+        s.live?.template === "horario-actividades",
+);
+
+const scheduleSlug = scheduleSection?.slug || "agenda";
+const scheduleContent = scheduleSection?.live ||
+    scheduleSection?.draft || {
+        title: "Actividades",
+        navLabel: "Programa",
+        subtitle: "Asambleas, talleres y formación colectiva",
+        highlight: "Horario del día",
+        template: "schedule",
+        body: "",
+    };
+if (
+    scheduleContent.title === "HORARIO DE ACTIVIDADES" ||
+    scheduleContent.title === "Programa y Actividades"
+) {
+    scheduleContent.title = "Actividades";
+}
+const scheduleNavLabel = scheduleContent.navLabel || "Programa";
+
+// 3. Filter other dynamic sections for <main>, excluding schedule, manifiesto, and huelga
+const dynamicSections = rawSections.filter((sec) => {
+    if (sec.slug === "manifiesto" || sec.id === "sec-manifiesto") {
+        return false;
+    }
+    if (sec.slug === "huelga" || sec.id === "sec-huelga") {
+        return false;
+    }
+    if (
+        sec.slug === "agenda" ||
+        sec.slug === "programa" ||
+        sec.id === "sec-agenda" ||
         sec.live?.template === "schedule" ||
-        sec.live?.template === "horario-actividades";
-    if (isSchedule && publishedActivities.length === 0) {
+        sec.live?.template === "horario-actividades"
+    ) {
         return false;
     }
     return true;
 });
-
-const hasAgenda = sections.some(
-    (s) =>
-        s.slug === "agenda" ||
-        s.live?.template === "schedule" ||
-        s.live?.template === "horario-actividades",
-);
 ---
 
 <Layout title="Acampada Setas Sevilla | Movilización por la Vivienda">
     <!-- Sticky Navigation Header -->
-    <div style="background-color:#333;display:flex;align-items:center ; justify-content: center; height:100vh">
-        <span style="color:#aaa">Este dominio está reservado</span>
-    </div>
+    <header class="sticky top-0 z-50 bg-[#fcf2df]/95 backdrop-blur-md border-b border-black/10 px-4 md:px-8 py-3 transition-all shadow-sm">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <a href="#" class="flex items-center gap-2 group">
+                <span class="text-3xl md:text-4xl font-londrina text-[#af0b56] tracking-wide group-hover:scale-105 transition-transform">
+                    ACAMPADA de las SETAS
+                </span>
+            </a>
+
+            <!-- Desktop Nav -->
+            <nav class="hidden md:flex items-center gap-6 font-bold text-sm text-[#1d1d1b]">
+                {publishedActivities.length > 0 && (
+                    <a
+                        href={`#${scheduleSlug}`}
+                        class="hover:text-[#af0b56] uppercase tracking-wider transition-colors scroll-link"
+                    >
+                        {scheduleNavLabel}
+                    </a>
+                )}
+                <a
+                    href="#manifiesto"
+                    class="hover:text-[#af0b56] uppercase tracking-wider transition-colors scroll-link"
+                >
+                    Manifiesto
+                </a>
+                <a
+                    href="#huelga"
+                    class="hover:text-[#af0b56] uppercase tracking-wider transition-colors scroll-link"
+                >
+                    Huelga 11N
+                </a>
+                {dynamicSections.map((sec) => (
+                    <a
+                        href={`#${sec.slug}`}
+                        class="hover:text-[#af0b56] uppercase tracking-wider transition-colors scroll-link"
+                    >
+                        {sec.live?.navLabel || sec.live?.title || sec.slug}
+                    </a>
+                ))}
+                <a
+                    href="/gallery"
+                    class="hover:text-[#af0b56] uppercase tracking-wider transition-colors text-[#af0b56] inline-flex items-center gap-1.5"
+                >
+                    <Image class="w-4 h-4" />
+                    <span>Galería</span>
+                </a>
+            </nav>
+
+            <!-- Mobile dropdown -->
+            <div class="dropdown dropdown-end md:hidden">
+                <label tabindex="0" class="btn btn-ghost btn-sm">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16"
+                        ></path>
+                    </svg>
+                </label>
+                <ul
+                    tabindex="0"
+                    class="dropdown-content menu p-2 shadow-lg bg-[#fcf2df] border border-black/10 rounded-box w-52 text-sm font-bold mt-2"
+                >
+                    {publishedActivities.length > 0 && (
+                        <li>
+                            <a
+                                href={`#${scheduleSlug}`}
+                                class="uppercase text-[#1d1d1b] hover:text-[#af0b56]"
+                            >
+                                {scheduleNavLabel}
+                            </a>
+                        </li>
+                    )}
+                    <li>
+                        <a
+                            href="#manifiesto"
+                            class="uppercase text-[#1d1d1b] hover:text-[#af0b56]"
+                        >
+                            Manifiesto
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="#huelga"
+                            class="uppercase text-[#1d1d1b] hover:text-[#af0b56]"
+                        >
+                            Huelga 11N
+                        </a>
+                    </li>
+                    {dynamicSections.map((sec) => (
+                        <li>
+                            <a
+                                href={`#${sec.slug}`}
+                                class="uppercase text-[#1d1d1b] hover:text-[#af0b56]"
+                            >
+                                {sec.live?.navLabel ||
+                                    sec.live?.title ||
+                                    sec.slug}
+                            </a>
+                        </li>
+                    ))}
+                    <li class="border-t border-black/10 mt-1 pt-1">
+                        <a
+                            href="/gallery"
+                            class="text-[#af0b56] inline-flex items-center gap-1.5"
+                        >
+                            <Image class="w-4 h-4" />
+                            <span>Galería</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="/login"
+                            class="text-gray-700 inline-flex items-center gap-1.5"
+                        >
+                            <Lock class="w-4 h-4" />
+                            <span>Administración</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero / Intro Banner -->
+    <section class="py-12 md:py-20 px-4 max-w-6xl mx-auto text-center border-b border-black/10">
+        <img
+            src="/assets/images/logo.svg"
+            class="w-64 mx-auto"
+            alt="Logo Acampada Setas"
+        />
+        <h1 class="text-6xl md:text-8xl font-londrina text-[#B50655] leading-none mb-6">
+            POR EL DERECHO A LA CIUDAD Y A LA VIVIENDA
+        </h1>
+        <p class="max-w-2xl mx-auto text-lg md:text-xl text-[#1d1d1b] font-medium leading-relaxed">
+            Frente a la especulación rentista, los desahucios y la
+            turistificación masiva: autoorganización popular y asamblea abierta
+            permanente.
+        </p>
+    </section>
+
+    <!-- Horario de Actividades: primera sección entre el header y las secciones que vienen después -->
+    {publishedActivities.length > 0 && (
+        <ScheduleActivities
+            slug={scheduleSlug}
+            content={scheduleContent}
+            isAlternate={false}
+        />
+    )}
+
+    <!-- Sección Destacada del Manifiesto -->
+    <section
+        id="manifiesto"
+        class="py-16 md:py-24 px-4 bg-[#FFF0DD] border-b border-black/10 relative overflow-hidden"
+    >
+        <div class="max-w-5xl mx-auto">
+            <div class="bg-white/90 backdrop-blur-xs rounded-3xl border border-black/10 shadow-sm hover:shadow-md transition-shadow p-8 md:p-12 relative overflow-hidden space-y-6">
+                <!-- Elemento decorativo de fondo -->
+                <div class="absolute -right-12 -bottom-12 w-72 h-72 bg-[#af0b56]/5 rounded-full blur-3xl pointer-events-none"></div>
+
+                <!-- Badge oficial asamblea -->
+                <div>
+                    <div class="inline-flex items-center gap-2 bg-[#af0b56] text-[#FFF0DD] text-xs md:text-sm font-bold uppercase tracking-wider px-4 py-1.5 rounded-full shadow-xs">
+                        <ScrollText class="w-4 h-4" />
+                        <span>Noticias</span>
+                    </div>
+                </div>
+
+                <!-- Título del Manifiesto -->
+                <h2 class="text-4xl sm:text-5xl md:text-6xl font-londrina text-[#af0b56] tracking-wide leading-[1.05]">
+                    MANIFIESTO DE LA ACAMPADA SETAS
+                </h2>
+
+                <!-- Párrafo explicativo -->
+                <p class="text-base md:text-lg text-[#1d1d1b] leading-relaxed font-sans max-w-4xl">
+                    El pasado 11 de octubre, reunidas en asamblea general en la
+                    Plaza de la Encarnación, acordamos colectivamente este
+                    manifiesto que recoge 11 medidas urgentes contra los fondos
+                    buitre, los desahucios y la turistificación salvaje. Una
+                    declaración de lucha por el derecho a la vivienda y la
+                    ciudad que convoca a toda la clase trabajadora hacia la
+                    Huelga General del 11 de Noviembre.
+                </p>
+
+                <!-- Botón CTA a continuación del párrafo -->
+                <div class="pt-2">
+                    <a
+                        href="/manifiesto"
+                        class="btn bg-[#af0b56] hover:bg-[#8f0946] text-[#FFF0DD] font-bold text-base md:text-lg px-8 py-3.5 rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all inline-flex items-center gap-2 group w-fit max-w-full"
+                    >
+                        <span>Leer completo</span>
+                        <ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform shrink-0" />
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Destacada: 11 de Noviembre (Huelga General) -->
+    <!-- <SeccionHuelga invert={false} /> -->
+
+    <!-- Dynamic Sections Rendered by Template -->
+    <main class="space-y-0">
+        {dynamicSections.map((sec, index) => {
+            const content = sec.live;
+            if (!content) return null;
+
+            const TemplateComponent = getTemplateComponent(content.template);
+            const renderedMarkdown = marked.parse(content.body || "");
+            const isAlternate = index % 2 === 1;
+
+            return (
+                <TemplateComponent
+                    slug={sec.slug}
+                    content={content}
+                    isAlternate={isAlternate}
+                    renderedMarkdown={renderedMarkdown}
+                />
+            );
+        })}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#1d1d1b] text-[#fcf2df] py-12 px-4 border-t-4 border-[#af0b56]">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
+            <div>
+                <h3 class="text-3xl font-londrina text-[#af0b56] tracking-wide">
+                    ACAMPADA SETAS SEVILLA
+                </h3>
+                <p class="text-xs text-gray-400 mt-1">
+                    Contacto:{" "}
+                    <a
+                        href="mailto:acampadasetas@gmail.com"
+                        class="hover:underline hover:text-white transition-colors"
+                    >
+                        acampadasetas@gmail.com
+                    </a>{" "}
+                    • Instagram:{" "}
+                    <a
+                        href="https://www.instagram.com/acampadasetas/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="hover:underline hover:text-white transition-colors"
+                    >
+                        @acampadasetas
+                    </a>
+                </p>
+            </div>
+
+            <div class="flex items-center gap-4 text-sm font-bold">
+                <a
+                    href="/manifiesto"
+                    class="hover:text-[#af0b56] transition-colors"
+                >
+                    Manifiesto
+                </a>
+                <span>•</span>
+                <a
+                    href="/huelga"
+                    class="hover:text-[#af0b56] transition-colors"
+                >
+                    Propuesta de Huelga
+                </a>
+                <span>•</span>
+                <a
+                    href="/gallery"
+                    class="hover:text-[#af0b56] transition-colors"
+                >
+                    Galería Fotográfica
+                </a>
+                <!--
+          <span>•</span>
+        <a href="/join-editor" class="hover:text-[#af0b56] transition-colors"
+          >Postularse como Editora</a
+        > -->
+                <span>•</span>
+                <a href="/login" class="hover:text-[#af0b56] transition-colors">
+                    Admin
+                </a>
+            </div>
+        </div>
+    </footer>
 </Layout>
 
 <style>

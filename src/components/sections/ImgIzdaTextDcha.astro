@@ -1,0 +1,110 @@
+---
+import type { SectionTemplateProps } from "./index";
+import { marked } from "marked";
+import { Megaphone, ArrowRight } from "lucide-astro";
+
+interface Props extends SectionTemplateProps {}
+
+const {
+  slug,
+  content,
+  isAlternate = false,
+  renderedMarkdown = marked.parse(content.body || ""),
+} = Astro.props;
+
+const buttonUrl = content.buttonUrl;
+const buttonLabel = content.buttonLabel || "Propuesta de huelga";
+---
+
+<!-- Sección: Imagen izquierda · Texto derecha -->
+<section
+  id={slug}
+  class="w-full py-16 md:py-24 px-4 md:px-8 border-b border-black/10 relative overflow-hidden bg-transparent text-[#B50655]"
+>
+  <!-- Elemento decorativo de fondo sutil -->
+  <div
+    class="absolute -right-16 -bottom-16 w-96 h-96 rounded-full blur-3xl pointer-events-none bg-[#B50655]/5"
+  >
+  </div>
+
+  <div class="max-w-6xl mx-auto relative z-10">
+    <div
+      class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 lg:gap-16 items-center"
+    >
+      <!-- Gráfico a la izquierda: Ilustración PNG transparente sin recuadro ni cortes -->
+      {
+        content.illustrationUrl && (
+          <div class="md:col-span-5 flex justify-center items-center">
+            <img
+              src={content.illustrationUrl}
+              alt={content.title}
+              width="512"
+              height="512"
+              class="w-full max-w-[512px] max-h-[512px] aspect-square object-contain drop-shadow-2xl hover:scale-[1.03] transition-transform duration-300"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+        )
+      }
+
+      <!-- Contenido a la derecha: Badge, Título, Subtítulo (Poppins), Markdown y Botón -->
+      <div
+        class={`${content.illustrationUrl ? "md:col-span-7" : "md:col-span-12"} space-y-6 text-left`}
+      >
+        <!-- Badge oficial -->
+        {
+          content.highlight && (
+            <div>
+              <div class="inline-flex items-center gap-2 text-xs md:text-sm font-bold uppercase tracking-wider px-4 py-1.5 rounded-full shadow-sm bg-[#B50655] text-[#FFF0DD]">
+                <Megaphone class="w-4 h-4 shrink-0" />
+                <span>{content.highlight}</span>
+              </div>
+            </div>
+          )
+        }
+
+        <!-- Título -->
+        <h2
+          class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-londrina tracking-wide leading-[1.05] text-[#B50655]"
+        >
+          {content.title}
+        </h2>
+
+        <!-- Subtítulo en familia tipográfica Poppins -->
+        {
+          content.subtitle && (
+            <p class="text-lg md:text-xl font-medium leading-relaxed max-w-xl text-[#B50655] font-sans">
+              {content.subtitle}
+            </p>
+          )
+        }
+
+        <!-- Cuerpo markdown opcional -->
+        {
+          content.body && (
+            <div
+              class="text-base md:text-lg leading-relaxed font-sans text-neutral-800 space-y-4 max-w-xl [&_a]:text-[#B50655] [&_a]:underline [&_strong]:font-semibold"
+              set:html={renderedMarkdown}
+            />
+          )
+        }
+
+        <!-- Botón de acción editable -->
+        {
+          buttonUrl && (
+            <div class="pt-2">
+              <a
+                href={buttonUrl}
+                class="btn font-bold text-base md:text-lg px-8 py-3.5 rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 border-none transition-all inline-flex items-center gap-2 group w-fit max-w-full bg-[#B50655] hover:bg-[#8f0946] text-[#FFF0DD]"
+              >
+                <span>{buttonLabel}</span>
+                <ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform shrink-0" />
+              </a>
+            </div>
+          )
+        }
+      </div>
+    </div>
+  </div>
+</section>

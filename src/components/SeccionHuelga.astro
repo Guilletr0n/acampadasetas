@@ -1,0 +1,12 @@
+---
+import SeccionHuelgaComponent from "./seccion-huelga.astro";
+
+interface Props {
+  invert?: boolean;
+  id?: string;
+}
+
+const props = Astro.props;
+---
+
+<SeccionHuelgaComponent {...props} />

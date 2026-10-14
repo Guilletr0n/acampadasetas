@@ -4,7 +4,10 @@ import NuevaPlantilla from './nuevaPlantilla.astro';
 import ScheduleActivities from './ScheduleActivities.astro';
 import type { SectionContent } from '../../lib/types';
 import FondoTrigo from './FondoTrigo.astro';
-import FondoCarmin from './FondoCarmin.astro'
+import FondoCarmin from './FondoCarmin.astro';
+import PastillaBlanca from './PastillaBlanca.astro';
+import PastillaCarmin from './PastillaCarmin.astro';
+import ImgIzdaTextDcha from './ImgIzdaTextDcha.astro';
 
 export interface SectionTemplateProps {
   slug: string;
@@ -42,7 +45,7 @@ export const TEMPLATES: Record<string, SectionTemplateMeta> = {
   },
   'schedule': {
     id: 'schedule',
-    label: 'Horario de Actividades',
+    label: 'Actividades',
     description: 'Diseño cartel con fecha automática del día y listado horario de actividades.',
     component: ScheduleActivities,
   },
@@ -69,12 +72,38 @@ export const TEMPLATES: Record<string, SectionTemplateMeta> = {
     label: 'Fondo carmin',
     description: 'Nueva plantilla con fondo de carmin.',
     component: FondoCarmin,
+  },
+  'pastilla-blanca': {
+    id: 'pastilla-blanca',
+    label: 'Pastilla blanca',
+    description: 'Tarjeta blanca redondeada sobre fondo trigo, con badge, tipografía en carmín y botón de acción.',
+    component: PastillaBlanca,
+  },
+  'pastilla blanca': {
+    id: 'pastilla blanca',
+    label: 'Pastilla blanca',
+    description: 'Tarjeta blanca redondeada sobre fondo trigo, con badge, tipografía en carmín y botón de acción.',
+    component: PastillaBlanca,
+  },
+  'pastilla-carmin': {
+    id: 'pastilla-carmin',
+    label: 'Pastilla carmín',
+    description: 'Tarjeta carmín con imagen a la izquierda y texto a la derecha, estilo "huelga general".',
+    component: PastillaCarmin,
+  },
+  'img-izda-text-dcha': {
+    id: 'img-izda-text-dcha',
+    label: 'Imagen izquierda · Texto derecha',
+    description: 'Imagen a la izquierda con título, subtítulo y botón CTA a la derecha, fondo transparente.',
+    component: ImgIzdaTextDcha,
   }
 };
 
 export const DEFAULT_TEMPLATE_ID = 'single-column';
 
-export const AVAILABLE_TEMPLATES = Object.values(TEMPLATES).filter(t => t.id !== 'horario-actividades');
+export const AVAILABLE_TEMPLATES = Object.values(TEMPLATES).filter(
+  t => t.id !== 'horario-actividades' && t.id !== 'pastilla blanca'
+);
 
 export function getTemplateComponent(templateId: string) {
   return TEMPLATES[templateId]?.component || TEMPLATES[DEFAULT_TEMPLATE_ID].component;
