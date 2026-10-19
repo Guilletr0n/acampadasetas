@@ -20,7 +20,14 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
   try {
     const data = await request.json();
     const updated = await updateUser(uid, data);
-    return new Response(JSON.stringify({ success: true, user: updated }), {
+    if (!updated) {
+      return new Response(JSON.stringify({ error: 'Usuario no encontrado' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    const { password: _pwd, ...safeUser } = updated;
+    return new Response(JSON.stringify({ success: true, user: safeUser }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
