@@ -1,0 +1,14 @@
+---
+import ManifestoView from "../components/ManifestoView.astro";
+
+export const prerender = false;
+
+// Actualizar cookie de preferencia para que recuerde que eligió portugués
+Astro.cookies.set("preferred_lang", "pt", {
+  path: "/",
+  maxAge: 60 * 60 * 24 * 365,
+  sameSite: "lax",
+});
+---
+
+<ManifestoView lang="pt" />

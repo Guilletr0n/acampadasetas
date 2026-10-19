@@ -7,13 +7,14 @@ interface Props {
     theme?: string;
     isDashboard?: boolean;
     pageId?: string;
+    lang?: string;
 }
 
-const { title, theme = "light", isDashboard = false, pageId } = Astro.props;
+const { title, theme = "light", isDashboard = false, pageId, lang = "es" } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="es" data-theme={theme}>
+<html lang={lang} data-theme={theme}>
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -58,6 +59,7 @@ const { title, theme = "light", isDashboard = false, pageId } = Astro.props;
         />
 
         <title>{title} | Acampada Setas Sevilla</title>
+        <slot name="head" />
     </head>
     <body
         class={

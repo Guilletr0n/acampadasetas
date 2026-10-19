@@ -1,0 +1,637 @@
+---
+import Layout from "../layouts/Layout.astro";
+import EditableBlock from "./EditableBlock.astro";
+import { getPageData, getResolvedPageList } from "../lib/db";
+import { marked } from "marked";
+import {
+  ArrowLeft,
+  Share2,
+  Image as ImageIcon,
+  Lock,
+  ArrowUp,
+  Languages,
+  Check,
+  ChevronDown,
+} from "lucide-astro";
+import {
+  MANIFIESTO_TRANSLATIONS,
+  SUPPORTED_LANGUAGES,
+  type LanguageCode,
+} from "../lib/manifiesto-translations";
+
+interface Props {
+  lang: LanguageCode;
+}
+
+const { lang = "es" } = Astro.props;
+
+const currentLang = SUPPORTED_LANGUAGES.includes(lang) ? lang : "es";
+const translation = MANIFIESTO_TRANSLATIONS[currentLang];
+const pageId =
+  currentLang === "es" ? "manifiesto" : `manifiesto-${currentLang}`;
+
+const pageData = await getPageData(pageId);
+const reivindicacionesList = getResolvedPageList(
+  pageData,
+  "reivindicaciones",
+  translation.content.reivindicaciones,
+);
+
+const languagesList = SUPPORTED_LANGUAGES.map(
+  (code) => MANIFIESTO_TRANSLATIONS[code],
+);
+---
+
+<Layout title={translation.pageTitle} pageId={pageId} lang={currentLang}>
+  <slot name="head" slot="head" />
+
+  <!-- Barra de Lectura / Progreso Superior -->
+  <div
+    id="reading-progress"
+    class="fixed top-0 left-0 h-1 bg-[#af0b56] z-[60] w-0 transition-all duration-150"
+  >
+  </div>
+
+  <!-- Header de Navegación Sticky -->
+  <header
+    class="sticky top-0 z-50 bg-[#fcf2df]/95 backdrop-blur-md border-b border-black/10 px-4 md:px-8 py-3 transition-all shadow-sm"
+  >
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2 group">
+        <span
+          class="text-2xl md:text-4xl font-londrina text-[#af0b56] tracking-wide group-hover:scale-105 transition-transform"
+        >
+          ACAMPADA de las SETAS
+        </span>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav
+        class="hidden md:flex items-center gap-6 font-bold text-sm text-[#1d1d1b]"
+        aria-label="Navegación principal"
+      >
+        <a
+          href="/"
+          class="hover:text-[#af0b56] uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 hover:-translate-x-0.5"
+        >
+          <ArrowLeft class="w-4 h-4" />
+          <span>{translation.ui.home}</span>
+        </a>
+        <a
+          href={translation.path}
+          class="text-[#af0b56] uppercase tracking-wider transition-colors font-extrabold border-b-2 border-[#af0b56] pb-0.5"
+        >
+          {translation.ui.manifesto}
+        </a>
+        <a
+          href="/gallery"
+          class="hover:text-[#af0b56] uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 hover:text-[#af0b56]"
+        >
+          <ImageIcon class="w-4 h-4" />
+          <span>{translation.ui.gallery}</span>
+        </a>
+
+        <!-- Selector de idioma en el Header Desktop -->
+        <div class="dropdown dropdown-end">
+          <button
+            type="button"
+            tabindex="0"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-black/15 bg-white/70 hover:bg-white text-xs font-bold text-[#1d1d1b] hover:text-[#af0b56] transition-all cursor-pointer shadow-2xs hover:shadow-xs"
+            aria-label={translation.ui.selectLanguage}
+          >
+            <Languages class="w-3.5 h-3.5 text-[#af0b56]" />
+            <span class="uppercase tracking-wide">{translation.code}</span>
+            <ChevronDown class="w-3 h-3 text-neutral-500" />
+          </button>
+          <ul
+            tabindex="0"
+            class="dropdown-content menu p-2 shadow-xl bg-[#fcf2df] border border-black/15 rounded-2xl w-48 z-[70] mt-2 text-xs font-bold space-y-1"
+          >
+            <li
+              class="menu-title px-2 py-1 text-[11px] text-neutral-500 uppercase tracking-wider"
+            >
+              {translation.ui.languages}
+            </li>
+            {
+              languagesList.map((item) => {
+                const isActive = item.code === currentLang;
+                return (
+                  <li>
+                    <a
+                      href={item.path}
+                      data-lang-switch={item.code}
+                      class={`flex items-center justify-between py-2 px-3 rounded-xl transition-colors ${
+                        isActive
+                          ? "bg-[#af0b56] text-white hover:bg-[#930a48]"
+                          : "text-[#1d1d1b] hover:text-[#af0b56] hover:bg-black/5"
+                      }`}
+                      aria-current={isActive ? "page" : undefined}
+                    >
+                      <span class="flex items-center gap-2">
+                        <span>{item.name}</span>
+                      </span>
+                      {isActive && <Check class="w-3.5 h-3.5" />}
+                    </a>
+                  </li>
+                );
+              })
+            }
+          </ul>
+        </div>
+      </nav>
+
+      <!-- Mobile bar right: Quick Language Selector + Hamburger -->
+      <div class="flex items-center gap-2 md:hidden">
+        <!-- Quick Language Menu Mobile -->
+        <div class="dropdown dropdown-end">
+          <button
+            type="button"
+            tabindex="0"
+            class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-black/15 bg-white/70 text-xs font-bold text-[#1d1d1b]"
+            aria-label={translation.ui.selectLanguage}
+          >
+            <span class="uppercase">{translation.code}</span>
+            <ChevronDown class="w-3 h-3 text-neutral-500" />
+          </button>
+          <ul
+            tabindex="0"
+            class="dropdown-content menu p-2 shadow-xl bg-[#fcf2df] border border-black/15 rounded-2xl w-44 z-[70] mt-2 text-xs font-bold space-y-1"
+          >
+            {
+              languagesList.map((item) => {
+                const isActive = item.code === currentLang;
+                return (
+                  <li>
+                    <a
+                      href={item.path}
+                      data-lang-switch={item.code}
+                      class={`flex items-center justify-between py-2 px-3 rounded-xl ${
+                        isActive
+                          ? "bg-[#af0b56] text-white hover:bg-[#930a48]"
+                          : "text-[#1d1d1b] hover:text-[#af0b56]"
+                      }`}
+                      aria-current={isActive ? "page" : undefined}
+                    >
+                      <span class="flex items-center gap-2">
+                        <span>{item.name}</span>
+                      </span>
+                      {isActive && <Check class="w-3 h-3" />}
+                    </a>
+                  </li>
+                );
+              })
+            }
+          </ul>
+        </div>
+
+        <!-- Mobile hamburger dropdown -->
+        <div class="dropdown dropdown-end">
+          <label tabindex="0" class="btn btn-ghost btn-sm" aria-label="Menú">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </label>
+          <ul
+            tabindex="0"
+            class="dropdown-content menu p-2 shadow-lg bg-[#fcf2df] border border-black/10 rounded-box w-56 text-sm font-bold mt-2 z-[70]"
+          >
+            <li>
+              <a href="/" class="uppercase text-[#1d1d1b] hover:text-[#af0b56]">
+                ← {translation.ui.home}
+              </a>
+            </li>
+            <li>
+              <a href={translation.path} class="uppercase text-[#af0b56]">
+                {translation.ui.manifesto}
+              </a>
+            </li>
+            <li>
+              <a
+                href="/gallery"
+                class="text-[#1d1d1b] hover:text-[#af0b56] inline-flex items-center gap-1.5"
+              >
+                <ImageIcon class="w-4 h-4" />
+                <span>{translation.ui.gallery}</span>
+              </a>
+            </li>
+            <li class="border-t border-black/10 mt-1 pt-1">
+              <a
+                href="/login"
+                class="text-gray-700 inline-flex items-center gap-1.5"
+              >
+                <Lock class="w-4 h-4" />
+                <span>{translation.ui.admin}</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="min-h-screen py-8 md:py-16 px-4 md:px-6">
+    <div class="max-w-4xl mx-auto space-y-8 md:space-y-10">
+      <!-- Barra de acciones contextuales -->
+      <div
+        class="flex items-center justify-between text-xs md:text-sm font-semibold text-neutral-600"
+      >
+        <a
+          href="/"
+          class="inline-flex items-center gap-1.5 text-[#af0b56] hover:underline transition-all hover:-translate-x-0.5"
+        >
+          <ArrowLeft class="w-4 h-4" />
+          <span>{translation.ui.backToHome}</span>
+        </a>
+        <button
+          id="btn-share"
+          type="button"
+          class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-black/15 bg-white/80 hover:bg-white text-[#1d1d1b] hover:text-[#af0b56] hover:border-[#af0b56]/40 transition-all cursor-pointer shadow-xs hover:shadow-sm"
+        >
+          <Share2 class="w-3.5 h-3.5 text-[#af0b56]" />
+          <span id="share-text">{translation.ui.share}</span>
+        </button>
+      </div>
+
+      <!-- Menú Superior de Idiomas para Navegación -->
+      <nav
+        aria-label={translation.ui.selectLanguage}
+        class="bg-white/70 backdrop-blur-xs p-2.5 sm:p-3.5 rounded-2xl border border-black/10 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-2.5"
+      >
+        <div
+          class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-neutral-600"
+        >
+          <Languages class="w-4 h-4 text-[#af0b56]" />
+          <span>{translation.ui.languages}:</span>
+        </div>
+
+        <div
+          class="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2"
+        >
+          {
+            languagesList.map((item) => {
+              const isActive = item.code === currentLang;
+              return (
+                <a
+                  href={item.path}
+                  data-lang-switch={item.code}
+                  class={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                    isActive
+                      ? "bg-[#af0b56] text-white shadow-xs pointer-events-none scale-105"
+                      : "bg-white/80 hover:bg-white text-[#1d1d1b] hover:text-[#af0b56] border border-black/10 hover:border-[#af0b56]/40 hover:shadow-2xs"
+                  }`}
+                  aria-current={isActive ? "page" : undefined}
+                >
+                  <span>{item.name}</span>
+                </a>
+              );
+            })
+          }
+        </div>
+      </nav>
+
+      <!-- Título Principal Dinámico -->
+      <header class="text-center pt-2 pb-8 border-b-2 border-black/10 relative">
+        <EditableBlock
+          pageData={pageData}
+          pageId={pageId}
+          blockKey="hero_title"
+          tag="h1"
+          class="text-4xl sm:text-6xl md:text-8xl font-londrina text-[#af0b56] leading-[0.98] tracking-wide drop-shadow-xs uppercase"
+          defaultText={translation.content.heroTitle}
+        />
+        <div class="w-24 h-1.5 bg-[#af0b56] mx-auto mt-6 rounded-full"></div>
+      </header>
+
+      <!-- Artículo Completo con Estilos Dinámicos -->
+      <article
+        class="space-y-8 text-[#1d1d1b] text-base md:text-lg leading-relaxed font-sans"
+      >
+        <!-- Párrafo 1: Bloque de Apertura -->
+        <div
+          class="bg-white/90 backdrop-blur-xs p-6 md:p-9 rounded-3xl border border-black/10 shadow-xs hover:shadow-md transition-shadow"
+        >
+          <EditableBlock
+            pageData={pageData}
+            pageId={pageId}
+            blockKey="p1"
+            tag="div"
+            multiline={true}
+            class="first-letter:text-5xl first-letter:md:text-6xl first-letter:font-londrina first-letter:text-[#af0b56] first-letter:float-left first-letter:mr-3 first-letter:leading-none"
+            defaultText={translation.content.p1}
+          />
+        </div>
+
+        <!-- Párrafo 2: Llamada con Borde Carmín Acentuado -->
+        <div
+          class="bg-[#FFF0DD]/70 border-l-4 md:border-l-6 border-[#af0b56] p-6 md:p-8 rounded-r-3xl shadow-xs"
+        >
+          <EditableBlock
+            pageData={pageData}
+            pageId={pageId}
+            blockKey="p2"
+            tag="div"
+            multiline={true}
+            defaultText={translation.content.p2}
+          />
+        </div>
+
+        <!-- Párrafo 3: Bloque Declarativo Central -->
+        <div
+          class="bg-white/80 p-6 md:p-8 rounded-3xl border border-black/10 shadow-xs"
+        >
+          <EditableBlock
+            pageData={pageData}
+            pageId={pageId}
+            blockKey="p3"
+            tag="div"
+            multiline={true}
+            defaultText={translation.content.p3}
+          />
+        </div>
+
+        <!-- Párrafo 4: Llamamiento Previo a las Reivindicaciones -->
+        <div
+          class="p-6 md:p-7 rounded-2xl bg-[#FFF0DD] border border-[#af0b56]/20 font-medium"
+        >
+          <EditableBlock
+            pageData={pageData}
+            pageId={pageId}
+            blockKey="p4"
+            tag="div"
+            multiline={true}
+            class="text-lg md:text-xl text-[#1d1d1b]"
+            defaultText={translation.content.p4}
+          />
+        </div>
+
+        <!-- Lista de las 11 Reivindicaciones en Tarjetas Interactivas -->
+        <ol
+          class="space-y-4 my-8 pl-0 list-none"
+          data-editable-list="reivindicaciones"
+          data-editable-page={pageId}
+        >
+          {
+            reivindicacionesList.items.map((item, index) => {
+              const formattedNumber =
+                index + 1 < 10 ? `0${index + 1}` : `${index + 1}`;
+              return (
+                <li
+                  class="group bg-white/85 hover:bg-white p-5 md:p-6 rounded-2xl border border-black/10 hover:border-[#af0b56]/40 shadow-xs hover:shadow-md transition-all duration-200 flex items-start gap-4 sm:gap-5 hover:-translate-y-0.5"
+                  data-editable-item-id={item.id}
+                  data-editable-page={pageId}
+                  data-editable-raw={item.text}
+                  data-editable-hidden={item.hidden ? "true" : "false"}
+                >
+                  <div class="shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-[#FFF0DD] border border-[#af0b56]/20 group-hover:bg-[#af0b56] transition-colors flex items-center justify-center">
+                    <span class="font-londrina text-[#af0b56] group-hover:text-[#FFF0DD] text-2xl md:text-3xl leading-none transition-colors">
+                      {formattedNumber}
+                    </span>
+                  </div>
+                  <div
+                    class="text-neutral-900 leading-relaxed text-base md:text-lg self-center"
+                    data-editable-item-text
+                    set:html={marked.parseInline(item.text)}
+                  />
+                </li>
+              );
+            })
+          }
+        </ol>
+
+        <!-- Párrafo 5: Tarjeta con Acento Carmín -->
+        <div
+          class="bg-white/85 border-l-4 md:border-l-6 border-[#af0b56] p-6 md:p-8 rounded-r-3xl shadow-xs"
+        >
+          <EditableBlock
+            pageData={pageData}
+            pageId={pageId}
+            blockKey="p5"
+            tag="div"
+            multiline={true}
+            defaultText={translation.content.p5}
+          />
+        </div>
+
+        <!-- Párrafo 6: Bloque sobre el Rescate Bancario -->
+        <div
+          class="bg-white/80 p-6 md:p-8 rounded-3xl border border-black/10 shadow-xs"
+        >
+          <EditableBlock
+            pageData={pageData}
+            pageId={pageId}
+            blockKey="p6"
+            tag="div"
+            multiline={true}
+            defaultText={translation.content.p6}
+          />
+        </div>
+
+        <!-- Párrafo 7: Bloque sobre la Huelga General -->
+        <div
+          class="bg-white/80 p-6 md:p-8 rounded-3xl border border-black/10 shadow-xs"
+        >
+          <EditableBlock
+            pageData={pageData}
+            pageId={pageId}
+            blockKey="p7"
+            tag="div"
+            multiline={true}
+            defaultText={translation.content.p7}
+          />
+        </div>
+
+        <!-- Párrafo 8: Antesala del Cierre -->
+        <div
+          class="bg-[#FFF0DD]/90 p-6 md:p-8 rounded-3xl border border-[#af0b56]/20 shadow-xs"
+        >
+          <EditableBlock
+            pageData={pageData}
+            pageId={pageId}
+            blockKey="p8"
+            tag="div"
+            multiline={true}
+            class="text-base md:text-lg"
+            defaultText={translation.content.p8}
+          />
+        </div>
+
+        <!-- Cierre del Documento en Carmín y Trigo con Gran Dinamismo -->
+        <div
+          class="bg-[#B50655] text-[#FFF0DD] p-8 md:p-12 rounded-3xl shadow-xl my-10 relative overflow-hidden text-center"
+        >
+          <div class="relative z-10 max-w-2xl mx-auto space-y-4">
+            <EditableBlock
+              pageData={pageData}
+              pageId={pageId}
+              blockKey="cierre_1"
+              tag="p"
+              class="font-londrina text-3xl sm:text-4xl md:text-5xl leading-tight text-white tracking-wide"
+              defaultText={translation.content.cierre_1}
+            />
+            <EditableBlock
+              pageData={pageData}
+              pageId={pageId}
+              blockKey="cierre_2"
+              tag="p"
+              class="font-londrina text-2xl sm:text-3xl md:text-4xl leading-tight text-[#FFF0DD] tracking-wide"
+              defaultText={translation.content.cierre_2}
+            />
+            <EditableBlock
+              pageData={pageData}
+              pageId={pageId}
+              blockKey="cierre_3"
+              tag="p"
+              class="font-londrina text-2xl sm:text-3xl md:text-4xl leading-tight text-white tracking-wide"
+              defaultText={translation.content.cierre_3}
+            />
+          </div>
+        </div>
+      </article>
+
+      <!-- Botón Flotante para Volver Arriba -->
+      <div class="flex justify-center pt-2">
+        <button
+          id="btn-scroll-top"
+          type="button"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-black/15 bg-white/80 hover:bg-white text-xs md:text-sm font-semibold text-[#1d1d1b] hover:text-[#af0b56] transition-all cursor-pointer shadow-xs hover:shadow-sm"
+        >
+          <ArrowUp class="w-4 h-4 text-[#af0b56]" />
+          <span>{translation.ui.backToTop}</span>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer Coherente -->
+  <footer
+    class="bg-[#1d1d1b] text-[#fcf2df] py-12 px-4 border-t-4 border-[#af0b56] mt-16"
+  >
+    <div
+      class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left"
+    >
+      <div>
+        <h3 class="text-3xl font-londrina text-[#af0b56] tracking-wide">
+          ACAMPADA SETAS SEVILLA
+        </h3>
+        <p class="text-xs text-gray-400 mt-1">
+          {translation.ui.contact}: <a
+            href="mailto:acampadasetas@gmail.com"
+            class="hover:underline hover:text-white transition-colors"
+            >acampadasetas@gmail.com</a
+          > • Instagram: <a
+            href="https://www.instagram.com/acampadasetas/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline hover:text-white transition-colors"
+            >@acampadasetas</a
+          >
+        </p>
+      </div>
+
+      <div class="flex items-center gap-4 text-sm font-bold">
+        <a href="/" class="hover:text-[#af0b56] transition-colors"
+          >{translation.ui.home}</a
+        >
+        <span>•</span>
+        <a href="/gallery" class="hover:text-[#af0b56] transition-colors"
+          >{translation.ui.gallery}</a
+        >
+        <span>•</span>
+        <a href="/login" class="hover:text-[#af0b56] transition-colors"
+          >{translation.ui.admin}</a
+        >
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts interactivos: Barra de progreso, compartir, scroll arriba y sincronización de idioma -->
+  <script
+    define:vars={{
+      currentLang,
+      copiedText: translation.ui.copied,
+      shareTitle: translation.pageTitle,
+    }}
+  >
+    // Guardar preferencia de idioma en localStorage y Cookie
+    try {
+      localStorage.setItem("preferred_lang", currentLang);
+      document.cookie = `preferred_lang=${currentLang}; path=/; max-age=31536000; SameSite=Lax`;
+    } catch (e) {}
+
+    // Escuchar clics en enlaces de cambio de idioma para guardar preferencia de inmediato
+    document.querySelectorAll("[data-lang-switch]").forEach((el) => {
+      el.addEventListener("click", (evt) => {
+        const targetLang = el.getAttribute("data-lang-switch");
+        if (targetLang) {
+          try {
+            localStorage.setItem("preferred_lang", targetLang);
+            document.cookie = `preferred_lang=${targetLang}; path=/; max-age=31536000; SameSite=Lax`;
+          } catch (e) {}
+        }
+      });
+    });
+
+    // Barra de progreso de lectura
+    const progressBar = document.getElementById("reading-progress");
+    window.addEventListener("scroll", () => {
+      if (!progressBar) return;
+      const totalHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
+      const progress =
+        totalHeight > 0 ? (window.scrollY / totalHeight) * 100 : 0;
+      progressBar.style.width = `${progress}%`;
+    });
+
+    // Compartir documento
+    const shareBtn = document.getElementById("btn-share");
+    const shareText = document.getElementById("share-text");
+
+    if (shareBtn && shareText) {
+      shareBtn.addEventListener("click", async () => {
+        const title = shareTitle;
+        const url = window.location.href;
+
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title,
+              url,
+            });
+            return;
+          } catch (err) {
+            // Usuario canceló o no soportado
+          }
+        }
+
+        try {
+          await navigator.clipboard.writeText(url);
+          const original = shareText.textContent;
+          shareText.textContent = copiedText;
+          setTimeout(() => {
+            shareText.textContent = original;
+          }, 2000);
+        } catch {
+          window.prompt("URL:", url);
+        }
+      });
+    }
+
+    // Volver arriba
+    const scrollTopBtn = document.getElementById("btn-scroll-top");
+    if (scrollTopBtn) {
+      scrollTopBtn.addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    }
+  </script>
+</Layout>
